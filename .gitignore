@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+Venv Venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment / secrets
+.env
+
+# Generated PDFs
+*.pdf
+
+# macOS
+.DS_Store
+
+# Archive folder contains an old file with an API key -- exclude it specifically
+archive/Untitled

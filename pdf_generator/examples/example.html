@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-3xl md:text-4xl font-medium mb-2 mt-2 text-center">Templating basics</h1>
+    <div class="text-center m-5 text-lg">
+        You can configure the header or footer in the "Settings" tab
+        <br>
+        Learn more at https://docs.apitemplate.io/reference/learn-jinja2.html
+    </div>
+    
+    <div class="section">
+        <h1 class="text-2xl md:text-1xl font-medium mb-2 mt-2">Introduction</h1>
+        A template is a text document that contains dynamic data replaced by the values passed in as JSON when the template is rendered.
+        <br><br>
+        Template variables are enclosed in <b>{{ ... }}</b>
+        <br><br>
+        <b>Website:</b> {{website}}
+    </div>
+
+    <div class="section">
+        <h1 class="text-3xl md:text-2xl font-medium mb-2 mt-2">HTML Table and Looping</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Price</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{item.item_name}}</td>
+                    <td>{{item.qty}}</td>
+                    <td>{{item.unit_price}}</td>
+                    <td>{{item.unit_price*item.qty}}</td>
+                    <td>
+                        {% if item.unit_price*item.qty > 90 %}
+                        Price >90
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

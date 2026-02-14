@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LIV Financial – Affordable Burial Program</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FAF0E6;
+      --card: #ffffff;
+      --gold: #C9A227;
+      --gold-dark: #A68520;
+      --blue: #1e4d7b;
+      --blue-light: #e8f0f7;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --border: #e8e4df;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .banner {
+      background: linear-gradient(180deg, #a8d4ee 0%, #c5e3f5 100%);
+      padding: 1.5rem 1.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      text-align: center;
+    }
+    .logo {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+    .brand {
+      font-family: "Great Vibes", cursive;
+      font-size: 2.2rem;
+      color: var(--blue);
+      margin: 0;
+      line-height: 1.2;
+    }
+    .brand-tag {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--blue);
+      letter-spacing: 0.02em;
+      margin: 0;
+    }
+    .promo-card {
+      background: var(--blue);
+      color: #fff;
+      padding: 0.9rem 1.25rem;
+      border-radius: 10px;
+      max-width: 420px;
+      text-align: left;
+    }
+    .promo-card strong {
+      font-size: 1rem;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+    .promo-card span {
+      font-size: 0.85rem;
+      opacity: 0.95;
+    }
+    .promo-card em {
+      color: #f5d4a0;
+      font-style: normal;
+    }
+    .gold-bar {
+      height: 4px;
+      background: var(--gold);
+      margin: 0;
+    }
+    .main-block {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .hero-card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .hero-card h1 {
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 0.5rem;
+      line-height: 1.3;
+    }
+    .hero-card .sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin: 0 0 1.5rem;
+    }
+    .cta {
+      display: inline-block;
+      background: var(--gold);
+      color: #1a1a1a !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.9rem 2rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .cta:hover {
+      background: var(--gold-dark);
+      color: #fff !important;
+    }
+    .cards {
+      padding: 0 1.5rem 3rem;
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--blue);
+      margin: 0 0 0.5rem;
+      font-weight: 700;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+    /* Form */
+    .form-card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .form-card h1 {
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      color: var(--text);
+      margin: 0 0 0.25rem;
+    }
+    .form-card .sub { font-size: 0.95rem; color: var(--text-muted); margin: 0 0 1.5rem; }
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      font-size: 0.95rem;
+    }
+    .form-group label .req { color: #c00; }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(30,77,123,0.15);
+    }
+    .form-group .radio-group { margin-top: 0.5rem; }
+    .form-group .radio-group label {
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+    }
+    .form-group .radio-group input { margin-right: 0.5rem; width: auto; }
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      gap: 1rem;
+    }
+    .form-nav .cta { margin: 0; }
+    .form-nav .btn-back {
+      background: var(--border);
+      color: var(--text);
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .form-nav .btn-back:hover { background: #ddd; }
+    .form-step-title { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <header class="banner">
+    <img src="234.png" alt="LIV Financial" class="logo" onerror="this.style.display='none';" />
+    <div>
+      <p class="brand">LIV</p>
+      <p class="brand-tag">Financial</p>
+    </div>
+    <div class="promo-card">
+      <strong>Affordable Whole Life &amp; Final Expense Insurance for Seniors 50+</strong>
+      <span>Protect your family from financial burden and leave a legacy of love — <em>not unexpected expenses</em>.</span>
+    </div>
+  </header>
+  <div class="gold-bar"></div>
+
+  <section class="main-block">
+    <div class="form-card">
+      <h1>See If You Qualify For Your Affordable Burial Program!</h1>
+      <p class="sub">Take a short quiz below.</p>
+
+      <!--
+        REQUIRED: Replace YOUR_SCRIPT_URL with your Google Apps Script Web app URL.
+        1. Open your Google Sheet → Extensions → Apps Script. Paste form-to-sheet.gs and save.
+        2. Deploy → New deployment → Web app → Execute as Me, Who has access: Anyone → Deploy.
+        3. Copy the URL (ends in /exec) and paste it below between the quotes, replacing YOUR_SCRIPT_URL.
+        Example: action="https://script.google.com/macros/s/AKfycbz.../exec"
+      -->
+      <form id="burial-form" action="action="https://script.google.com/macros/s/AKfycbz...yourId.../exec" method="POST" target="_blank">
+        <input type="hidden" name="timestamp" id="timestamp" value="" />
+
+        <div class="form-step active" data-step="1">
+          <p class="form-step-title">Step 1 of 2 – Contact info</p>
+          <div class="form-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="full_name" required placeholder="Your answer" />
+          </div>
+          <div class="form-group">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" name="phone" required placeholder="Your answer" />
+          </div>
+          <div class="form-group">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" name="email" required placeholder="Your answer" />
+          </div>
+          <div class="form-group">
+            <label>City <span class="req">*</span></label>
+            <input type="text" name="city" required placeholder="Your answer" />
+          </div>
+          <div class="form-group">
+            <label>State <span class="req">*</span></label>
+            <input type="text" name="state" required placeholder="Your answer" />
+          </div>
+          <div class="form-group">
+            <label>Date of Birth <span class="req">*</span></label>
+            <input type="date" name="dob" required />
+          </div>
+          <div class="form-nav">
+            <span></span>
+            <button type="button" class="cta" id="next-1">Next</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-step="2">
+          <p class="form-step-title">Step 2 of 2 – A few more questions</p>
+          <div class="form-group">
+            <label>Who will be your beneficiary? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="beneficiary" value="Child" required /> Child</label>
+              <label><input type="radio" name="beneficiary" value="Spouse" /> Spouse</label>
+              <label><input type="radio" name="beneficiary" value="Friend" /> Friend</label>
+              <label><input type="radio" name="beneficiary" value="Option 4" /> Option 4</label>
+              <label><input type="radio" name="beneficiary" value="Other" /> Other: <input type="text" name="beneficiary_other" placeholder="Specify" style="width:auto; margin-left:0.5rem;" /></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>What is your goal? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="goal" value="Burial" required /> Burial</label>
+              <label><input type="radio" name="goal" value="Cremation" /> Cremation</label>
+              <label><input type="radio" name="goal" value="Leave a Legacy" /> Leave a Legacy</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Desired monthly payment? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="payment" value="$40-$70" required /> $40-$70</label>
+              <label><input type="radio" name="payment" value="$70-$100" /> $70-$100</label>
+              <label><input type="radio" name="payment" value="$100-$150" /> $100-$150</label>
+              <label><input type="radio" name="payment" value="$150+" /> $150+</label>
+            </div>
+          </div>
+          <div class="form-nav">
+            <button type="button" class="btn-back" id="back-2">Back</button>
+            <button type="submit" class="cta">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Whole life &amp; final expense</h3>
+      <p>Coverage options designed for seniors 50+.</p>
+    </div>
+    <div class="card">
+      <h3>Protect your family</h3>
+      <p>Help ease the financial burden and leave a legacy.</p>
+    </div>
+    <div class="card">
+      <h3>Simple process</h3>
+      <p>Clear next steps and support from start to finish.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    LIV Financial – Affordable Burial Program
+  </footer>
+
+  <script>
+    function initForm() {
+      var ts = document.getElementById('timestamp');
+      if (ts) ts.value = new Date().toISOString();
+
+      var steps = document.querySelectorAll('.form-step');
+      function go(stepNum) {
+        for (var i = 0; i < steps.length; i++) {
+          steps[i].classList.toggle('active', parseInt(steps[i].getAttribute('data-step'), 10) === stepNum);
+        }
+      }
+
+      var nextBtn = document.getElementById('next-1');
+      if (nextBtn) {
+        nextBtn.onclick = function() {
+          var step1 = document.querySelector('.form-step[data-step="1"]');
+          if (!step1) return;
+          var inputs = step1.querySelectorAll('input[required]');
+          var valid = true;
+          for (var i = 0; i < inputs.length; i++) {
+            if (!inputs[i].value || !String(inputs[i].value).trim()) {
+              valid = false;
+              inputs[i].focus();
+              alert('Please fill in all required fields.');
+              break;
+            }
+          }
+          if (valid) go(2);
+        };
+      }
+
+      var backBtn = document.getElementById('back-2');
+      if (backBtn) backBtn.onclick = function() { go(1); };
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initForm);
+    } else {
+      initForm();
+    }
+  </script>
+</body>
+</html>
