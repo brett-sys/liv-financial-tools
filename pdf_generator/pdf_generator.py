@@ -617,6 +617,7 @@ def generate_pdf_html(
     summary_data: dict | None = None,
     nlg_logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
+    client_name: str = "",
 ):
     """Create complete HTML document styled to match livfinancialgroup.com vibe."""
     # Inject NLG company info into html_body at the placeholder
@@ -832,11 +833,28 @@ def generate_pdf_html(
             summary_html=summary_html,
         )
 
+    # Prepared-for line and date stamp
+    from datetime import date
+    today_str = date.today().strftime("%B %d, %Y")
+    prepared_for_html = ""
+    if client_name.strip():
+        prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}</strong></div>'
+    date_html = f'<div class="date-stamp">{today_str}</div>'
+
     return f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <style>
+        @page {{
+            margin-bottom: 40px;
+            @bottom-center {{
+                content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 8px;
+                color: #6b7f8f;
+            }}
+        }}
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -919,6 +937,20 @@ def generate_pdf_html(
         .hero-subtitle {{
             font-size: 14px;
             opacity: 0.9;
+        }}
+        .prepared-for {{
+            font-size: 14px;
+            color: #ffffff;
+            margin-top: 8px;
+            font-weight: 400;
+        }}
+        .prepared-for strong {{
+            font-weight: 700;
+        }}
+        .date-stamp {{
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.75);
+            margin-top: 4px;
         }}
         .hero-nlg-right {{
             flex: 0 0 auto;
@@ -1305,6 +1337,8 @@ def generate_pdf_html(
                     <div class="hero-subtitle">
                         Plan today, protect what matters most for a lifetime.
                     </div>
+                    {prepared_for_html}
+                    {date_html}
                 </div>
                 <span class="hero-nlg-right">{nlg_logo_html}</span>
             </div>
@@ -1644,7 +1678,24 @@ class SimplePDFApp:
         self.root.lift()
         self.root.attributes('-topmost', True)
         self.root.after_idle(self.root.attributes, '-topmost', False)
-        
+
+        # Client name input at top
+        name_frame = tk.Frame(root, pady=8, padx=15)
+        name_frame.pack(fill=tk.X)
+        tk.Label(
+            name_frame,
+            text="Client Name:",
+            font=("Arial", 12, "bold"),
+        ).pack(side=tk.LEFT, padx=(0, 8))
+        self.client_name_var = tk.StringVar()
+        self.client_name_entry = tk.Entry(
+            name_frame,
+            textvariable=self.client_name_var,
+            font=("Arial", 12),
+            width=35,
+        )
+        self.client_name_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
         # Text area - fills most of window
         self.text_area = scrolledtext.ScrolledText(
             root,
@@ -1728,6 +1779,7 @@ class SimplePDFApp:
                 summary_data=summary_data,
                 nlg_logo_data_uri=nlg_logo_data_uri,
                 agent_photo_data_uri=agent_photo_data_uri,
+                client_name=self.client_name_var.get(),
             )
             
             # Generate PDF
