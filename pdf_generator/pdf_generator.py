@@ -29,6 +29,15 @@ BUSINESS_CARD_TEMPLATE_ID = "f9177b23cf19f372"
 LOGO_FILENAME = "assets/234.png"
 NLG_LOGO_FILENAME = "assets/nlg_logo.png"
 
+# Agent info (shown in PDF header) — update these with your real details
+AGENT_NAME = "Your Name"
+AGENT_TITLE = "Licensed Agent"
+AGENT_PHONE = "(555) 123-4567"
+AGENT_EMAIL = "you@example.com"
+AGENT_LICENSE = "License #12345"
+AGENT_WEBSITE = "www.example.com"
+AGENT_PHOTO_FILENAME = "assets/agent_headshot.png"
+
 
 def parse_policy_submitted_email(text: str) -> dict | None:
     """Parse policy details from email/confirmation text format.
@@ -132,6 +141,22 @@ def load_nlg_logo_data_uri() -> str | None:
         data = logo_path.read_bytes()
         b64 = base64.b64encode(data).decode("ascii")
         return f"data:image/png;base64,{b64}"
+    except Exception:
+        return None
+
+
+def load_agent_photo_data_uri() -> str | None:
+    """Load agent headshot image and return a data: URI, or None if missing."""
+    try:
+        photo_path = Path(__file__).resolve().parent / AGENT_PHOTO_FILENAME
+        if not photo_path.exists():
+            return None
+        data = photo_path.read_bytes()
+        b64 = base64.b64encode(data).decode("ascii")
+        # Detect format from extension
+        suffix = photo_path.suffix.lower()
+        mime = "image/png" if suffix == ".png" else "image/jpeg"
+        return f"data:{mime};base64,{b64}"
     except Exception:
         return None
 
@@ -568,6 +593,7 @@ def generate_pdf_html(
     graph_points: list[dict] | None = None,
     summary_data: dict | None = None,
     nlg_logo_data_uri: str | None = None,
+    agent_photo_data_uri: str | None = None,
 ):
     """Create complete HTML document styled to match livfinancialgroup.com vibe."""
     logo_html = (
@@ -580,6 +606,25 @@ def generate_pdf_html(
         if nlg_logo_data_uri
         else ""
     )
+
+    # Build agent info HTML
+    agent_photo_html = (
+        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        if agent_photo_data_uri
+        else ""
+    )
+    agent_info_html = f"""
+        <div class="agent-info">
+            {agent_photo_html}
+            <div class="agent-details">
+                <div class="agent-name">{AGENT_NAME}</div>
+                <div class="agent-detail">{AGENT_TITLE}</div>
+                <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
+                <div class="agent-detail">{AGENT_LICENSE}</div>
+                <div class="agent-detail">{AGENT_WEBSITE}</div>
+            </div>
+        </div>
+    """
 
     # Build graph HTML if we have points
     graph_section_html = ""
@@ -761,15 +806,42 @@ def generate_pdf_html(
         .logo {{
             height: 80px;
             width: auto;
-            max-width: 50%;
+            max-width: 30%;
             border-radius: 0;
             background: transparent;
             padding: 0;
             display: block;
         }}
         .logo-nlg {{
-            max-width: 45%;
+            max-width: 30%;
             margin-left: auto;
+        }}
+        .agent-info {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+        }}
+        .agent-photo {{
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            object-fit: cover;
+            flex-shrink: 0;
+        }}
+        .agent-details {{
+            line-height: 1.3;
+        }}
+        .agent-name {{
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }}
+        .agent-detail {{
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.9);
         }}
         .hero-title {{
             font-size: 22px;
@@ -1137,6 +1209,7 @@ def generate_pdf_html(
         <header class="hero">
             <div class="hero-top">
                 <span>{logo_html}</span>
+                {agent_info_html}
                 <span>{nlg_logo_html}</span>
             </div>
             <div class="hero-title">Policy Illustration Summary</div>
@@ -1581,6 +1654,7 @@ class SimplePDFApp:
             html_body = parse_data_to_html(data)
             logo_data_uri = load_logo_data_uri()
             nlg_logo_data_uri = load_nlg_logo_data_uri()
+            agent_photo_data_uri = load_agent_photo_data_uri()
             graph_points = parse_graph_points(data)
             summary_data = parse_summary_data(data)
             html_content = generate_pdf_html(
@@ -1589,6 +1663,7 @@ class SimplePDFApp:
                 graph_points=graph_points,
                 summary_data=summary_data,
                 nlg_logo_data_uri=nlg_logo_data_uri,
+                agent_photo_data_uri=agent_photo_data_uri,
             )
             
             # Generate PDF
