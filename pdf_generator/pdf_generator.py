@@ -399,7 +399,9 @@ def parse_data_to_html(data_text):
         # Detect Values table header
         if "Policy Year" in line and "Age" in line:
             if in_values_table:
-                html_parts.append("</tbody></table></div>")
+                # Duplicate header row (e.g. repeated across pages) – skip it
+                i += 1
+                continue
 
             html_parts.append('<div class="section"><h2>Policy Values</h2>')
             html_parts.append('<table class="data-table"><thead><tr>')
@@ -546,7 +548,7 @@ def parse_data_to_html(data_text):
 
                 if pairs:
                     html_parts.append(
-                        '<div class="section"><h2>Initial Policy Information</h2>'
+                        '<div class="section section-no-break"><h2>Initial Policy Information</h2>'
                     )
                     html_parts.append('<div class="info-grid">')
                     for label, value in pairs:
@@ -561,19 +563,40 @@ def parse_data_to_html(data_text):
                     html_parts.append(" ".join(disclaimer_lines))
                     html_parts.append("</p>")
 
+                # Close the section and insert placeholder for NLG info
+                html_parts.append("</div>")  # end section
+                html_parts.append("<!-- NLG_PLACEHOLDER -->")
+                i = i  # section div already closed above
+            else:
+                pass
+
             continue
 
-        # Skip Display Information section entirely (user requested removal)
-        if stripped_line.startswith("Display Information"):
+        # Skip Display Information section and related UI text entirely
+        skip_phrases = [
+            "Display Information",
+            "View Option",
+            "Current Illustrated",
+            "Export to CSV",
+            "Export to",
+        ]
+        if any(phrase in stripped_line for phrase in skip_phrases):
             i += 1
-            while i < len(lines):
-                sub = lines[i].strip()
-                if not sub:
+            # If this is the "Display Information" heading, skip the whole block
+            if "Display Information" in stripped_line:
+                while i < len(lines):
+                    sub = lines[i].strip()
+                    if not sub:
+                        i += 1
+                        continue
+                    if "Initial Policy Information" in sub:
+                        break
                     i += 1
-                    continue
-                if "Initial Policy Information" in sub:
-                    break
-                i += 1
+            continue
+
+        # Skip standalone "Values" heading (already handled by table parser)
+        if stripped_line == "Values" or stripped_line.startswith("Values"):
+            i += 1
             continue
 
         # Fallback: any other non-empty line before the docs
@@ -596,6 +619,39 @@ def generate_pdf_html(
     agent_photo_data_uri: str | None = None,
 ):
     """Create complete HTML document styled to match livfinancialgroup.com vibe."""
+    # Inject NLG company info into html_body at the placeholder
+    nlg_section_html = """
+        <div class="nlg-section">
+            <h2>National Life Group</h2>
+            <div class="nlg-story">
+                <p>At National Life Group, we are a mission-driven and purpose-filled business. For us, the cause of what we do is as important as the products we sell.</p>
+                <p>And our cause is a very simple one, directed at the people who live and work on America&rsquo;s Main Streets: To Do Good in our communities and with the individuals we serve. Since 1848, we have aimed to keep our promises to provide stability in good times and in bad. And throughout that history, we have provided peace of mind to them as they plan their futures.</p>
+            </div>
+            <div class="nlg-cols">
+                <div class="nlg-col">
+                    <h3>Our Purpose</h3>
+                    <p><strong>MISSION:</strong> <span class="nlg-value">Keeping our promises.</span></p>
+                    <p><strong>VISION:</strong> To bring peace of mind to everyone we touch.</p>
+                    <p><strong>VALUES:</strong> Do good. Be good. Make good.</p>
+                </div>
+                <div class="nlg-col">
+                    <h3>Our Foundation</h3>
+                    <p><span class="nlg-value">$57B</span> Total Assets&#185;</p>
+                    <p><span class="nlg-value">$52B</span> Total Liabilities&#185;</p>
+                    <p><span class="nlg-value">$3.9B</span> Total Benefits and Promises Kept&#178;</p>
+                </div>
+                <div class="nlg-col">
+                    <h3>Strength and Stability</h3>
+                    <p><span class="nlg-value">A+</span> (Superior) A.M. Best</p>
+                    <p><span class="nlg-value">A+</span> (Strong) Standard &amp; Poor&rsquo;s</p>
+                    <p><span class="nlg-value">A1</span> (Good) Moody&rsquo;s</p>
+                </div>
+            </div>
+            <p class="nlg-footnotes">&#185; As of most recent reporting. &#178; Total benefits and promises kept.</p>
+        </div>
+    """
+    html_body = html_body.replace("<!-- NLG_PLACEHOLDER -->", nlg_section_html)
+
     logo_html = (
         f'<img class="logo" src="{logo_data_uri}" alt="LIV Financial Logo" />'
         if logo_data_uri
@@ -645,12 +701,13 @@ def generate_pdf_html(
             return math.ceil(n / step) * step
 
         top = nice(max_val)
-        y_levels = [0.0, top * (1 / 3), top * (2 / 3), top]
+        y_levels = [top, top * (2 / 3), top * (1 / 3), 0.0]
         y_labels_html = []
         for v in y_levels:
             y_labels_html.append(f'<div class="cv-ylabel">${v:,.0f}</div>')
 
         cols_html = []
+        xlabels_html = []
         for p in graph_points:
             year = p["year"]
             prem = p["premium_paid"]
@@ -663,18 +720,16 @@ def generate_pdf_html(
             cols_html.append(
                 f"""
                 <div class="cv-col">
-                    <div class="cv-col-bars">
-                        <div class="cv-bar-vertical cash" style="height:{cv_pct:.1f}%">
-                            <span class="cv-value-label-vert">{cv_label}</span>
-                        </div>
-                        <div class="cv-bar-vertical premium" style="height:{prem_pct:.1f}%">
-                            <span class="cv-value-label-vert">{prem_label}</span>
-                        </div>
+                    <div class="cv-bar-vertical cash" style="height:{cv_pct:.1f}%">
+                        <span class="cv-value-label-vert">{cv_label}</span>
                     </div>
-                    <div class="cv-year-label">{year}</div>
+                    <div class="cv-bar-vertical premium" style="height:{prem_pct:.1f}%">
+                        <span class="cv-value-label-vert">{prem_label}</span>
+                    </div>
                 </div>
                 """
             )
+            xlabels_html.append(f'<div class="cv-xlbl">{year}</div>')
 
         # Simple textual summary using the last point
         last_point = graph_points[-1]
@@ -749,13 +804,17 @@ def generate_pdf_html(
             </div>
         </div>
         <div class="cv-body">
-            <div class="cv-chart">
+            <div class="cv-chart-area">
                 <div class="cv-yaxis">
                     {y_labels}
                 </div>
                 <div class="cv-columns">
                     {cols}
                 </div>
+            </div>
+            <div class="cv-xlabels">
+                <div class="cv-xlbl-spacer"></div>
+                {xlabels}
             </div>
             <div class="cv-xaxis-label">Years</div>
             <p class="cv-summary">
@@ -766,6 +825,7 @@ def generate_pdf_html(
         """.format(
             y_labels="\n".join(y_labels_html),
             cols="\n".join(cols_html),
+            xlabels="\n".join(xlabels_html),
             last_year=last_year,
             last_prem=last_prem,
             last_cv=last_cv,
@@ -801,33 +861,33 @@ def generate_pdf_html(
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 14px;
+        }}
+        .hero-logo-left {{
+            flex: 0 0 auto;
         }}
         .logo {{
-            height: 80px;
+            height: 50px;
             width: auto;
-            max-width: 30%;
+            max-width: 160px;
             border-radius: 0;
             background: transparent;
             padding: 0;
             display: block;
         }}
-        .logo-nlg {{
-            max-width: 30%;
-            margin-left: auto;
-        }}
         .agent-info {{
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-align: left;
         }}
         .agent-photo {{
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
             border: 2px solid #ffffff;
             object-fit: cover;
+            object-position: top center;
             flex-shrink: 0;
         }}
         .agent-details {{
@@ -843,6 +903,14 @@ def generate_pdf_html(
             font-size: 10px;
             color: rgba(255, 255, 255, 0.9);
         }}
+        .hero-bottom {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .hero-title-area {{
+            flex: 1 1 auto;
+        }}
         .hero-title {{
             font-size: 22px;
             font-weight: 500;
@@ -852,11 +920,23 @@ def generate_pdf_html(
             font-size: 14px;
             opacity: 0.9;
         }}
+        .hero-nlg-right {{
+            flex: 0 0 auto;
+            margin-left: 20px;
+        }}
+        .logo-nlg {{
+            height: 45px;
+            width: auto;
+        }}
         .content {{
             padding: 28px 32px 32px 32px;
         }}
         .section {{
             margin: 24px 0;
+            page-break-before: always;
+        }}
+        .section.section-no-break {{
+            page-break-before: avoid;
         }}
         .section h2 {{
             color: #0e7fa6;
@@ -875,8 +955,7 @@ def generate_pdf_html(
         table.data-table thead {{
             background: #0e7fa6;
             color: #ffffff;
-            /* prevent header from repeating on each PDF page so the table doesn't look duplicated */
-            display: table-row-group;
+            display: table-header-group;
         }}
         table.data-table th {{
             padding: 8px 6px;
@@ -897,13 +976,14 @@ def generate_pdf_html(
         }}
         .info-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
+            grid-template-columns: auto auto auto auto;
+            gap: 10px;
             margin: 14px 0 4px 0;
+            justify-content: start;
         }}
         .info-item {{
             background: #ffffff;
-            padding: 14px 16px;
+            padding: 8px 14px;
             border: 1px solid #0e7fa6;
             border-radius: 6px;
             box-shadow: 0 1px 4px rgba(14, 127, 166, 0.12);
@@ -911,13 +991,13 @@ def generate_pdf_html(
         .info-item strong {{
             display: block;
             color: #0e7fa6;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
             border-bottom: 1px solid #d1e2ea;
-            padding-bottom: 6px;
+            padding-bottom: 4px;
         }}
         .info-item span {{
             color: #123047;
@@ -976,46 +1056,58 @@ def generate_pdf_html(
             padding: 18px 20px 22px 20px;
             background: #ffffff;
         }}
-        .cv-chart {{
+        .cv-chart-area {{
             display: flex;
-            align-items: flex-end;
-            gap: 10px;
+            height: 200px;
         }}
         .cv-yaxis {{
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 180px;
-            font-size: 10px;
+            height: 200px;
+            font-size: 9px;
             color: #476072;
-            margin-right: 6px;
+            margin-right: 8px;
+            flex-shrink: 0;
         }}
         .cv-ylabel {{
             text-align: right;
-            min-width: 40px;
+            min-width: 65px;
+            white-space: nowrap;
         }}
         .cv-columns {{
             display: flex;
             align-items: flex-end;
-            gap: 18px;
-            height: 210px;
+            gap: 24px;
+            height: 200px;
+            flex: 1;
         }}
         .cv-col {{
             flex: 1;
-            text-align: center;
-            font-size: 11px;
-        }}
-        .cv-col-bars {{
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            gap: 8px;
-            height: 180px;
+            gap: 4px;
+            height: 100%;
         }}
         .cv-bar-vertical {{
             position: relative;
-            width: 18px;
+            width: 22px;
             border-radius: 3px 3px 0 0;
+        }}
+        .cv-xlabels {{
+            display: flex;
+            margin-top: 6px;
+        }}
+        .cv-xlbl-spacer {{
+            min-width: 73px;
+            flex-shrink: 0;
+        }}
+        .cv-xlbl {{
+            flex: 1;
+            text-align: center;
+            font-size: 10px;
+            color: #476072;
         }}
         .cv-bar-vertical.premium {{
             background: #11b6c8;
@@ -1025,19 +1117,16 @@ def generate_pdf_html(
         }}
         .cv-value-label-vert {{
             position: absolute;
-            top: -16px;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 9px;
+            font-size: 7px;
             font-weight: 600;
             color: #123047;
             white-space: nowrap;
+            margin-bottom: 2px;
         }}
-        .cv-year-label {{
-            margin-top: 6px;
-            font-size: 11px;
-            color: #476072;
-        }}
+        
         .cv-xaxis-label {{
             margin-top: 4px;
             font-size: 10px;
@@ -1139,9 +1228,8 @@ def generate_pdf_html(
         }}
         /* National Life Group section */
         .nlg-section {{
-            padding: 24px 32px 32px 32px;
-            border-top: 1px solid #d1e2ea;
-            background: #f9fcfe;
+            padding: 20px 0;
+            margin: 24px 0;
         }}
         .nlg-section h2 {{
             color: #0e7fa6;
@@ -1208,46 +1296,22 @@ def generate_pdf_html(
     <div class="page">
         <header class="hero">
             <div class="hero-top">
-                <span>{logo_html}</span>
+                <span class="hero-logo-left">{logo_html}</span>
                 {agent_info_html}
-                <span>{nlg_logo_html}</span>
             </div>
-            <div class="hero-title">Policy Illustration Summary</div>
-            <div class="hero-subtitle">
-                Plan today, protect what matters most for a lifetime.
+            <div class="hero-bottom">
+                <div class="hero-title-area">
+                    <div class="hero-title">Policy Illustration Summary</div>
+                    <div class="hero-subtitle">
+                        Plan today, protect what matters most for a lifetime.
+                    </div>
+                </div>
+                <span class="hero-nlg-right">{nlg_logo_html}</span>
             </div>
         </header>
         <main class="content">
             {html_body}
         </main>
-        <div class="nlg-section">
-            <h2>National Life Group</h2>
-            <div class="nlg-story">
-                <p>At National Life Group, we are a mission-driven and purpose-filled business. For us, the cause of what we do is as important as the products we sell.</p>
-                <p>And our cause is a very simple one, directed at the people who live and work on America&rsquo;s Main Streets: To Do Good in our communities and with the individuals we serve. Since 1848, we have aimed to keep our promises to provide stability in good times and in bad. And throughout that history, we have provided peace of mind to them as they plan their futures.</p>
-            </div>
-            <div class="nlg-cols">
-                <div class="nlg-col">
-                    <h3>Our Purpose</h3>
-                    <p><strong>MISSION:</strong> <span class="nlg-value">Keeping our promises.</span></p>
-                    <p><strong>VISION:</strong> To bring peace of mind to everyone we touch.</p>
-                    <p><strong>VALUES:</strong> Do good. Be good. Make good.</p>
-                </div>
-                <div class="nlg-col">
-                    <h3>Our Foundation</h3>
-                    <p><span class="nlg-value">$57B</span> Total Assets&#185;</p>
-                    <p><span class="nlg-value">$52B</span> Total Liabilities&#185;</p>
-                    <p><span class="nlg-value">$3.9B</span> Total Benefits and Promises Kept&#178;</p>
-                </div>
-                <div class="nlg-col">
-                    <h3>Strength and Stability</h3>
-                    <p><span class="nlg-value">A+</span> (Superior) A.M. Best</p>
-                    <p><span class="nlg-value">A+</span> (Strong) Standard &amp; Poor&rsquo;s</p>
-                    <p><span class="nlg-value">A1</span> (Good) Moody&rsquo;s</p>
-                </div>
-            </div>
-            <p class="nlg-footnotes">&#185; As of most recent reporting. &#178; Total benefits and promises kept.</p>
-        </div>
     </div>
     <div class="page page-living">
         <div class="lb-heading-main">Living Benefits</div>
