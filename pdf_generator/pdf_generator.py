@@ -30,12 +30,12 @@ LOGO_FILENAME = "assets/234.png"
 NLG_LOGO_FILENAME = "assets/nlg_logo.png"
 
 # Agent info (shown in PDF header) — update these with your real details
-AGENT_NAME = "Your Name"
-AGENT_TITLE = "Licensed Agent"
-AGENT_PHONE = "(555) 123-4567"
-AGENT_EMAIL = "you@example.com"
-AGENT_LICENSE = "License #12345"
-AGENT_WEBSITE = "www.example.com"
+AGENT_NAME = "Brett Dunham"
+AGENT_TITLE = "Agency Owner"
+AGENT_PHONE = "(714) 335-1412"
+AGENT_EMAIL = "brett@fflliv.com"
+AGENT_LICENSE = "License #21114292"
+AGENT_WEBSITE = "www.livfinancialgroup.com"
 AGENT_PHOTO_FILENAME = "assets/agent_headshot.png"
 
 
