@@ -353,14 +353,16 @@ This is a known issue on some Windows machines, usually caused by GPU rendering 
    - Right-click the Cursor shortcut → **Run as administrator**
 
 2. **Disable GPU acceleration** (most common fix)
-   - Close Cursor completely
+   - Close Cursor completely (check Task Manager with `Ctrl+Shift+Esc` and end any `Cursor` processes)
    - Open a regular Command Prompt or PowerShell and run:
      ```powershell
-     cursor --disable-gpu
+     "%LOCALAPPDATA%\Programs\cursor\Cursor.exe" --disable-gpu
      ```
-   - If that works, you can make it permanent:
-     - Right-click your Cursor shortcut → **Properties**
-     - In the **Target** field, add ` --disable-gpu` at the end
+   - If that works, make it permanent so you don't have to type this every time:
+     - Find your Cursor shortcut on the Desktop or Start Menu
+     - Right-click it → **Properties**
+     - In the **Target** field, add ` --disable-gpu` at the very end (after the closing quote)
+     - Example: `"C:\Users\Isiah\AppData\Local\Programs\cursor\Cursor.exe" --disable-gpu`
      - Click **OK**
 
 3. **Clear the Cursor cache**
