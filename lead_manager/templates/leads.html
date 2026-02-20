@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title_extra %} — {{ file_name }}{% endblock %}
+{% block content %}
+<div class="dash-header">
+    <div>
+        <a href="{{ url_for('files') }}" class="back-link">← Back to Files</a>
+        <h1>{{ file_name }} <span class="badge badge-count">{{ total }} leads</span></h1>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="card filter-bar">
+    <form method="get" class="filter-form">
+        <div class="filter-row">
+            <input type="text" name="search" placeholder="Search name, phone, or city…" value="{{ search }}" class="filter-input">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            {% if search %}
+            <a href="{{ url_for('view_leads', file_id=file_id) }}" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Import bar -->
+<form method="post" action="{{ url_for('import_leads') }}" id="importForm">
+<input type="hidden" name="file_id" value="{{ file_id }}">
+<div class="card bulk-bar">
+    <div class="bulk-row">
+        <label class="bulk-check-all">
+            <input type="checkbox" id="checkAll" onclick="toggleAll(this)"> Select All
+        </label>
+        <select name="agent_name" class="filter-select" required>
+            <option value="">Assign to…</option>
+            {% for a in agents %}
+            <option value="{{ a.name }}">{{ a.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="extra_tags" placeholder="Extra tags (comma sep, optional)" class="filter-input" style="max-width:250px;">
+        <button type="submit" class="btn btn-primary btn-sm" {{ 'disabled' if not ghl_ok }}>
+            Import to Elite 360
+        </button>
+        <span class="selected-count text-muted" id="selectedCount">0 selected</span>
+    </div>
+</div>
+
+<!-- Lead table -->
+{% if leads %}
+<div class="lead-table-wrap">
+    <table class="lead-table">
+        <thead>
+            <tr>
+                <th class="col-check"></th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>City, State</th>
+                <th>Age</th>
+                <th>Tobacco</th>
+                <th>DUI</th>
+                <th>Insured</th>
+                <th>Vendor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr class="lead-row">
+                <td class="col-check">
+                    <input type="checkbox" name="selected" value="{{ lead._index }}" class="row-check" onchange="updateCount()">
+                </td>
+                <td>
+                    <div class="lead-name">{{ lead.full_name }}</div>
+                    {% if lead.dob %}<div class="lead-sub">DOB: {{ lead.dob }}</div>{% endif %}
+                </td>
+                <td>{{ lead.phone }}</td>
+                <td class="lead-sub">{{ lead.email }}</td>
+                <td>{{ lead.city }}{% if lead.city and lead.state %}, {% endif %}{{ lead.state }} {{ lead.zip }}</td>
+                <td>{{ lead.age }}</td>
+                <td>
+                    {% if lead.tobacco == 'True' %}<span class="badge badge-warn">Yes</span>
+                    {% else %}<span class="text-muted">No</span>{% endif %}
+                </td>
+                <td>
+                    {% if lead.dui == 'True' %}<span class="badge badge-warn">Yes</span>
+                    {% else %}<span class="text-muted">No</span>{% endif %}
+                </td>
+                <td>
+                    {% if lead.insured == 'True' %}<span class="badge badge-info">Yes</span>
+                    {% else %}<span class="text-muted">No</span>{% endif %}
+                </td>
+                <td class="lead-sub">{{ lead.vendor }}</td>
+            </tr>
+            {% if lead.address %}
+            <tr class="lead-detail-row">
+                <td></td>
+                <td colspan="9" class="lead-details-cell">
+                    <span class="detail-tag">{{ lead.address }}, {{ lead.city }}, {{ lead.state }} {{ lead.zip }}</span>
+                    {% if lead.coverage_amount %}<span class="detail-note">Coverage: {{ lead.coverage_amount }}</span>{% endif %}
+                    {% if lead.coverage_type %}<span class="detail-note">Type: {{ lead.coverage_type }}</span>{% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No leads found{% if search %} matching "{{ search }}"{% endif %}.</p>
+</div>
+{% endif %}
+</form>
+
+<script>
+function toggleAll(master) {
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
+    updateCount();
+}
+function updateCount() {
+    const n = document.querySelectorAll('.row-check:checked').length;
+    document.getElementById('selectedCount').textContent = n + ' selected';
+}
+</script>
+{% endblock %}

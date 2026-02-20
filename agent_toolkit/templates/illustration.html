@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}IUL Illustration - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>IUL Illustration</h1>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+        Paste illustration data below to generate a client-ready PDF.
+    </p>
+
+    <form method="POST" action="{{ url_for('tools.illustration') }}" class="call-form">
+        <div class="form-group">
+            <label for="client_name">Client Name</label>
+            <input type="text" id="client_name" name="client_name" placeholder="John Smith">
+        </div>
+
+        <div class="form-group">
+            <label for="paste_data">Illustration Data</label>
+            <textarea id="paste_data" name="paste_data" class="paste-area" rows="10"
+                      placeholder="Paste the full illustration data here...&#10;&#10;Should include 'Initial Policy Information' and a 'Values' table with Policy Year, Age, Premium Outlay, Accumulated Value columns."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Generate PDF</button>
+    </form>
+</div>
+{% endblock %}

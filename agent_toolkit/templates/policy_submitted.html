@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Policy Submitted - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Policy Submitted</h1>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+        Paste the policy confirmation email or text to generate a client-ready confirmation PDF.
+    </p>
+
+    <form method="POST" action="{{ url_for('tools.policy_submitted') }}" class="call-form">
+        <div class="form-group">
+            <label for="paste_data">Confirmation Data</label>
+            <textarea id="paste_data" name="paste_data" class="paste-area" rows="10"
+                      placeholder="Paste confirmation email here...&#10;&#10;Should include lines like:&#10;Insured: John Smith&#10;Policy #: ABC123&#10;Insurance Product: National Life IUL&#10;Face Amount: $250,000&#10;Monthly Premium: $150.00"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Generate PDF</button>
+    </form>
+</div>
+{% endblock %}

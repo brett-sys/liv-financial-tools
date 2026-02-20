@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Log Call - Call Logger{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Log a Call</h1>
+
+    <form method="POST" action="{{ url_for('log_call') }}" class="call-form" autocomplete="off">
+        <!-- Agent -->
+        <div class="form-group">
+            <label>Agent</label>
+            <div class="btn-group" data-field="agent_name">
+                {% for a in agents %}
+                <button type="button" class="btn-toggle {% if a == agent_pref %}active{% endif %}"
+                        data-value="{{ a }}">{{ a }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="agent_name" id="agent_name" value="{{ agent_pref }}">
+        </div>
+
+        <!-- Contact Info -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact_name">Contact Name</label>
+                <input type="text" id="contact_name" name="contact_name"
+                       placeholder="Who did you talk to?" autocomplete="off">
+                <div id="suggestions" class="suggestions-dropdown"></div>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" id="phone_number" name="phone_number" placeholder="(555) 123-4567">
+            </div>
+        </div>
+
+        <!-- Date/Time -->
+        <div class="form-group">
+            <label for="call_datetime">Date &amp; Time</label>
+            <input type="datetime-local" id="call_datetime" name="call_datetime"
+                   value="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+        </div>
+
+        <!-- Direction (big buttons) -->
+        <div class="form-group">
+            <label>Direction</label>
+            <div class="btn-group" data-field="direction">
+                {% for d in directions %}
+                <button type="button" class="btn-toggle {% if d == 'Outbound' %}active{% endif %}"
+                        data-value="{{ d }}">
+                    {% if d == 'Outbound' %}&#x2197;{% else %}&#x2199;{% endif %} {{ d }}
+                </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="direction" id="direction" value="Outbound">
+        </div>
+
+        <!-- Outcome (big buttons) -->
+        <div class="form-group">
+            <label>Outcome</label>
+            <div class="btn-group btn-group-wrap" data-field="outcome">
+                {% for o in outcomes %}
+                <button type="button" class="btn-toggle {% if loop.first %}active{% endif %}"
+                        data-value="{{ o }}">{{ o }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="outcome" id="outcome" value="{{ outcomes[0] }}">
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Call summary, key details..."></textarea>
+        </div>
+
+        <!-- Follow-up Date -->
+        <div class="form-group">
+            <label for="follow_up_date">Follow-up Date (optional)</label>
+            <input type="date" id="follow_up_date" name="follow_up_date">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Log Call</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Toggle button groups
+document.querySelectorAll('.btn-group').forEach(group => {
+    const field = group.dataset.field;
+    const hidden = document.getElementById(field);
+    group.querySelectorAll('.btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            group.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            hidden.value = btn.dataset.value;
+        });
+    });
+});
+
+// Auto-suggest for contact name
+const nameInput = document.getElementById('contact_name');
+const phoneInput = document.getElementById('phone_number');
+const suggestBox = document.getElementById('suggestions');
+let debounce;
+
+nameInput.addEventListener('input', () => {
+    clearTimeout(debounce);
+    const q = nameInput.value.trim();
+    if (q.length < 2) { suggestBox.innerHTML = ''; return; }
+    debounce = setTimeout(() => {
+        fetch('/api/suggest?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(items => {
+                if (!items.length) { suggestBox.innerHTML = ''; return; }
+                suggestBox.innerHTML = items.map(i =>
+                    `<div class="suggest-item" data-name="${i.name}" data-phone="${i.phone}">
+                        <strong>${i.name}</strong> <span>${i.phone}</span>
+                    </div>`
+                ).join('');
+                suggestBox.querySelectorAll('.suggest-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        nameInput.value = el.dataset.name;
+                        phoneInput.value = el.dataset.phone;
+                        suggestBox.innerHTML = '';
+                    });
+                });
+            });
+    }, 250);
+});
+
+document.addEventListener('click', e => {
+    if (!suggestBox.contains(e.target) && e.target !== nameInput) suggestBox.innerHTML = '';
+});
+</script>
+{% endblock %}

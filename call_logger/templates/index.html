@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Call Logger{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dash-header">
+        <h1>Dashboard</h1>
+        <a href="{{ url_for('log_call') }}" class="btn btn-primary btn-lg">+ Log Call</a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.today_count }}</div>
+            <div class="stat-label">Calls Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.week_count }}</div>
+            <div class="stat-label">Calls This Week</div>
+        </div>
+    </div>
+
+    <!-- Outcome Breakdown -->
+    {% if stats.outcomes %}
+    <div class="card">
+        <h2>This Week by Outcome</h2>
+        <div class="outcome-bars">
+            {% for o in stats.outcomes %}
+            <div class="outcome-row">
+                <span class="outcome-label">{{ o.outcome }}</span>
+                <div class="outcome-bar-track">
+                    <div class="outcome-bar-fill outcome-{{ o.outcome | lower | replace(' ', '-') }}"
+                         style="width: {{ (o.count / stats.week_count * 100) if stats.week_count else 0 }}%">
+                    </div>
+                </div>
+                <span class="outcome-count">{{ o.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Follow-ups -->
+    {% if stats.follow_ups %}
+    <div class="card">
+        <h2>Upcoming Follow-ups</h2>
+        <div class="follow-up-list">
+            {% for fu in stats.follow_ups %}
+            <div class="follow-up-item">
+                <div class="fu-date">{{ fu.follow_up_date }}</div>
+                <div class="fu-info">
+                    <strong>{{ fu.contact_name or 'Unknown' }}</strong>
+                    {% if fu.phone_number %}<span class="fu-phone">{{ fu.phone_number }}</span>{% endif %}
+                    {% if fu.notes %}<p class="fu-notes">{{ fu.notes[:80] }}{% if fu.notes|length > 80 %}...{% endif %}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Export -->
+    <div class="card">
+        <h2>Weekly Report</h2>
+        <p>Auto-exports every Friday at 6 PM. Or export now:</p>
+        <form action="{{ url_for('export_now') }}" method="POST" class="inline-form">
+            <button type="submit" class="btn btn-secondary">Export to Google Sheets</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

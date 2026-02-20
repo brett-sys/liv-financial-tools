@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Vault - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0e0;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .lock-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 32px;
+        }
+
+        .pin-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .pin-digit {
+            width: 52px;
+            height: 62px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-text-security: disc;
+        }
+
+        .pin-digit:focus {
+            border-color: #7c5cfc;
+            background: rgba(124,92,252,0.1);
+        }
+
+        .pin-extra {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+            -webkit-text-security: disc;
+            display: none;
+        }
+
+        .pin-extra:focus {
+            border-color: #7c5cfc;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #7c5cfc, #5a3fd6);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124,92,252,0.4);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 13px;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        .setup-note {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+
+        .confirm-label {
+            display: none;
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 8px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="lock-icon">&#128274;</div>
+        <h1>Password Vault</h1>
+
+        {% if is_setup %}
+            <p class="subtitle">Enter your PIN to unlock</p>
+        {% else %}
+            <p class="subtitle">Create a PIN to get started (4+ digits)</p>
+        {% endif %}
+
+        <form id="pinForm" onsubmit="return false;">
+            <div class="pin-input-group" id="pinGroup">
+                <input type="tel" class="pin-digit" maxlength="1" data-idx="0" autofocus>
+                <input type="tel" class="pin-digit" maxlength="1" data-idx="1">
+                <input type="tel" class="pin-digit" maxlength="1" data-idx="2">
+                <input type="tel" class="pin-digit" maxlength="1" data-idx="3">
+            </div>
+
+            <!-- Extra digits for longer PINs -->
+            <input type="password" class="pin-extra" id="pinExtra"
+                   placeholder="Continue typing for longer PIN..."
+                   inputmode="numeric">
+
+            {% if not is_setup %}
+                <p class="confirm-label" id="confirmLabel">Confirm your PIN:</p>
+                <div class="pin-input-group" id="confirmGroup" style="display:none;">
+                    <input type="tel" class="pin-digit" maxlength="1" data-idx="0">
+                    <input type="tel" class="pin-digit" maxlength="1" data-idx="1">
+                    <input type="tel" class="pin-digit" maxlength="1" data-idx="2">
+                    <input type="tel" class="pin-digit" maxlength="1" data-idx="3">
+                </div>
+                <input type="password" class="pin-extra" id="confirmExtra"
+                       placeholder="Continue typing for longer PIN..."
+                       inputmode="numeric">
+            {% endif %}
+
+            <button class="btn" id="submitBtn" type="button">
+                {% if is_setup %}Unlock{% else %}Create PIN{% endif %}
+            </button>
+        </form>
+
+        <p class="error-msg" id="errorMsg"></p>
+
+        {% if not is_setup %}
+            <p class="setup-note">
+                This PIN encrypts all your saved passwords.<br>
+                Remember it &mdash; it can't be recovered!
+            </p>
+        {% endif %}
+    </div>
+
+    <script>
+        const IS_SETUP = {{ 'true' if is_setup else 'false' }};
+
+        function setupDigitInputs(group, extraInput) {
+            const digits = group.querySelectorAll('.pin-digit');
+            digits.forEach((input, i) => {
+                input.addEventListener('input', (e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    e.target.value = val.slice(-1);
+                    if (val && i < digits.length - 1) {
+                        digits[i + 1].focus();
+                    } else if (val && i === digits.length - 1 && extraInput) {
+                        extraInput.style.display = 'block';
+                        extraInput.focus();
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && i > 0) {
+                        digits[i - 1].focus();
+                    }
+                    if (e.key === 'Enter') {
+                        document.getElementById('submitBtn').click();
+                    }
+                });
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                    for (let j = 0; j < Math.min(text.length, 4); j++) {
+                        digits[j].value = text[j];
+                    }
+                    if (text.length > 4 && extraInput) {
+                        extraInput.style.display = 'block';
+                        extraInput.value = text.slice(4);
+                        extraInput.focus();
+                    } else if (text.length >= 4) {
+                        if (extraInput) { extraInput.style.display = 'block'; extraInput.focus(); }
+                        else digits[3].focus();
+                    }
+                });
+            });
+            if (extraInput) {
+                extraInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+                extraInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value) {
+                        e.target.style.display = 'none';
+                        digits[3].focus();
+                    }
+                    if (e.key === 'Enter') {
+                        document.getElementById('submitBtn').click();
+                    }
+                });
+            }
+        }
+
+        function getPinFromGroup(group, extraInput) {
+            const digits = group.querySelectorAll('.pin-digit');
+            let pin = '';
+            digits.forEach(d => pin += d.value);
+            if (extraInput) pin += extraInput.value;
+            return pin;
+        }
+
+        const pinGroup = document.getElementById('pinGroup');
+        const pinExtra = document.getElementById('pinExtra');
+        setupDigitInputs(pinGroup, pinExtra);
+
+        if (!IS_SETUP) {
+            const confirmGroup = document.getElementById('confirmGroup');
+            const confirmExtra = document.getElementById('confirmExtra');
+            setupDigitInputs(confirmGroup, confirmExtra);
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const pin = getPinFromGroup(pinGroup, pinExtra);
+            const errEl = document.getElementById('errorMsg');
+            errEl.textContent = '';
+
+            if (IS_SETUP) {
+                // Login
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ pin })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    window.location.href = '/vault';
+                } else {
+                    errEl.textContent = data.error || 'Wrong PIN';
+                }
+            } else {
+                // Setup
+                const confirmGroup = document.getElementById('confirmGroup');
+                const confirmExtra = document.getElementById('confirmExtra');
+                const confirmLabel = document.getElementById('confirmLabel');
+
+                if (confirmGroup.style.display === 'none') {
+                    if (pin.length < 4) {
+                        errEl.textContent = 'PIN must be at least 4 digits';
+                        return;
+                    }
+                    confirmGroup.style.display = 'flex';
+                    confirmLabel.style.display = 'block';
+                    confirmGroup.querySelector('.pin-digit').focus();
+                    return;
+                }
+
+                const confirmPin = getPinFromGroup(confirmGroup, confirmExtra);
+                if (pin !== confirmPin) {
+                    errEl.textContent = 'PINs do not match';
+                    return;
+                }
+
+                const res = await fetch('/api/auth/setup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ pin })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    window.location.href = '/vault';
+                } else {
+                    errEl.textContent = data.error || 'Setup failed';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

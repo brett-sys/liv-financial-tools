@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Quote Comparison - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Quote Comparison</h1>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+        Enter up to 4 carrier quotes to generate a comparison PDF.
+    </p>
+
+    <form method="POST" action="{{ url_for('tools.quote_comparison') }}" class="call-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="client_name">Client Name</label>
+                <input type="text" id="client_name" name="client_name" placeholder="John Smith" required>
+            </div>
+            <div class="form-group">
+                <label for="client_age">Age</label>
+                <input type="text" id="client_age" name="client_age" placeholder="45">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="recommended">Recommended Carrier #</label>
+            <input type="text" id="recommended" name="recommended" value="1" style="width: 60px;">
+        </div>
+
+        {% for i in range(1, 5) %}
+        <div class="card">
+            <h2>Carrier {{ i }}{% if i > 2 %} (optional){% endif %}</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Carrier</label>
+                    <input type="text" name="carrier_{{ i }}" placeholder="National Life">
+                </div>
+                <div class="form-group">
+                    <label>Product</label>
+                    <input type="text" name="product_{{ i }}" placeholder="SummitLife IUL">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Monthly Premium</label>
+                    <input type="text" name="premium_{{ i }}" placeholder="$150">
+                </div>
+                <div class="form-group">
+                    <label>Death Benefit</label>
+                    <input type="text" name="death_benefit_{{ i }}" placeholder="$250,000">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>10-Yr Cash Value</label>
+                    <input type="text" name="cash_value_{{ i }}" placeholder="$12,000">
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <input type="text" name="rating_{{ i }}" placeholder="A+">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Generate Comparison PDF</button>
+    </form>
+</div>
+{% endblock %}

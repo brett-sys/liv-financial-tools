@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Referrals - LIFI{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+    <h1>Referral Tracker</h1>
+</div>
+
+<!-- Stats -->
+<div class="ref-stats-grid">
+    <div class="ref-stat">
+        <div class="ref-stat-num">{{ stats.total }}</div>
+        <div class="ref-stat-label">Total</div>
+    </div>
+    <div class="ref-stat">
+        <div class="ref-stat-num">{{ stats.sold }}</div>
+        <div class="ref-stat-label">Sold</div>
+    </div>
+    <div class="ref-stat">
+        <div class="ref-stat-num">{{ "%.0f"|format(stats.conversion_pct) }}%</div>
+        <div class="ref-stat-label">Conv. Rate</div>
+    </div>
+</div>
+
+<!-- Add Form -->
+<div class="card">
+    <h2>Add Referral</h2>
+    <form method="POST" action="{{ url_for('referrals.add') }}" class="call-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Referrer</label>
+                <input type="text" name="referrer_name" placeholder="Who referred?" required>
+            </div>
+            <div class="form-group">
+                <label>Referred Person</label>
+                <input type="text" name="referred_name" placeholder="Who was referred?" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" name="referred_phone" placeholder="(555) 123-4567">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" name="referred_email" placeholder="email@example.com">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <input type="text" name="notes" placeholder="Any details...">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Add Referral</button>
+    </form>
+</div>
+
+<!-- Top Referrers -->
+{% if stats.top_referrers %}
+<div class="card">
+    <h2>Top Referrers</h2>
+    {% for name, count in stats.top_referrers %}
+    <div style="display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--border);">
+        <span style="font-size: 0.85rem;">{{ name }}</span>
+        <span style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">{{ count }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Referral List -->
+{% if referrals %}
+<h2 style="font-size: 0.95rem; margin-bottom: 0.5rem;">All Referrals</h2>
+<div class="referral-cards">
+    {% for r in referrals %}
+    <div class="referral-card">
+        <div class="referral-header">
+            <div>
+                <strong style="font-size: 0.85rem;">{{ r.referred_name }}</strong>
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.3rem;">from {{ r.referrer_name }}</span>
+            </div>
+            <span class="referral-status status-{{ r.status | lower }}">{{ r.status }}</span>
+        </div>
+        {% if r.referred_phone %}
+        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ r.referred_phone }}</div>
+        {% endif %}
+        {% if r.notes %}
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">{{ r.notes }}</div>
+        {% endif %}
+        {% if r.premium_sold %}
+        <div style="font-size: 0.8rem; color: var(--success); margin-top: 0.2rem;">Premium: {{ r.premium_sold }}</div>
+        {% endif %}
+        <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem; padding-top: 0.4rem; border-top: 1px solid var(--border); align-items: center;">
+            <form method="POST" action="{{ url_for('referrals.update', row_id=r.id) }}" class="inline-form" style="display: flex; gap: 0.3rem; align-items: center; flex: 1;">
+                <select name="status" class="filter-select" style="flex: 1; font-size: 0.75rem; padding: 0.3rem;">
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if r.status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="premium" placeholder="$" style="width: 60px; font-size: 0.75rem; padding: 0.3rem;">
+                <button type="submit" class="btn btn-sm btn-secondary">Update</button>
+            </form>
+            <form method="POST" action="{{ url_for('referrals.delete', row_id=r.id) }}" class="inline-form"
+                  onsubmit="return confirm('Delete this referral?')">
+                <button type="submit" class="btn btn-sm btn-danger">Del</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No referrals yet. Add one above!</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% set active_tab = "home" %}
+{% block title %}Dashboard - LIFI{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dash-header">
+        <h1>Dashboard</h1>
+        <a href="{{ url_for('calls.log_call_route') }}" class="btn btn-primary">+ Log Call</a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.today_count }}</div>
+            <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.week_count }}</div>
+            <div class="stat-label">This Week</div>
+        </div>
+    </div>
+
+    <!-- Due Today -->
+    {% if stats.due_today %}
+    <div class="card">
+        <h2>Due Today</h2>
+        <div class="due-today-list">
+            {% for fu in stats.due_today %}
+            <div class="due-item">
+                <div class="due-item-icon">&#x1F4DE;</div>
+                <div class="due-item-info">
+                    <div class="due-item-name">{{ fu.contact_name or 'Unknown' }}</div>
+                    {% if fu.phone_number %}
+                    <div class="due-item-phone">{{ fu.phone_number }}</div>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('calls.edit_call_route', call_id=fu.id) }}" class="btn btn-sm btn-secondary">View</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Agent Leaderboard -->
+    {% if stats.agent_stats %}
+    <div class="card">
+        <h2>Agent Leaderboard (This Week)</h2>
+        <div class="agent-bars">
+            {% set max_count = stats.agent_stats[0].count if stats.agent_stats else 1 %}
+            {% for a in stats.agent_stats %}
+            <div class="agent-row">
+                <span class="agent-name">{{ a.agent }}</span>
+                <div class="agent-bar-track">
+                    <div class="agent-bar-fill" style="width: {{ (a.count / max_count * 100) }}%"></div>
+                </div>
+                <span class="agent-count">{{ a.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Outcome Breakdown -->
+    {% if stats.outcomes %}
+    <div class="card">
+        <h2>This Week by Outcome</h2>
+        <div class="outcome-bars">
+            {% for o in stats.outcomes %}
+            <div class="outcome-row">
+                <span class="outcome-label">{{ o.outcome }}</span>
+                <div class="outcome-bar-track">
+                    <div class="outcome-bar-fill outcome-{{ o.outcome | lower | replace(' ', '-') }}"
+                         style="width: {{ (o.count / stats.week_count * 100) if stats.week_count else 0 }}%"></div>
+                </div>
+                <span class="outcome-count">{{ o.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Follow-ups -->
+    {% if stats.follow_ups %}
+    <div class="card">
+        <h2>Upcoming Follow-ups</h2>
+        <div class="follow-up-list">
+            {% for fu in stats.follow_ups %}
+            <div class="follow-up-item">
+                <div class="fu-date">{{ fu.follow_up_date }}</div>
+                <div class="fu-info">
+                    <strong>{{ fu.contact_name or 'Unknown' }}</strong>
+                    {% if fu.phone_number %}<span class="fu-phone">{{ fu.phone_number }}</span>{% endif %}
+                    {% if fu.notes %}<p class="fu-notes">{{ fu.notes[:60] }}{% if fu.notes|length > 60 %}...{% endif %}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Export -->
+    <div class="card">
+        <h2>Weekly Report</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Auto-exports Friday at 6 PM</p>
+        <form action="{{ url_for('calls.export_now') }}" method="POST" class="inline-form">
+            <button type="submit" class="btn btn-secondary btn-sm">Export to Google Sheets</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Edit Call - Call Logger{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Edit Call</h1>
+
+    <form method="POST" action="{{ url_for('edit_call', call_id=call.id) }}" class="call-form">
+        <!-- Agent -->
+        <div class="form-group">
+            <label>Agent</label>
+            <div class="btn-group" data-field="agent_name">
+                {% for a in agents %}
+                <button type="button" class="btn-toggle {% if call.agent_name == a %}active{% endif %}"
+                        data-value="{{ a }}">{{ a }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="agent_name" id="agent_name" value="{{ call.agent_name }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact_name">Contact Name</label>
+                <input type="text" id="contact_name" name="contact_name" value="{{ call.contact_name }}">
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" id="phone_number" name="phone_number" value="{{ call.phone_number }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="call_datetime">Date &amp; Time</label>
+            <input type="datetime-local" id="call_datetime" name="call_datetime"
+                   value="{{ call.call_datetime[:16] if call.call_datetime|length > 16 else call.call_datetime }}">
+        </div>
+
+        <div class="form-group">
+            <label>Direction</label>
+            <div class="btn-group" data-field="direction">
+                {% for d in directions %}
+                <button type="button" class="btn-toggle {% if call.direction == d %}active{% endif %}"
+                        data-value="{{ d }}">
+                    {% if d == 'Outbound' %}&#x2197;{% else %}&#x2199;{% endif %} {{ d }}
+                </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="direction" id="direction" value="{{ call.direction }}">
+        </div>
+
+        <div class="form-group">
+            <label>Outcome</label>
+            <div class="btn-group btn-group-wrap" data-field="outcome">
+                {% for o in outcomes %}
+                <button type="button" class="btn-toggle {% if call.outcome == o %}active{% endif %}"
+                        data-value="{{ o }}">{{ o }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="outcome" id="outcome" value="{{ call.outcome }}">
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3">{{ call.notes }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="follow_up_date">Follow-up Date (optional)</label>
+            <input type="date" id="follow_up_date" name="follow_up_date"
+                   value="{{ call.follow_up_date or '' }}">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+            <a href="{{ url_for('history') }}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.btn-group').forEach(group => {
+    const field = group.dataset.field;
+    const hidden = document.getElementById(field);
+    group.querySelectorAll('.btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            group.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            hidden.value = btn.dataset.value;
+        });
+    });
+});
+</script>
+{% endblock %}

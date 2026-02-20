@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f1117">
+    <title>{% block title %}LIFI{% endblock %}</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% if vapid_public_key %}<meta name="vapid-key" content="{{ vapid_public_key }}">{% endif %}
+</head>
+<body class="theme-{{ theme }}">
+    <!-- Top bar (minimal on mobile) -->
+    <header class="top-bar">
+        <a href="{{ url_for('calls.leaderboard') }}" class="top-brand">
+            <img src="{{ url_for('static', filename='lumberjack_logo.png') }}" alt="LIFI" class="top-logo">
+            <span>{{ app_name }}</span>
+        </a>
+        <span class="top-agent">{{ agent_pref }}</span>
+    </header>
+
+    <!-- Flash messages -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+                {{ message | safe }}
+                <button class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main content area (scrolls between top bar and bottom nav) -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('calls.leaderboard') }}"
+           class="nav-tab {% if active_tab == 'home' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('calls.log_call_route') }}"
+           class="nav-tab {% if active_tab == 'log' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                <line x1="12" y1="1" x2="12" y2="7"/><line x1="9" y1="4" x2="15" y2="4"/>
+            </svg>
+            <span>Log</span>
+        </a>
+        <a href="{{ url_for('quoter.quoter_page') }}"
+           class="nav-tab {% if active_tab == 'quoter' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="2" width="16" height="20" rx="2"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+                <line x1="8" y1="14" x2="12" y2="14"/>
+            </svg>
+            <span>Quoter</span>
+        </a>
+        <a href="{{ url_for('tools.tools_menu') }}"
+           class="nav-tab {% if active_tab == 'tools' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            <span>Tools</span>
+        </a>
+        <a href="{{ url_for('calls.history') }}"
+           class="nav-tab {% if active_tab == 'history' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>History</span>
+        </a>
+    </nav>
+
+    {% block scripts %}{% endblock %}
+    <script>
+    (function() {
+        if (!('serviceWorker' in navigator)) return;
+        navigator.serviceWorker.register('/static/sw.js').then(function(reg) {
+            if (!('PushManager' in window)) return;
+            // Check if already subscribed
+            reg.pushManager.getSubscription().then(function(sub) {
+                if (sub) return;
+                // Request permission and subscribe
+                Notification.requestPermission().then(function(perm) {
+                    if (perm !== 'granted') return;
+                    var vapidKey = document.querySelector('meta[name="vapid-key"]');
+                    if (!vapidKey) return;
+                    var key = vapidKey.content;
+                    if (!key) return;
+                    reg.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: key
+                    }).then(function(subscription) {
+                        fetch('/api/push-subscribe', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                agent_name: '{{ agent_pref }}',
+                                subscription: subscription.toJSON()
+                            })
+                        });
+                    });
+                });
+            });
+        }).catch(function(){});
+    })();
+    </script>
+</body>
+</html>

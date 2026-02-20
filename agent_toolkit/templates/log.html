@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% set active_tab = "log" %}
+{% block title %}Log Call - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Log a Call</h1>
+    <form method="POST" action="{{ url_for('calls.log_call_route') }}" class="call-form" autocomplete="off">
+        <div class="form-group">
+            <label>Agent</label>
+            <div class="btn-group btn-group-wrap" data-field="agent_name">
+                {% for a in agents %}
+                <button type="button" class="btn-toggle {% if a == agent_pref %}active{% endif %}"
+                        data-value="{{ a }}">{{ a }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="agent_name" id="agent_name" value="{{ agent_pref }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact_name">Contact Name</label>
+                <input type="text" id="contact_name" name="contact_name" placeholder="Who did you talk to?" autocomplete="off">
+                <div id="suggestions" class="suggestions-dropdown"></div>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" id="phone_number" name="phone_number" placeholder="(555) 123-4567">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="call_datetime">Date & Time</label>
+            <input type="datetime-local" id="call_datetime" name="call_datetime"
+                   value="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+        </div>
+
+        <div class="form-group">
+            <label>Direction</label>
+            <div class="btn-group" data-field="direction">
+                {% for d in directions %}
+                <button type="button" class="btn-toggle {% if d == 'Outbound' %}active{% endif %}"
+                        data-value="{{ d }}">{{ d }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="direction" id="direction" value="Outbound">
+        </div>
+
+        <div class="form-group">
+            <label>Outcome</label>
+            <div class="btn-group btn-group-wrap" data-field="outcome">
+                {% for o in outcomes %}
+                <button type="button" class="btn-toggle {% if loop.first %}active{% endif %}"
+                        data-value="{{ o }}">{{ o }}</button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="outcome" id="outcome" value="{{ outcomes[0] }}">
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Call summary..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="follow_up_date">Follow-up Date (optional)</label>
+            <input type="date" id="follow_up_date" name="follow_up_date">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Log Call</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.btn-group').forEach(function(group) {
+    var field = group.dataset.field;
+    var hidden = document.getElementById(field);
+    group.querySelectorAll('.btn-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            group.querySelectorAll('.btn-toggle').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            hidden.value = btn.dataset.value;
+        });
+    });
+});
+
+var nameInput = document.getElementById('contact_name');
+var phoneInput = document.getElementById('phone_number');
+var suggestBox = document.getElementById('suggestions');
+var debounce;
+nameInput.addEventListener('input', function() {
+    clearTimeout(debounce);
+    var q = nameInput.value.trim();
+    if (q.length < 2) { suggestBox.innerHTML = ''; return; }
+    debounce = setTimeout(function() {
+        fetch('/api/suggest?q=' + encodeURIComponent(q))
+            .then(function(r) { return r.json(); })
+            .then(function(items) {
+                if (!items.length) { suggestBox.innerHTML = ''; return; }
+                suggestBox.innerHTML = items.map(function(i) {
+                    return '<div class="suggest-item" data-name="' + i.name + '" data-phone="' + i.phone + '">' +
+                        '<strong>' + i.name + '</strong> <span>' + i.phone + '</span></div>';
+                }).join('');
+                suggestBox.querySelectorAll('.suggest-item').forEach(function(el) {
+                    el.addEventListener('click', function() {
+                        nameInput.value = el.dataset.name;
+                        phoneInput.value = el.dataset.phone;
+                        suggestBox.innerHTML = '';
+                    });
+                });
+            });
+    }, 250);
+});
+document.addEventListener('click', function(e) {
+    if (!suggestBox.contains(e.target) && e.target !== nameInput) suggestBox.innerHTML = '';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title_extra %} — Files{% endblock %}
+{% block content %}
+<div class="dash-header">
+    <h1>Lead Files <span class="badge badge-count">{{ total }} CSVs</span></h1>
+    {% if not ghl_ok %}
+    <div class="flash flash-error" style="margin:0;font-size:0.85rem;">GHL not configured — check GHL_API_KEY in .env</div>
+    {% endif %}
+</div>
+
+{% if files %}
+<div class="file-grid">
+    {% for f in files %}
+    <a href="{{ url_for('view_leads', file_id=f.id) }}" class="file-card">
+        <div class="file-state">{{ f.state }}</div>
+        <div class="file-name">{{ f.name }}</div>
+        <div class="file-meta">{{ f.size }} · {{ f.modified }}</div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No CSV files found in Drive folder.</p>
+    <p class="text-muted">Check LEAD_DRIVE_FOLDER_ID in .env</p>
+</div>
+{% endif %}
+{% endblock %}

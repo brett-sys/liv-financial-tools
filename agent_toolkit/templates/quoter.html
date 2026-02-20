@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% set active_tab = "quoter" %}
+{% block title %}Quoter - LIFI{% endblock %}
+
+{% block content %}
+<div id="quoter-container">
+    <iframe id="quoter-iframe" src="{{ integrity_url }}" class="quoter-frame"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
+            allow="fullscreen"
+            loading="lazy"></iframe>
+</div>
+
+<div id="quoter-fallback" class="quoter-fallback" style="display:none;">
+    <h2 style="margin-bottom: 0.5rem;">Integrity Connect</h2>
+    <p style="color: var(--text-muted); font-size: 0.85rem;">Open the portal in a new tab:</p>
+    <div class="quoter-links">
+        <a href="{{ integrity_url }}" target="_blank" class="btn btn-primary btn-lg btn-block">
+            Open Integrity Connect
+        </a>
+        <a href="{{ integrity_url }}/agent/clients" target="_blank" class="btn btn-secondary btn-block">
+            Client List
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var iframe = document.getElementById('quoter-iframe');
+var fallback = document.getElementById('quoter-fallback');
+var container = document.getElementById('quoter-container');
+
+iframe.addEventListener('error', function() {
+    container.style.display = 'none';
+    fallback.style.display = 'block';
+});
+
+setTimeout(function() {
+    try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc || !doc.body || doc.body.innerHTML === '') {
+            container.style.display = 'none';
+            fallback.style.display = 'block';
+        }
+    } catch (e) {
+        // Cross-origin means iframe loaded (good sign), keep it
+    }
+}, 3000);
+</script>
+{% endblock %}
