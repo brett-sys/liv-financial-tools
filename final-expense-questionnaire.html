@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LIV Financial – Final Expense Planning Questionnaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FAF0E6;
+      --card: #ffffff;
+      --gold: #C9A227;
+      --gold-dark: #A68520;
+      --blue: #1e4d7b;
+      --blue-light: #e8f0f7;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --border: #e8e4df;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --green: #2e7d32;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 18px;
+    }
+
+    /* Banner */
+    .banner {
+      background: linear-gradient(180deg, #a8d4ee 0%, #c5e3f5 100%);
+      padding: 1.5rem 1.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      text-align: center;
+    }
+    .logo { height: 48px; width: auto; display: block; }
+    .brand { font-family: "Great Vibes", cursive; font-size: 2.2rem; color: var(--blue); margin: 0; line-height: 1.2; }
+    .brand-tag { font-size: 0.9rem; font-weight: 600; color: var(--blue); letter-spacing: 0.02em; margin: 0; }
+    .gold-bar { height: 4px; background: var(--gold); margin: 0; }
+
+    /* Main content */
+    .main-block {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* Intro */
+    .intro-card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 2rem 2.25rem;
+      border: 1px solid var(--border);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .intro-card h1 {
+      font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+      font-weight: 700;
+      color: var(--blue);
+      margin: 0 0 0.75rem;
+      line-height: 1.3;
+    }
+    .intro-card p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin: 0 0 0.5rem;
+      line-height: 1.7;
+    }
+    .intro-card .heart { font-size: 1.6rem; display: block; margin-bottom: 0.5rem; }
+
+    /* Form card */
+    .form-card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 2rem 2.25rem;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    /* Step indicator */
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .step-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .step-dot.active { background: var(--gold); }
+    .step-dot.done { background: var(--green); }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin: 0 0 0.25rem;
+    }
+    .step-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0 0 1.5rem;
+    }
+
+    /* Section divider */
+    .section-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 0.35rem;
+      margin: 1.75rem 0 1rem;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* Form groups */
+    .form-group { margin-bottom: 1.35rem; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      font-size: 1.05rem;
+    }
+    .form-group label .req { color: #c00; }
+    .form-group .hint {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 400;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      font-size: 1.05rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(30,77,123,0.15);
+    }
+
+    /* Radio / Checkbox groups */
+    .radio-group, .check-group { margin-top: 0.5rem; }
+    .radio-group label,
+    .check-group label {
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+      margin-bottom: 0.55rem;
+      cursor: pointer;
+      font-size: 1.05rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .radio-group label:hover,
+    .check-group label:hover { background: var(--blue-light); }
+    .radio-group input,
+    .check-group input {
+      margin-right: 0.65rem;
+      width: 20px; height: 20px;
+      accent-color: var(--blue);
+      flex-shrink: 0;
+    }
+
+    /* Two-column on wider screens */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 1.25rem;
+    }
+    @media (max-width: 560px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* Navigation */
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+    .cta {
+      display: inline-block;
+      background: var(--gold);
+      color: #1a1a1a !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.9rem 2.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .cta:hover { background: var(--gold-dark); color: #fff !important; }
+    .cta:active { transform: scale(0.97); }
+    .btn-back {
+      background: var(--border);
+      color: var(--text);
+      padding: 0.9rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-back:hover { background: #ddd; }
+
+    /* Thank-you state */
+    .thank-you {
+      display: none;
+      text-align: center;
+      padding: 2rem 0;
+    }
+    .thank-you.visible { display: block; }
+    .thank-you h2 { color: var(--green); font-size: 1.6rem; margin: 0 0 0.75rem; }
+    .thank-you p { color: var(--text-muted); font-size: 1.05rem; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Print friendly */
+    @media print {
+      body { font-size: 14px; background: #fff; }
+      .banner, .gold-bar, .form-nav, .step-indicator { display: none; }
+      .form-card, .intro-card { box-shadow: none; border: 1px solid #ccc; }
+      .form-step { display: block !important; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="banner">
+    <img src="234.png" alt="LIV Financial" class="logo" onerror="this.style.display='none';" />
+    <div>
+      <p class="brand">LIV</p>
+      <p class="brand-tag">Financial</p>
+    </div>
+  </header>
+  <div class="gold-bar"></div>
+
+  <section class="main-block">
+
+    <div class="intro-card">
+      <span class="heart" aria-hidden="true">&#x1F3E1;</span>
+      <h1>Final Expense Planning Questionnaire</h1>
+      <p>Thank you for taking a moment to answer these questions. This helps us find the <strong>best and most affordable</strong> plan to protect your family and honor your wishes.</p>
+      <p style="font-size:0.92rem; color:#888;">All information is kept strictly confidential.</p>
+    </div>
+
+    <div class="form-card">
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-dot active" data-dot="1"></div>
+        <div class="step-dot" data-dot="2"></div>
+        <div class="step-dot" data-dot="3"></div>
+        <div class="step-dot" data-dot="4"></div>
+      </div>
+
+      <!--
+        REQUIRED: Replace YOUR_SCRIPT_URL below with your Google Apps Script Web app URL.
+        See form-to-sheet-questionnaire.gs for setup instructions.
+      -->
+      <form id="questionnaire" action="YOUR_SCRIPT_URL" method="POST" target="_blank">
+        <input type="hidden" name="timestamp" id="timestamp" value="" />
+        <input type="hidden" name="form_type" value="final_expense_questionnaire" />
+
+        <!-- ===== STEP 1: ABOUT YOU ===== -->
+        <div class="form-step active" data-step="1">
+          <p class="step-title">Step 1 of 4 &mdash; About You</p>
+          <p class="step-sub">Let's start with basic info for you and your spouse.</p>
+
+          <div class="section-label">Primary Applicant</div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Full Name <span class="req">*</span></label>
+              <input type="text" name="p1_name" required placeholder="First and Last name" />
+            </div>
+            <div class="form-group">
+              <label>Date of Birth <span class="req">*</span></label>
+              <input type="date" name="p1_dob" required />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Gender <span class="req">*</span></label>
+              <select name="p1_gender" required>
+                <option value="" disabled selected>Select</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Height &amp; Weight</label>
+              <input type="text" name="p1_height_weight" placeholder="e.g. 5'6&quot;, 170 lbs" />
+            </div>
+          </div>
+
+          <div class="section-label">Spouse / Partner</div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" name="p2_name" placeholder="First and Last name" />
+            </div>
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" name="p2_dob" />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Gender</label>
+              <select name="p2_gender">
+                <option value="" disabled selected>Select</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Height &amp; Weight</label>
+              <input type="text" name="p2_height_weight" placeholder="e.g. 5'4&quot;, 150 lbs" />
+            </div>
+          </div>
+
+          <div class="section-label">Contact Information</div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Phone Number <span class="req">*</span></label>
+              <input type="tel" name="phone" required placeholder="(555) 555-5555" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" name="email" placeholder="you@email.com" />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>City <span class="req">*</span></label>
+              <input type="text" name="city" required placeholder="City" />
+            </div>
+            <div class="form-group">
+              <label>State <span class="req">*</span></label>
+              <input type="text" name="state" required placeholder="State" />
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <span></span>
+            <button type="button" class="cta btn-next">Next &rarr;</button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 2: FUNERAL WISHES ===== -->
+        <div class="form-step" data-step="2">
+          <p class="step-title">Step 2 of 4 &mdash; Your Wishes</p>
+          <p class="step-sub">Help us understand how you'd like things handled.</p>
+
+          <div class="form-group">
+            <label>What type of service do you prefer? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="service_type" value="Traditional Burial" required /> Traditional Burial</label>
+              <label><input type="radio" name="service_type" value="Cremation" /> Cremation</label>
+              <label><input type="radio" name="service_type" value="Cremation with Memorial Service" /> Cremation with a Memorial Service</label>
+              <label><input type="radio" name="service_type" value="Green / Natural Burial" /> Green / Natural Burial</label>
+              <label><input type="radio" name="service_type" value="Not sure yet" /> Not sure yet</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Do you already have a funeral home in mind?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="funeral_home_chosen" value="Yes" /> Yes</label>
+              <label><input type="radio" name="funeral_home_chosen" value="No" /> No, not yet</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>If yes, which funeral home?</label>
+            <input type="text" name="funeral_home_name" placeholder="Name of funeral home" />
+          </div>
+
+          <div class="form-group">
+            <label>Have you received an estimate or price from a funeral home?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="has_estimate" value="Yes" /> Yes</label>
+              <label><input type="radio" name="has_estimate" value="No" /> No</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>If yes, about how much was the estimate?</label>
+            <input type="text" name="estimate_amount" placeholder="e.g. $8,000" />
+          </div>
+
+          <div class="form-group">
+            <label>Do you have a cemetery plot or columbarium niche already?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="has_plot" value="Yes" /> Yes, already purchased</label>
+              <label><input type="radio" name="has_plot" value="No" /> No</label>
+              <label><input type="radio" name="has_plot" value="Family plot" /> There's a family plot</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Do you want a viewing / visitation before the service?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="wants_viewing" value="Yes" /> Yes</label>
+              <label><input type="radio" name="wants_viewing" value="No" /> No</label>
+              <label><input type="radio" name="wants_viewing" value="Unsure" /> Not sure</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Any special wishes or requests?</label>
+            <span class="hint">Military honors, religious ceremony, specific music, flowers, etc.</span>
+            <textarea name="special_wishes" placeholder="Tell us anything that's important to you..."></textarea>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn-back btn-prev">&larr; Back</button>
+            <button type="button" class="cta btn-next">Next &rarr;</button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 3: HEALTH ===== -->
+        <div class="form-step" data-step="3">
+          <p class="step-title">Step 3 of 4 &mdash; Health Questions</p>
+          <p class="step-sub">A few simple health questions so we can find the best rates. Answer for both spouses if applicable.</p>
+
+          <div class="section-label">Primary Applicant</div>
+
+          <div class="form-group">
+            <label>Do you currently use any tobacco or nicotine products? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="p1_tobacco" value="Yes" required /> Yes</label>
+              <label><input type="radio" name="p1_tobacco" value="No" /> No</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Have you been diagnosed with or treated for any of the following?</label>
+            <span class="hint">Check all that apply</span>
+            <div class="check-group">
+              <label><input type="checkbox" name="p1_conditions" value="Heart Disease" /> Heart Disease / Heart Attack</label>
+              <label><input type="checkbox" name="p1_conditions" value="Stroke" /> Stroke / TIA</label>
+              <label><input type="checkbox" name="p1_conditions" value="Cancer" /> Cancer (any type)</label>
+              <label><input type="checkbox" name="p1_conditions" value="Diabetes" /> Diabetes</label>
+              <label><input type="checkbox" name="p1_conditions" value="COPD" /> COPD / Emphysema</label>
+              <label><input type="checkbox" name="p1_conditions" value="Kidney Disease" /> Kidney Disease / Dialysis</label>
+              <label><input type="checkbox" name="p1_conditions" value="Alzheimers/Dementia" /> Alzheimer's / Dementia</label>
+              <label><input type="checkbox" name="p1_conditions" value="None" /> None of the above</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Are you currently taking any medications?</label>
+            <textarea name="p1_medications" placeholder="List any current medications..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Have you been hospitalized in the last 2 years?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="p1_hospitalized" value="Yes" /> Yes</label>
+              <label><input type="radio" name="p1_hospitalized" value="No" /> No</label>
+            </div>
+          </div>
+
+          <div class="section-label">Spouse / Partner</div>
+
+          <div class="form-group">
+            <label>Does your spouse use tobacco or nicotine products?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="p2_tobacco" value="Yes" /> Yes</label>
+              <label><input type="radio" name="p2_tobacco" value="No" /> No</label>
+              <label><input type="radio" name="p2_tobacco" value="N/A" /> Not applicable</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Has your spouse been diagnosed with or treated for any of the following?</label>
+            <span class="hint">Check all that apply</span>
+            <div class="check-group">
+              <label><input type="checkbox" name="p2_conditions" value="Heart Disease" /> Heart Disease / Heart Attack</label>
+              <label><input type="checkbox" name="p2_conditions" value="Stroke" /> Stroke / TIA</label>
+              <label><input type="checkbox" name="p2_conditions" value="Cancer" /> Cancer (any type)</label>
+              <label><input type="checkbox" name="p2_conditions" value="Diabetes" /> Diabetes</label>
+              <label><input type="checkbox" name="p2_conditions" value="COPD" /> COPD / Emphysema</label>
+              <label><input type="checkbox" name="p2_conditions" value="Kidney Disease" /> Kidney Disease / Dialysis</label>
+              <label><input type="checkbox" name="p2_conditions" value="Alzheimers/Dementia" /> Alzheimer's / Dementia</label>
+              <label><input type="checkbox" name="p2_conditions" value="None" /> None of the above</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Spouse medications?</label>
+            <textarea name="p2_medications" placeholder="List any current medications..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Has your spouse been hospitalized in the last 2 years?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="p2_hospitalized" value="Yes" /> Yes</label>
+              <label><input type="radio" name="p2_hospitalized" value="No" /> No</label>
+              <label><input type="radio" name="p2_hospitalized" value="N/A" /> Not applicable</label>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn-back btn-prev">&larr; Back</button>
+            <button type="button" class="cta btn-next">Next &rarr;</button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 4: COVERAGE & BUDGET ===== -->
+        <div class="form-step" data-step="4">
+          <p class="step-title">Step 4 of 4 &mdash; Coverage &amp; Budget</p>
+          <p class="step-sub">Almost done! Let us know what fits your budget.</p>
+
+          <div class="form-group">
+            <label>How much coverage are you looking for? <span class="req">*</span></label>
+            <span class="hint">This is the total amount your family would receive.</span>
+            <div class="radio-group">
+              <label><input type="radio" name="coverage_amount" value="$5,000 - $10,000" required /> $5,000 &ndash; $10,000</label>
+              <label><input type="radio" name="coverage_amount" value="$10,000 - $15,000" /> $10,000 &ndash; $15,000</label>
+              <label><input type="radio" name="coverage_amount" value="$15,000 - $25,000" /> $15,000 &ndash; $25,000</label>
+              <label><input type="radio" name="coverage_amount" value="$25,000 - $40,000" /> $25,000 &ndash; $40,000</label>
+              <label><input type="radio" name="coverage_amount" value="$40,000+" /> $40,000+</label>
+              <label><input type="radio" name="coverage_amount" value="Not sure" /> Not sure &mdash; help me figure it out</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>What monthly budget works for you? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="monthly_budget" value="$30-$50" required /> $30 &ndash; $50 per month</label>
+              <label><input type="radio" name="monthly_budget" value="$50-$75" /> $50 &ndash; $75 per month</label>
+              <label><input type="radio" name="monthly_budget" value="$75-$100" /> $75 &ndash; $100 per month</label>
+              <label><input type="radio" name="monthly_budget" value="$100-$150" /> $100 &ndash; $150 per month</label>
+              <label><input type="radio" name="monthly_budget" value="$150+" /> $150+ per month</label>
+              <label><input type="radio" name="monthly_budget" value="Not sure" /> Not sure yet</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Who would you like as your beneficiary? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="beneficiary" value="Spouse" required /> Spouse / Partner</label>
+              <label><input type="radio" name="beneficiary" value="Child" /> Child / Children</label>
+              <label><input type="radio" name="beneficiary" value="Grandchild" /> Grandchild</label>
+              <label><input type="radio" name="beneficiary" value="Sibling" /> Sibling</label>
+              <label><input type="radio" name="beneficiary" value="Other" /> Other</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Beneficiary name(s)</label>
+            <input type="text" name="beneficiary_names" placeholder="Full name of beneficiary" />
+          </div>
+
+          <div class="form-group">
+            <label>Do you currently have any life insurance?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="existing_insurance" value="Yes" /> Yes</label>
+              <label><input type="radio" name="existing_insurance" value="No" /> No</label>
+              <label><input type="radio" name="existing_insurance" value="Not sure" /> Not sure</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>If yes, how much coverage and with which company?</label>
+            <input type="text" name="existing_insurance_details" placeholder="e.g. $10,000 with Globe Life" />
+          </div>
+
+          <div class="form-group">
+            <label>What is most important to you? <span class="req">*</span></label>
+            <span class="hint">Check all that apply</span>
+            <div class="check-group">
+              <label><input type="checkbox" name="priorities" value="Cover funeral costs" /> Making sure funeral costs are covered</label>
+              <label><input type="checkbox" name="priorities" value="No burden on family" /> Not leaving a financial burden on family</label>
+              <label><input type="checkbox" name="priorities" value="Leave extra for family" /> Leaving extra money for loved ones</label>
+              <label><input type="checkbox" name="priorities" value="Lowest cost" /> Getting the lowest monthly cost possible</label>
+              <label><input type="checkbox" name="priorities" value="Peace of mind" /> Peace of mind knowing everything is handled</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Anything else you'd like us to know?</label>
+            <textarea name="additional_notes" placeholder="Any questions, concerns, or other details..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Best time to reach you?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="best_time" value="Morning (8am-12pm)" /> Morning (8am &ndash; 12pm)</label>
+              <label><input type="radio" name="best_time" value="Afternoon (12pm-4pm)" /> Afternoon (12pm &ndash; 4pm)</label>
+              <label><input type="radio" name="best_time" value="Evening (4pm-7pm)" /> Evening (4pm &ndash; 7pm)</label>
+              <label><input type="radio" name="best_time" value="Anytime" /> Anytime works</label>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn-back btn-prev">&larr; Back</button>
+            <button type="submit" class="cta">Submit My Answers</button>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="thank-you" id="thank-you">
+        <h2>Thank You!</h2>
+        <p>We received your answers and will be in touch soon to go over your personalized options.</p>
+        <p style="margin-top:1rem;"><strong>God bless you and your family.</strong></p>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    LIV Financial &mdash; Final Expense Planning Questionnaire &middot; All information is confidential.
+  </footer>
+
+  <script>
+  (function() {
+    var form = document.getElementById('questionnaire');
+    var steps = document.querySelectorAll('.form-step');
+    var dots  = document.querySelectorAll('.step-dot');
+    var totalSteps = steps.length;
+    var current = 1;
+
+    function goTo(n) {
+      if (n < 1 || n > totalSteps) return;
+      current = n;
+      steps.forEach(function(s) {
+        s.classList.toggle('active', +s.dataset.step === n);
+      });
+      dots.forEach(function(d) {
+        var dn = +d.dataset.dot;
+        d.classList.toggle('active', dn === n);
+        d.classList.toggle('done', dn < n);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(stepEl) {
+      var inputs = stepEl.querySelectorAll('[required]');
+      for (var i = 0; i < inputs.length; i++) {
+        var inp = inputs[i];
+        if (inp.type === 'radio') {
+          var name = inp.name;
+          var checked = stepEl.querySelector('input[name="' + name + '"]:checked');
+          if (!checked) {
+            alert('Please answer: ' + inp.closest('.form-group').querySelector('label').textContent.replace('*', '').trim());
+            return false;
+          }
+        } else if (!inp.value || !inp.value.trim()) {
+          inp.focus();
+          alert('Please fill in: ' + inp.closest('.form-group').querySelector('label').textContent.replace('*', '').trim());
+          return false;
+        }
+      }
+      return true;
+    }
+
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('btn-next')) {
+        var stepEl = e.target.closest('.form-step');
+        if (validateStep(stepEl)) goTo(current + 1);
+      }
+      if (e.target.classList.contains('btn-prev')) {
+        goTo(current - 1);
+      }
+    });
+
+    form.addEventListener('submit', function() {
+      var ts = document.getElementById('timestamp');
+      if (ts) ts.value = new Date().toISOString();
+    });
+  })();
+  </script>
+
+</body>
+</html>
