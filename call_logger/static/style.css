@@ -380,39 +380,39 @@ textarea { resize: vertical; }
 .theme-kevin .fu-date { background: #ff8c00; }
 .theme-kevin .navbar { border-bottom-color: #2a2a2a; background: #111; }
 
-/* ===== Easton Theme (Highlighter Blue & Dark) ===== */
+/* ===== Easton Theme (Highlighter Pink & Dark) ===== */
 .theme-easton {
-    --bg: #060a10;
-    --surface: #0c1420;
-    --surface-hover: #142030;
-    --border: #1a2e48;
-    --text: #e4eef8;
-    --text-muted: #7ba0c4;
-    --primary: #00d4ff;
-    --primary-hover: #00b8e6;
-    --success: #00d4ff;
+    --bg: #100610;
+    --surface: #1a0c1a;
+    --surface-hover: #2a142a;
+    --border: #3d1a3d;
+    --text: #f8e4f4;
+    --text-muted: #c47bb8;
+    --primary: #ff2eed;
+    --primary-hover: #e600d4;
+    --success: #ff2eed;
     --danger: #ff453a;
-    --warning: #66e0ff;
+    --warning: #ff80e5;
 }
-.theme-easton .nav-brand { color: #00d4ff; }
-.theme-easton .btn-toggle:hover { border-color: #00d4ff; }
+.theme-easton .nav-brand { color: #ff2eed; }
+.theme-easton .btn-toggle:hover { border-color: #ff2eed; }
 .theme-easton .btn-toggle.active {
-    background: rgba(0, 212, 255, 0.15);
-    border-color: #00d4ff;
-    color: #00d4ff;
+    background: rgba(255, 46, 237, 0.15);
+    border-color: #ff2eed;
+    color: #ff2eed;
 }
 .theme-easton input:focus,
 .theme-easton select:focus,
-.theme-easton textarea:focus { border-color: #00d4ff; }
-.theme-easton .badge-inbound { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
-.theme-easton .badge-outbound { background: rgba(102, 224, 255, 0.15); color: #66e0ff; }
-.theme-easton .badge-callback { color: #00d4ff; }
-.theme-easton .call-agent { color: #00d4ff; }
-.theme-easton .flash-success { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
-.theme-easton .outcome-sale { background: #00d4ff; }
-.theme-easton .outcome-callback { background: #66e0ff; }
-.theme-easton .fu-date { background: #00d4ff; }
-.theme-easton .navbar { border-bottom-color: #1a2e48; background: #081018; }
+.theme-easton textarea:focus { border-color: #ff2eed; }
+.theme-easton .badge-inbound { background: rgba(255, 46, 237, 0.15); color: #ff2eed; }
+.theme-easton .badge-outbound { background: rgba(255, 128, 229, 0.15); color: #ff80e5; }
+.theme-easton .badge-callback { color: #ff2eed; }
+.theme-easton .call-agent { color: #ff2eed; }
+.theme-easton .flash-success { background: rgba(255, 46, 237, 0.15); color: #ff2eed; }
+.theme-easton .outcome-sale { background: #ff2eed; }
+.theme-easton .outcome-callback { background: #ff80e5; }
+.theme-easton .fu-date { background: #ff2eed; }
+.theme-easton .navbar { border-bottom-color: #3d1a3d; background: #120810; }
 
 /* ===== Joe Theme (Green & Dark) ===== */
 .theme-joe {
