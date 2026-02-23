@@ -60,14 +60,25 @@ def set_joe_theme():
     return resp
 
 
+THEME_MAP = {
+    "brett": "Brett",
+    "kevin": "Kevin Nelson",
+    "easton": "Easton Passolt",
+    "joe": "Joe",
+}
+
 @app.context_processor
 def inject_theme():
     """Make theme and agent_pref available in all templates."""
-    # Cookie override if set, otherwise detect from hostname
+    # Priority: URL param > cookie > hostname default
+    url_theme = request.args.get("user")
     cookie_theme = request.cookies.get("theme")
-    if cookie_theme:
+    if url_theme and url_theme in THEME_MAP:
+        theme = url_theme
+        agent_pref = THEME_MAP[url_theme]
+    elif cookie_theme and cookie_theme in THEME_MAP:
         theme = cookie_theme
-        agent_pref = request.cookies.get("agent_pref", "Brett")
+        agent_pref = request.cookies.get("agent_pref", THEME_MAP.get(cookie_theme, "Brett"))
     else:
         host = request.host.split(":")[0]
         is_local = host in ("localhost", "127.0.0.1") or host.startswith("192.168.")
