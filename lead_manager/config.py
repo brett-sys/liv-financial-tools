@@ -26,7 +26,7 @@ DRIVE_FOLDER_ID = os.getenv("LEAD_DRIVE_FOLDER_ID", "1qfo-He84pnSfA5qhtowJ_1FKL0
 # Flask
 SECRET_KEY = os.getenv("LEAD_MANAGER_SECRET_KEY", "lead-mgr-dev-key-change-me")
 HOST = os.getenv("LEAD_MANAGER_HOST", "0.0.0.0")
-PORT = int(os.getenv("LEAD_MANAGER_PORT", "5070"))
+PORT = int(os.getenv("PORT") or os.getenv("LEAD_MANAGER_PORT", "5070"))
 
 # Go High Level (Elite 360)
 GHL_API_KEY = os.getenv("GHL_API_KEY", "")
