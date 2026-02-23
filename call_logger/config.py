@@ -26,7 +26,7 @@ CALL_LOG_SHEET_ID = os.getenv("CALL_LOG_SHEET_ID", "")
 # Flask
 SECRET_KEY = os.getenv("CALL_LOGGER_SECRET_KEY", "call-logger-dev-key-change-me")
 HOST = os.getenv("CALL_LOGGER_HOST", "0.0.0.0")
-PORT = int(os.getenv("CALL_LOGGER_PORT", "5055"))
+PORT = int(os.getenv("PORT", os.getenv("CALL_LOGGER_PORT", "5055")))
 
 # Scheduler
 REPORT_DAY = "fri"
