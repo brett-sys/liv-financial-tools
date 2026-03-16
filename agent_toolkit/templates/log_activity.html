@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% set active_tab = "scoreboard" %}
+{% block title %}Log Activity - LIFI{% endblock %}
+
+{% block content %}
+<div class="log-wrap">
+
+    <div class="log-header">
+        <a href="{{ url_for('scoreboard.scoreboard') }}" class="back-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
+        <h1 class="log-title">Log Activity</h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('scoreboard.log') }}" class="log-form" id="logForm">
+
+        <!-- Agent -->
+        <div class="form-group">
+            <label class="form-label">Agent</label>
+            <div class="agent-pills">
+                {% for agent in agents %}
+                <label class="agent-pill">
+                    <input type="radio" name="agent_name" value="{{ agent }}"
+                           {% if agent == default_agent %}checked{% endif %}>
+                    <span>{{ agent }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Activity Type -->
+        <div class="form-group">
+            <label class="form-label">Activity Type</label>
+            <div class="activity-grid" id="activityGrid">
+                {% for atype in activity_types %}
+                <label class="activity-card" data-type="{{ atype }}">
+                    <input type="radio" name="activity_type" value="{{ atype }}"
+                           {% if atype == 'policy' %}checked{% endif %}>
+                    <span class="act-emoji">{{ activity_emojis[atype] }}</span>
+                    <span class="act-label">{{ activity_labels[atype] }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Annual Premium (policy only) -->
+        <div class="form-group" id="apGroup">
+            <label class="form-label" for="ap_amount">Annual Premium ($)</label>
+            <input type="number" id="ap_amount" name="ap_amount" class="form-input"
+                   placeholder="e.g. 1200" min="0" step="0.01">
+        </div>
+
+        <!-- Count -->
+        <div class="form-group">
+            <label class="form-label">Count</label>
+            <div class="count-row">
+                <button type="button" class="count-btn" id="countDown">−</button>
+                <input type="number" name="count" id="countInput" class="count-input"
+                       value="1" min="1" max="99">
+                <button type="button" class="count-btn" id="countUp">+</button>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+            <label class="form-label">Notes <span class="optional">(optional)</span></label>
+            <input type="text" name="notes" class="form-input"
+                   placeholder="e.g. client name, carrier, product...">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+            Log Activity
+        </button>
+
+    </form>
+</div>
+
+<style>
+.log-wrap { padding: 0.75rem; max-width: 480px; margin: 0 auto; }
+.log-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
+.back-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); text-decoration: none; flex-shrink: 0;
+}
+.log-title { font-size: 1.3rem; font-weight: 700; }
+
+.log-form { display: flex; flex-direction: column; gap: 1.1rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-muted); }
+.optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.form-input {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.7rem 0.9rem; color: var(--text);
+    font-size: 1rem; width: 100%; outline: none; transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--primary); }
+
+/* Agent pills */
+.agent-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.agent-pill input { display: none; }
+.agent-pill span {
+    display: block; padding: 0.45rem 0.9rem; border-radius: 999px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    color: var(--text-muted);
+}
+.agent-pill input:checked + span {
+    background: var(--primary); border-color: var(--primary); color: #fff;
+}
+
+/* Activity cards */
+.activity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.activity-card input { display: none; }
+.activity-card {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.2rem; padding: 0.7rem 0.5rem;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: all 0.15s;
+}
+.activity-card input:checked ~ .act-emoji,
+.activity-card input:checked ~ .act-label { opacity: 1; }
+.activity-card:has(input:checked) {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+}
+.act-emoji { font-size: 1.6rem; }
+.act-label { font-size: 0.75rem; font-weight: 600; color: var(--text); text-align: center; }
+
+/* Count row */
+.count-row { display: flex; align-items: center; gap: 0.75rem; }
+.count-btn {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text); font-size: 1.4rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s; flex-shrink: 0;
+}
+.count-btn:hover { background: var(--surface-hover); }
+.count-input {
+    flex: 1; text-align: center; background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 0.6rem; color: var(--text); font-size: 1.3rem;
+    font-weight: 700; outline: none;
+}
+.count-input:focus { border-color: var(--primary); }
+
+.btn-full { width: 100%; padding: 0.9rem; font-size: 1rem; margin-top: 0.5rem; }
+</style>
+
+<script>
+// Count +/- buttons
+document.getElementById('countDown').addEventListener('click', () => {
+    const inp = document.getElementById('countInput');
+    if (parseInt(inp.value) > 1) inp.value = parseInt(inp.value) - 1;
+});
+document.getElementById('countUp').addEventListener('click', () => {
+    const inp = document.getElementById('countInput');
+    inp.value = parseInt(inp.value) + 1;
+});
+
+// Show/hide AP field based on activity type
+function updateAPField() {
+    const selected = document.querySelector('input[name="activity_type"]:checked');
+    const apGroup = document.getElementById('apGroup');
+    apGroup.style.display = (selected && selected.value === 'policy') ? 'flex' : 'none';
+}
+document.querySelectorAll('input[name="activity_type"]').forEach(r => {
+    r.addEventListener('change', updateAPField);
+});
+updateAPField();
+
+// Prevent double-submit
+document.getElementById('logForm').addEventListener('submit', () => {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Logging...';
+});
+</script>
+{% endblock %}

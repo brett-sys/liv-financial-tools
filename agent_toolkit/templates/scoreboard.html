@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% set active_tab = "scoreboard" %}
+{% block title %}Scoreboard - LIFI{% endblock %}
+
+{% block content %}
+<div class="sb-wrap">
+
+    <!-- Header -->
+    <div class="sb-header">
+        <h1 class="sb-title">🏆 Scoreboard</h1>
+        <a href="{{ url_for('scoreboard.log') }}" class="btn btn-primary btn-sm sb-log-btn">+ Log Activity</a>
+    </div>
+
+    <!-- Period Filter -->
+    <div class="filter-row">
+        {% for p, label in periods.items() %}
+        <a href="{{ url_for('scoreboard.scoreboard', period=p, metric=metric) }}"
+           class="filter-pill {% if period == p %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Metric Filter -->
+    <div class="filter-row metric-row">
+        {% for m, (mlabel, memoji) in metrics.items() %}
+        <a href="{{ url_for('scoreboard.scoreboard', period=period, metric=m) }}"
+           class="filter-pill {% if metric == m %}active{% endif %}">{{ memoji }} {{ mlabel }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Recognition Badges -->
+    {% if recognition %}
+    <div class="recognition-row">
+        {% for badge in recognition %}
+        <div class="rec-badge" style="--badge-color: {{ badge.color }}">
+            <div class="rec-emoji">{{ badge.emoji }}</div>
+            <div class="rec-info">
+                <div class="rec-title">{{ badge.title }}</div>
+                <div class="rec-agent">{{ badge.agent }}</div>
+                <div class="rec-stat">{{ badge.stat }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Leaderboard -->
+    <div class="lb-list">
+        {% set metric_label = metrics[metric][0] %}
+        {% set metric_emoji = metrics[metric][1] %}
+
+        {% for agent in ranked %}
+        {% set score = agent[metric] if metric != 'ap' else agent.ap %}
+        <div class="lb-row {% if loop.index == 1 %}lb-first{% elif loop.index == 2 %}lb-second{% elif loop.index == 3 %}lb-third{% endif %}">
+            <div class="lb-rank">
+                {% if loop.index == 1 %}🥇
+                {% elif loop.index == 2 %}🥈
+                {% elif loop.index == 3 %}🥉
+                {% else %}#{{ loop.index }}{% endif %}
+            </div>
+            <div class="lb-agent-info">
+                <div class="lb-agent-name">{{ agent.agent }}</div>
+                <div class="lb-agent-stats">
+                    {% if agent.policies %}💰 {{ agent.policies }} {% if agent.policies == 1 %}policy{% else %}policies{% endif %}{% endif %}
+                    {% if agent.ap %}&nbsp;·&nbsp;💵 ${{ "{:,.0f}".format(agent.ap) }} AP{% endif %}
+                    {% if agent.calls %}&nbsp;·&nbsp;📞 {{ agent.calls }}{% endif %}
+                    {% if agent.appointments %}&nbsp;·&nbsp;📅 {{ agent.appointments }}{% endif %}
+                    {% if agent.presentations %}&nbsp;·&nbsp;🎯 {{ agent.presentations }}{% endif %}
+                </div>
+            </div>
+            <div class="lb-score">
+                {% if metric == 'ap' %}
+                ${{ "{:,.0f}".format(score) }}
+                {% else %}
+                {{ score }}
+                {% endif %}
+                <span class="lb-score-label">{{ metric_emoji }}</span>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not ranked or ranked|selectattr(metric, 'gt', 0)|list|length == 0 %}
+        <div class="empty-state">
+            <div style="font-size:2.5rem">📊</div>
+            <p>No activity logged yet for this period.</p>
+            <a href="{{ url_for('scoreboard.log') }}" class="btn btn-primary" style="margin-top:0.75rem">Log First Activity</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Activity Feed -->
+    {% if recent_feed %}
+    <div class="feed-section">
+        <div class="feed-header">
+            <span class="feed-title">Recent Activity</span>
+            <!-- Slack summary button -->
+            <form action="{{ url_for('scoreboard.post_summary') }}" method="POST" style="display:inline">
+                <input type="hidden" name="period" value="{{ period }}">
+                <button type="submit" class="btn btn-ghost btn-xs" title="Post summary to Slack">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>
+                    </svg>
+                    Post to Slack
+                </button>
+            </form>
+        </div>
+        <div class="feed-list">
+            {% for item in recent_feed %}
+            <div class="feed-item">
+                <span class="feed-emoji">{{ item.emoji }}</span>
+                <div class="feed-body">
+                    <span class="feed-agent">{{ item.agent_name }}</span>
+                    <span class="feed-action">{{ item.label }}{% if item.count > 1 %} ×{{ item.count }}{% endif %}{{ item.ap_str }}</span>
+                    {% if item.notes %}<div class="feed-notes">{{ item.notes }}</div>{% endif %}
+                </div>
+                <span class="feed-time">{{ item.time_str }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.sb-wrap { padding: 0.75rem 0.75rem 1rem 0.75rem; }
+.sb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.sb-title { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+.sb-log-btn { white-space: nowrap; }
+
+/* Filters */
+.filter-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.metric-row { margin-bottom: 0.75rem; }
+.filter-pill {
+    padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.78rem;
+    font-weight: 600; background: var(--surface); color: var(--text-muted);
+    text-decoration: none; border: 1px solid var(--border); transition: all 0.15s;
+    white-space: nowrap;
+}
+.filter-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.filter-pill:hover:not(.active) { background: var(--surface-hover); color: var(--text); }
+
+/* Recognition */
+.recognition-row {
+    display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem;
+    margin-bottom: 0.75rem; scrollbar-width: none;
+}
+.recognition-row::-webkit-scrollbar { display: none; }
+.rec-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--surface); border: 1px solid var(--badge-color, var(--border));
+    border-radius: 10px; padding: 0.5rem 0.75rem; min-width: 160px; flex-shrink: 0;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--badge-color, transparent) 20%, transparent);
+}
+.rec-emoji { font-size: 1.6rem; }
+.rec-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--badge-color, var(--text-muted)); }
+.rec-agent { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+.rec-stat { font-size: 0.72rem; color: var(--text-muted); }
+
+/* Leaderboard */
+.lb-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+.lb-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 0.75rem 1rem; transition: background 0.15s;
+}
+.lb-first { border-color: #ffd700; background: color-mix(in srgb, #ffd700 8%, var(--surface)); }
+.lb-second { border-color: #c0c0c0; background: color-mix(in srgb, #c0c0c0 6%, var(--surface)); }
+.lb-third { border-color: #cd7f32; background: color-mix(in srgb, #cd7f32 6%, var(--surface)); }
+.lb-rank { font-size: 1.4rem; min-width: 2rem; text-align: center; }
+.lb-agent-info { flex: 1; min-width: 0; }
+.lb-agent-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+.lb-agent-stats { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+.lb-score { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-align: right; }
+.lb-score-label { font-size: 1rem; }
+
+.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); }
+
+/* Feed */
+.feed-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.feed-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border);
+}
+.feed-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); }
+.feed-list { }
+.feed-item {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border);
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-emoji { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.feed-body { flex: 1; min-width: 0; }
+.feed-agent { font-weight: 700; font-size: 0.85rem; color: var(--text); }
+.feed-action { font-size: 0.82rem; color: var(--text-muted); margin-left: 0.25rem; }
+.feed-notes { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; font-style: italic; }
+.feed-time { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+
+.btn-ghost {
+    background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+    padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.72rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px; font-weight: 500;
+    transition: all 0.15s;
+}
+.btn-ghost:hover { background: var(--surface-hover); color: var(--text); }
+.btn-xs { padding: 0.2rem 0.4rem; font-size: 0.65rem; }
+</style>
+{% endblock %}
