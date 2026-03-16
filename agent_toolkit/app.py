@@ -18,11 +18,13 @@ from blueprints.calls import calls_bp       # noqa: E402
 from blueprints.quoter import quoter_bp     # noqa: E402
 from blueprints.tools import tools_bp       # noqa: E402
 from blueprints.referrals import referrals_bp  # noqa: E402
+from blueprints.underwriting_api import underwriting_bp  # noqa: E402
 
 app.register_blueprint(calls_bp)
 app.register_blueprint(quoter_bp, url_prefix="/quoter")
 app.register_blueprint(tools_bp, url_prefix="/tools")
 app.register_blueprint(referrals_bp, url_prefix="/referrals")
+app.register_blueprint(underwriting_bp, url_prefix="/underwriting")
 
 
 # ---------------------------------------------------------------------------

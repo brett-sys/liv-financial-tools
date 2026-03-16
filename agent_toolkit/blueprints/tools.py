@@ -6,7 +6,7 @@ from pathlib import Path
 
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
-    send_file,
+    send_file, jsonify,
 )
 
 tools_bp = Blueprint("tools", __name__)
@@ -270,3 +270,74 @@ def quote_comparison():
             return redirect(url_for("tools.quote_comparison"))
 
     return render_template("quote_comparison.html")
+
+
+# ---------------------------------------------------------------------------
+# JSON API – Generate Illustration PDF & Email to Client
+# ---------------------------------------------------------------------------
+@tools_bp.route("/api/illustration", methods=["POST"])
+def api_illustration():
+    """Accept JSON, generate an IUL illustration PDF, and email it to the client.
+
+    Expects JSON body:
+        paste_data   (str, required) – raw carrier illustration text
+        client_name  (str, required) – client's full name
+        client_email (str, required) – client's email address
+
+    Returns JSON with success status and message.
+    """
+    payload = request.get_json(silent=True) or {}
+    paste_data = (payload.get("paste_data") or "").strip()
+    client_name = (payload.get("client_name") or "").strip()
+    client_email = (payload.get("client_email") or "").strip()
+
+    errors = []
+    if not paste_data:
+        errors.append("paste_data is required")
+    if not client_name:
+        errors.append("client_name is required")
+    if not client_email:
+        errors.append("client_email is required")
+    if errors:
+        return jsonify({"success": False, "error": ", ".join(errors)}), 400
+
+    try:
+        eng = _get_pdf_engine()
+        html_body = eng["parse_data_to_html"](paste_data)
+        graph_points = eng["parse_graph_points"](paste_data)
+        summary_data = eng["parse_summary_data"](paste_data)
+        logo = eng["load_logo_data_uri"]()
+        nlg_logo = eng["load_nlg_logo_data_uri"]()
+        agent_photo = eng["load_agent_photo_data_uri"]()
+
+        html_content = eng["generate_pdf_html"](
+            html_body,
+            logo_data_uri=logo,
+            graph_points=graph_points,
+            summary_data=summary_data,
+            nlg_logo_data_uri=nlg_logo,
+            agent_photo_data_uri=agent_photo,
+            client_name=client_name,
+        )
+
+        pdf_bytes = eng["generate_pdf_bytes"](html_content)
+        filename = f"{client_name or 'illustration'}_IUL.pdf".replace(" ", "_")
+    except Exception as e:
+        return jsonify({"success": False, "error": f"PDF generation failed: {e}"}), 500
+
+    from email_utils import send_illustration_email, EmailError
+
+    try:
+        send_illustration_email(client_name, client_email, pdf_bytes, filename)
+    except EmailError as e:
+        return jsonify({
+            "success": False,
+            "error": f"PDF was generated but email failed: {e}",
+            "pdf_generated": True,
+        }), 500
+
+    return jsonify({
+        "success": True,
+        "message": f"Illustration PDF emailed to {client_email}",
+        "filename": filename,
+    })

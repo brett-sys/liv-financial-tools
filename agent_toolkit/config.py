@@ -89,6 +89,14 @@ GHL_ENABLED = os.getenv("GHL_ENABLED", "false").lower() in ("true", "1", "yes")
 GHL_BASE_URL = "https://services.leadconnectorhq.com"
 
 # ---------------------------------------------------------------------------
+# SMTP (Gmail) – used to email illustration PDFs to clients
+# ---------------------------------------------------------------------------
+SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+
+# ---------------------------------------------------------------------------
 # PDF Engine
 # ---------------------------------------------------------------------------
 PDF_ENGINE_DIR = BASE_DIR / "pdf_engine"

@@ -25,10 +25,20 @@ HEADER_ROW = [
 def _get_client():
     if not SHEETS_AVAILABLE:
         raise RuntimeError("gspread / google-auth not installed.")
-    creds_path = config.GOOGLE_SHEETS_CREDENTIALS
-    if not creds_path.exists():
-        raise FileNotFoundError(f"Google credentials not found at {creds_path}")
-    creds = Credentials.from_service_account_file(str(creds_path), scopes=SCOPES)
+
+    import os, json
+    creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    if creds_json:
+        from pathlib import Path
+        tmp = Path("/tmp/credentials.json")
+        tmp.write_text(creds_json)
+        creds = Credentials.from_service_account_file(str(tmp), scopes=SCOPES)
+    else:
+        creds_path = config.GOOGLE_SHEETS_CREDENTIALS
+        if not creds_path.exists():
+            raise FileNotFoundError(f"Google credentials not found at {creds_path}")
+        creds = Credentials.from_service_account_file(str(creds_path), scopes=SCOPES)
+
     return gspread.authorize(creds)
 
 
