@@ -1050,35 +1050,35 @@ def build_quote_comparison_html(
             <td class="center">{c.get('rating', '—')}</td>
         </tr>"""
 
-    # Build carrier detail cards
-    cards_html = ""
-    for i, c in enumerate(carriers):
+    # Build carrier detail cards as full-width stacked blocks.
+    # WeasyPrint has bugs with multi-column containers (flex, grid, table)
+    # that cause overflowed rows to appear after subsequent document content.
+    # Simple block elements with page-break-inside: avoid are bulletproof.
+    def _single_card(i: int, c: dict) -> str:
         rec_border = "border-left: 4px solid #4CAF50;" if i == recommended_idx else ""
         rec_tag = '<div class="card-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
-        cards_html += f"""
+        return f"""
         <div class="detail-card" style="{rec_border}">
             {rec_tag}
             <div class="detail-carrier">{c.get('carrier', '—')}</div>
             <div class="detail-product">{c.get('product', '—')}</div>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-label">Monthly Premium</div>
-                    <div class="detail-value">{c.get('monthly_premium', '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Death Benefit</div>
-                    <div class="detail-value">{c.get('death_benefit', '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">10-Year Cash Value</div>
-                    <div class="detail-value">{c.get('cash_value_10yr', '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Rating</div>
-                    <div class="detail-value">{c.get('rating', '—')}</div>
-                </div>
-            </div>
+            <table class="detail-stats">
+              <tr>
+                <td><div class="detail-label">Monthly<br>Premium</div><div class="detail-value">{c.get('monthly_premium', '—')}</div></td>
+                <td><div class="detail-label">Death<br>Benefit</div><div class="detail-value">{c.get('death_benefit', '—')}</div></td>
+                <td><div class="detail-label">10-Year Cash<br>Value</div><div class="detail-value">{c.get('cash_value_10yr', '—')}</div></td>
+                <td><div class="detail-label">Rating</div><div class="detail-value">{c.get('rating', '—')}</div></td>
+              </tr>
+            </table>
         </div>"""
+
+    # First 2 cards stay on page 1 with the summary table.
+    # All remaining cards + next steps + disclaimer are wrapped in a
+    # page-break-before:always container so they land at the TOP of page 2
+    # before next-steps flows in — WeasyPrint ignores page-break-before on
+    # individual sibling elements but does respect it on a block wrapper.
+    first_cards = "".join(_single_card(i, c) for i, c in enumerate(carriers[:2]))
+    overflow_cards = "".join(_single_card(i, c) for i, c in enumerate(carriers[2:], start=2))
 
     prepared_for_html = ""
     if client_name.strip():
@@ -1214,18 +1214,27 @@ def build_quote_comparison_html(
         letter-spacing: 0.04em;
     }}
     /* Detail cards */
-    .detail-cards {{
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin: 20px 0;
-    }}
     .detail-card {{
+        display: block;
         border: 1px solid #d1e2ea;
         border-radius: 8px;
-        padding: 16px;
+        padding: 14px 16px;
         background: #f9fcfe;
         position: relative;
+        margin-bottom: 12px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }}
+    .detail-carrier {{
+        font-size: 15px;
+        font-weight: 700;
+        color: #123047;
+        margin-bottom: 2px;
+    }}
+    .detail-product {{
+        font-size: 11px;
+        color: #476072;
+        margin-bottom: 10px;
     }}
     .card-rec-tag {{
         position: absolute;
@@ -1239,21 +1248,27 @@ def build_quote_comparison_html(
         border-radius: 3px;
         letter-spacing: 0.04em;
     }}
-    .detail-carrier {{
-        font-size: 16px;
-        font-weight: 700;
-        color: #123047;
+    .detail-stats {{
+        width: 100%;
+        border-collapse: collapse;
+    }}
+    .detail-stats td {{
+        padding: 0 12px 0 0;
+        vertical-align: top;
+        width: 25%;
+    }}
+    .detail-label {{
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #0e7fa6;
+        font-weight: 600;
         margin-bottom: 2px;
     }}
-    .detail-product {{
-        font-size: 12px;
-        color: #476072;
-        margin-bottom: 12px;
-    }}
-    .detail-grid {{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+    .detail-value {{
+        font-size: 14px;
+        font-weight: 600;
+        color: #123047;
     }}
     .detail-label {{
         font-size: 10px;
@@ -1337,9 +1352,8 @@ def build_quote_comparison_html(
         </table>
 
         <h2 class="section-title">Detailed Breakdown</h2>
-        <div class="detail-cards">
-            {cards_html}
-        </div>
+        {first_cards}
+        {"" if not overflow_cards else f'<div style="page-break-before: always;">{overflow_cards}</div>'}
 
         <div class="next-steps">
             <h3>Next Steps</h3>

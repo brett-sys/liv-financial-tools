@@ -26,46 +26,23 @@ import scheduler  # noqa: F401 — starts APScheduler for weekly Sheets export
 
 
 # ---------------------------------------------------------------------------
-# Theme: set via /kevin or /brett URL, stored in cookie
+# Theme: set via /<agent-slug> URL, stored in cookie
 # ---------------------------------------------------------------------------
-@app.route("/kevin")
-def set_kevin_theme():
-    resp = make_response(redirect(url_for("index")))
-    resp.set_cookie("theme", "kevin", max_age=60*60*24*365)
-    resp.set_cookie("agent_pref", "Kevin Nelson", max_age=60*60*24*365)
-    return resp
+THEME_MAP = dict(config.AGENT_ROUTES)
 
 
-@app.route("/brett")
-def set_brett_theme():
-    resp = make_response(redirect(url_for("index")))
-    resp.set_cookie("theme", "brett", max_age=60*60*24*365)
-    resp.set_cookie("agent_pref", "Brett", max_age=60*60*24*365)
-    return resp
+def _make_agent_route(slug, full_name):
+    def agent_theme():
+        resp = make_response(redirect(url_for("index")))
+        resp.set_cookie("theme", slug, max_age=60*60*24*365)
+        resp.set_cookie("agent_pref", full_name, max_age=60*60*24*365)
+        return resp
+    agent_theme.__name__ = f"set_{slug}_theme"
+    return agent_theme
 
 
-@app.route("/easton")
-def set_easton_theme():
-    resp = make_response(redirect(url_for("index")))
-    resp.set_cookie("theme", "easton", max_age=60*60*24*365)
-    resp.set_cookie("agent_pref", "Easton Passolt", max_age=60*60*24*365)
-    return resp
-
-
-@app.route("/joe")
-def set_joe_theme():
-    resp = make_response(redirect(url_for("index")))
-    resp.set_cookie("theme", "joe", max_age=60*60*24*365)
-    resp.set_cookie("agent_pref", "Joe", max_age=60*60*24*365)
-    return resp
-
-
-THEME_MAP = {
-    "brett": "Brett",
-    "kevin": "Kevin Nelson",
-    "easton": "Easton Passolt",
-    "joe": "Joe",
-}
+for _slug, _name in config.AGENT_ROUTES.items():
+    app.route(f"/{_slug}")(_make_agent_route(_slug, _name))
 
 @app.context_processor
 def inject_theme():

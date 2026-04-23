@@ -14,6 +14,19 @@ lsof -ti :$PORT | xargs kill -9 2>/dev/null
 pkill -f "cloudflared tunnel" 2>/dev/null
 sleep 1
 
+# Verify port is actually free before proceeding
+for i in $(seq 1 10); do
+    lsof -ti :$PORT >/dev/null 2>&1 || break
+    lsof -ti :$PORT | xargs kill -9 2>/dev/null
+    sleep 1
+done
+
+if lsof -ti :$PORT >/dev/null 2>&1; then
+    echo "ERROR: Port $PORT still in use after cleanup. Stale PIDs:"
+    lsof -i :$PORT
+    exit 1
+fi
+
 # Start Flask server
 cd "$APP_DIR"
 source "$VENV"
@@ -33,18 +46,30 @@ done
 # Start Cloudflare tunnel and capture URL
 cloudflared tunnel --url http://localhost:$PORT 2>&1 | while read line; do
     echo "$line"
-    # Extract the tunnel URL
-    if echo "$line" | grep -q "trycloudflare.com"; then
+    # Extract the tunnel URL (exclude api.trycloudflare.com from error messages)
+    if echo "$line" | grep -q "trycloudflare.com" && ! echo "$line" | grep -q "api.trycloudflare.com"; then
         URL=$(echo "$line" | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com')
         if [ -n "$URL" ]; then
             echo "$URL" > "$URL_FILE"
             echo ""
-            echo "======================================"
-            echo "  Brett's link:  ${URL}/brett"
-            echo "  Kevin's link:  ${URL}/kevin"
-            echo "  Easton's link: ${URL}/easton"
-            echo "  Joe's link:    ${URL}/joe"
-            echo "======================================"
+            echo "========================================="
+            echo "  Brett's link:    ${URL}/brett"
+            echo "  Kevin's link:    ${URL}/kevin"
+            echo "  Easton's link:   ${URL}/easton"
+            echo "  Joe's link:      ${URL}/joe"
+            echo "  Kooper's link:   ${URL}/kooper"
+            echo "  Kaiden's link:   ${URL}/kaiden"
+            echo "  Alex's link:     ${URL}/alex"
+            echo "  Pedro's link:    ${URL}/pedro"
+            echo "  Quavo's link:    ${URL}/quavo"
+            echo "  Mahan's link:    ${URL}/mahan"
+            echo "  Deven's link:    ${URL}/deven"
+            echo "  Carmello's link: ${URL}/carmello"
+            echo "  Daniel's link:   ${URL}/daniel"
+            echo "  Manuel's link:   ${URL}/manuel"
+            echo "  Nico's link:     ${URL}/nico"
+            echo "  Jean's link:     ${URL}/jean"
+            echo "========================================="
             echo ""
             # Update Google Sheet with the URLs
             cd "$APP_DIR"
@@ -71,6 +96,18 @@ update_link_tab(sheet, 'Brett Link', 'Brett', '${URL}/brett')
 update_link_tab(sheet, 'Kevin Link', 'Kevin', '${URL}/kevin')
 update_link_tab(sheet, 'Easton Link', 'Easton', '${URL}/easton')
 update_link_tab(sheet, 'Joe Link', 'Joe', '${URL}/joe')
+update_link_tab(sheet, 'Kooper Link', 'Kooper', '${URL}/kooper')
+update_link_tab(sheet, 'Kaiden Link', 'Kaiden', '${URL}/kaiden')
+update_link_tab(sheet, 'Alex Link', 'Alex', '${URL}/alex')
+update_link_tab(sheet, 'Pedro Link', 'Pedro', '${URL}/pedro')
+update_link_tab(sheet, 'Quavo Link', 'Quavo', '${URL}/quavo')
+update_link_tab(sheet, 'Mahan Link', 'Mahan', '${URL}/mahan')
+update_link_tab(sheet, 'Deven Link', 'Deven', '${URL}/deven')
+update_link_tab(sheet, 'Carmello Link', 'Carmello', '${URL}/carmello')
+update_link_tab(sheet, 'Daniel Link', 'Daniel', '${URL}/daniel')
+update_link_tab(sheet, 'Manuel Link', 'Manuel', '${URL}/manuel')
+update_link_tab(sheet, 'Nico Link', 'Nico', '${URL}/nico')
+update_link_tab(sheet, 'Jean Link', 'Jean', '${URL}/jean')
 print('Google Sheet updated with all agent links')
 " 2>&1 &
         fi

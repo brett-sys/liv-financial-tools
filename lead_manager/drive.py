@@ -3,6 +3,7 @@
 import csv
 import io
 import re
+from pathlib import Path
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -77,6 +78,45 @@ def download_csv(file_id):
     return leads
 
 
+def list_local_csv_files():
+    """List all CSV files in the local leads directory."""
+    leads_dir = config.LOCAL_LEADS_DIR
+    if not leads_dir.exists():
+        return []
+
+    results = []
+    for f in sorted(leads_dir.glob("*.csv")):
+        stat = f.stat()
+        state = _parse_state(f.name)
+        results.append({
+            "id": f"local:{f.name}",
+            "name": f.name,
+            "state": state or "??",
+            "size": _human_size(stat.st_size),
+            "modified": str(stat.st_mtime)[:10],
+            "source": "local",
+        })
+    return results
+
+
+def read_local_csv(filename):
+    """Read and parse a local CSV file from the leads directory."""
+    filepath = config.LOCAL_LEADS_DIR / filename
+    if not filepath.exists():
+        raise FileNotFoundError(f"File not found: {filepath}")
+
+    with open(filepath, encoding="utf-8", errors="replace") as fh:
+        reader = csv.DictReader(fh)
+        leads = []
+        col_map = config.CSV_COLUMNS
+        for i, row in enumerate(reader):
+            lead = {"_index": i}
+            for key, csv_header in col_map.items():
+                lead[key] = row.get(csv_header, "").strip()
+            leads.append(lead)
+    return leads
+
+
 def _parse_state(filename):
     """Extract state abbreviation from filename like leads_FL_2026-02-01.csv."""
     m = re.match(r"leads_([A-Z]{2})_", filename)
@@ -89,3 +129,5 @@ def _human_size(nbytes):
             return f"{nbytes:.0f} {unit}" if unit == "B" else f"{nbytes:.1f} {unit}"
         nbytes /= 1024
     return f"{nbytes:.1f} TB"
+
+

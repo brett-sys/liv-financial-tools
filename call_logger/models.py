@@ -43,6 +43,8 @@ def init_db():
             conn.execute("ALTER TABLE calls ADD COLUMN agent_name TEXT NOT NULL DEFAULT ''")
         except sqlite3.OperationalError:
             pass  # column already exists
+        # Migration: normalize call_datetime from 'T' separator to space
+        conn.execute("UPDATE calls SET call_datetime = REPLACE(call_datetime, 'T', ' ') WHERE call_datetime LIKE '%T%'")
         conn.commit()
 
 
@@ -53,6 +55,7 @@ def init_db():
 def log_call(agent_name, contact_name, phone_number, call_datetime, direction,
              outcome, notes="", follow_up_date=None):
     """Insert a new call record. Returns the new row id."""
+    call_datetime = call_datetime.replace("T", " ")
     with get_db() as conn:
         cur = conn.execute(
             """INSERT INTO calls
@@ -74,6 +77,8 @@ def update_call(call_id, **fields):
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return
+    if "call_datetime" in updates and updates["call_datetime"]:
+        updates["call_datetime"] = updates["call_datetime"].replace("T", " ")
     updates["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [call_id]

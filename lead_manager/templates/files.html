@@ -14,14 +14,14 @@
     <a href="{{ url_for('view_leads', file_id=f.id) }}" class="file-card">
         <div class="file-state">{{ f.state }}</div>
         <div class="file-name">{{ f.name }}</div>
-        <div class="file-meta">{{ f.size }} · {{ f.modified }}</div>
+        <div class="file-meta">{{ f.size }}{% if f.source == 'local' %} · Local{% elif f.source == 'drive' %} · Drive{% endif %}</div>
     </a>
     {% endfor %}
 </div>
 {% else %}
 <div class="empty-state">
-    <p>No CSV files found in Drive folder.</p>
-    <p class="text-muted">Check LEAD_DRIVE_FOLDER_ID in .env</p>
+    <p>No CSV files found.</p>
+    <p class="text-muted">Place CSVs in sharktank_scraper/Leads/ or check Drive config</p>
 </div>
 {% endif %}
 {% endblock %}

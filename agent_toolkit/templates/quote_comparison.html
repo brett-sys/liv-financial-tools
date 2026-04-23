@@ -55,9 +55,27 @@
                     <input type="text" name="cash_value_{{ i }}" placeholder="$12,000">
                 </div>
                 <div class="form-group">
-                    <label>Rating</label>
-                    <input type="text" name="rating_{{ i }}" placeholder="A+">
+                    <label>20-Yr Cash Value</label>
+                    <input type="text" name="cash_value_20yr_{{ i }}" placeholder="$38,000">
                 </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>A.M. Best Rating</label>
+                    <input type="text" name="am_best_{{ i }}" placeholder="A+ (Superior)">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>S&amp;P Rating</label>
+                    <input type="text" name="sp_{{ i }}" placeholder="A+ (Strong)">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Moody's Rating</label>
+                    <input type="text" name="moodys_{{ i }}" placeholder="A1 (Good)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>About This Carrier <span style="font-weight:400;color:var(--text-muted)">(shown in company info section)</span></label>
+                <textarea name="about_{{ i }}" rows="3" placeholder="Brief description of the carrier — mission, history, financial strength highlights..."></textarea>
             </div>
         </div>
         {% endfor %}

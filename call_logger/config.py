@@ -36,7 +36,28 @@ REPORT_MINUTE = 0
 # Call field options
 DIRECTION_CHOICES = ["Inbound", "Outbound"]
 OUTCOME_CHOICES = ["Sale", "Callback", "No Answer", "Voicemail", "Not Interested", "Other"]
-AGENT_CHOICES = ["Brett", "Kevin Nelson", "Easton Passolt", "Joe"]
+
+# Agent registry: URL slug -> display name
+AGENT_ROUTES = {
+    "brett": "Brett",
+    "kevin": "Kevin Nelson",
+    "easton": "Easton Passolt",
+    "joe": "Joe",
+    "kooper": "Kooper",
+    "kaiden": "Kaiden",
+    "alex": "Alex",
+    "pedro": "Pedro",
+    "quavo": "Quavo",
+    "mahan": "Mahan",
+    "deven": "Deven",
+    "carmello": "Carmello",
+    "daniel": "Daniel",
+    "manuel": "Manuel",
+    "nico": "Nico",
+    "jean": "Jean",
+}
+
+AGENT_CHOICES = list(AGENT_ROUTES.values())
 
 # Agent email mapping for calendar invites
 AGENT_EMAILS = {
@@ -44,6 +65,17 @@ AGENT_EMAILS = {
     "Kevin Nelson": "kevinnelsonk2@outlook.com",
     "Easton Passolt": "eastonpassolt.ffl@gmail.com",
     "Joe": "everyoneneedsajoe@gmail.com",
+    "Kaiden": "Kaidenkranz1@gmail.com",
+    "Alex": "alexvalle.liv.financial@gmail.com",
+    "Pedro": "prtrading13@gmail.com",
+    "Quavo": "Cordaekennedy28@gmail.com",
+    "Mahan": "Mahan@empirefia.com",
+    "Deven": "devenworldsffl@gmail.com",
+    "Carmello": "carmello@elevatedfia.com",
+    "Daniel": "danielvareaghin1@gmail.com",
+    "Manuel": "msvargas2407@gmail.com",
+    "Nico": "Nicovilgil08@gmail.com",
+    "Jean": "jeancoral07@gmail.com",
 }
 
 # Calendar reminder (minutes before event)

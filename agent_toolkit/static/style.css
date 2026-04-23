@@ -438,17 +438,70 @@ textarea { resize: vertical; }
 .tool-card-title { font-weight: 600; font-size: 0.85rem; }
 .tool-card-desc { font-size: 0.7rem; color: var(--text-muted); }
 
-/* ===== Quoter (iframe) ===== */
-.quoter-frame {
-    width: 100%;
-    height: calc(100vh - var(--top-bar-height) - var(--bottom-nav-height) - var(--safe-top) - var(--safe-bottom));
-    border: none;
-}
-.quoter-fallback {
+/* ===== Quoter (launcher) ===== */
+.quoter-launcher {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - var(--top-bar-height) - var(--bottom-nav-height) - var(--safe-top) - var(--safe-bottom) - 2rem);
+    padding: 2rem 1.25rem;
     text-align: center;
-    padding: 2rem;
 }
-.quoter-links { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+.quoter-hero { margin-bottom: 2rem; }
+.quoter-hero-icon {
+    width: 56px;
+    height: 56px;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+}
+.quoter-hero h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.quoter-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.quoter-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 320px;
+}
+.quoter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.25rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.1s, opacity 0.15s;
+}
+.quoter-btn:active { transform: scale(0.97); }
+.quoter-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+.quoter-btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+.quoter-btn-primary:hover { opacity: 0.9; }
+.quoter-btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.quoter-btn-secondary:hover { border-color: var(--primary); }
+.quoter-hint {
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
 
 /* ===== Referrals ===== */
 .referral-cards { display: flex; flex-direction: column; gap: 0.5rem; }

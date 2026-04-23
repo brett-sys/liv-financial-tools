@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Call Logger{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='lumberjack_logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='lumberjack_logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ range(10000, 99999) | random }}">
 </head>
 <body class="theme-{{ theme }}">

@@ -1,32 +1,37 @@
 """Sharktank Leads Scraper — Tkinter GUI for scraping insurance leads."""
 
 import csv
+import io
 import json
 import os
 import random
 import re
+import subprocess
 import sys
 import threading
 import time
 import tkinter as tk
-from datetime import datetime, date
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, date, timedelta
 from tkinter import scrolledtext, messagebox
 
 import requests
+
+try:
+    from google.oauth2.service_account import Credentials
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaIoBaseUpload
+    GDRIVE_AVAILABLE = True
+except ImportError:
+    GDRIVE_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 BASE_URL = "https://backend.socialinsuranceleads.com:3000"
-API_PREFIX = "/v1/api"
 SEARCH_ENDPOINT = "/v1/api/sharktank/leads/search"
 LOGIN_ENDPOINT = "/v1/api/sharktank/login"
-API_KEY = "df1559c16e1dcb8484ea9b7471ae771a423e0f57"
-
-DEFAULT_TOKEN = ""
-DEFAULT_EMAIL = "brett@fflliv.com"
-DEFAULT_PASSWORD = "Password1234#!"
 
 ALL_STATES = [
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -74,14 +79,44 @@ FIELD_MAP = {
 
 CONFIG_FILE = "leads_scraper_config.json"
 LEADS_DIR = "Leads"
+LOG_FILE = "scraper.log"
+
+DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+DRIVE_FOLDER_ID = os.getenv("LEAD_DRIVE_FOLDER_ID", "1qfo-He84pnSfA5qhtowJ_1FKL0rWdRqL")
+
 PAGE_LIMIT = 500
 BATCH_SAVE_SIZE = 20
-RATE_LIMIT_SLEEP = 2
+RATE_LIMIT_SLEEP_MIN = 0.4   # random jitter range (seconds)
+RATE_LIMIT_SLEEP_MAX = 1.6
+BACKOFF_RATE_LIMITED = 5
+BACKOFF_ERROR = 3
 RETRY_COUNT = 3
-RETRY_SLEEP = 10
+RETRY_SLEEP = 5
 FULL_MODE_THRESHOLD = 2000
+POLL_INTERVAL_SECS = 300       # wait between cycles when no new leads
+TOKEN_REFRESH_INTERVAL = 43200  # proactive token refresh every 12 hours
 
 DEFAULT_DATE_FROM = "02/03/2026"
+
+# Realistic browser User-Agent pool — rotated per request
+USER_AGENTS = [
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+]
+
+ACCEPT_LANGUAGES = [
+    "en-US,en;q=0.9",
+    "en-US,en;q=0.8,es;q=0.5",
+    "en-GB,en;q=0.9,en-US;q=0.8",
+    "en-US,en;q=0.9,fr;q=0.7",
+    "en-US,en;q=0.9,de;q=0.7",
+]
 
 DATE_FORMATS = [
     "%Y-%m-%d %H:%M:%S",
@@ -112,12 +147,16 @@ def parse_lead_date(raw):
             pass
     return None
 
+
 # ---------------------------------------------------------------------------
 # Helper Functions
 # ---------------------------------------------------------------------------
 
 
 def get_script_directory():
+    fixed = os.path.expanduser("~/Desktop/python/sharktank_scraper")
+    if os.path.isdir(fixed):
+        return fixed
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
@@ -130,35 +169,94 @@ def resolve_csv_directory():
     return csv_dir
 
 
-def load_saved_token():
-    config_path = os.path.join(get_script_directory(), CONFIG_FILE)
+def _config_path():
+    return os.path.join(get_script_directory(), CONFIG_FILE)
+
+
+def load_config():
+    """Load full config; migrate/seed credentials on first run."""
+    defaults = {
+        "token": "",
+        "email": "brett@fflliv.com",
+        "password": "Password1234#!",
+        "api_key": "df1559c16e1dcb8484ea9b7471ae771a423e0f57",
+    }
     try:
-        with open(config_path, "r") as f:
+        with open(_config_path(), "r") as f:
             data = json.load(f)
-            return data.get("token", DEFAULT_TOKEN)
+        changed = False
+        for k, v in defaults.items():
+            if k not in data:
+                data[k] = v
+                changed = True
+        if changed:
+            save_config(data)
+        return data
     except (FileNotFoundError, json.JSONDecodeError):
-        return DEFAULT_TOKEN
+        save_config(defaults)
+        return defaults
 
 
-def save_token(token):
-    config_path = os.path.join(get_script_directory(), CONFIG_FILE)
+def save_config(data):
     try:
-        with open(config_path, "w") as f:
-            json.dump({"token": token.strip()}, f, indent=2)
+        with open(_config_path(), "w") as f:
+            json.dump(data, f, indent=2)
+        os.chmod(_config_path(), 0o600)
     except OSError:
         pass
 
 
-def fetch_token_from_api(email, password):
+def load_saved_token():
+    return load_config().get("token", "")
+
+
+def save_token(token):
+    cfg = load_config()
+    cfg["token"] = token.strip()
+    save_config(cfg)
+
+
+def fetch_token_from_api(email=None, password=None, api_key=None):
+    cfg = load_config()
+    email = email or cfg["email"]
+    password = password or cfg["password"]
+    api_key = api_key or cfg["api_key"]
     url = f"{BASE_URL}{LOGIN_ENDPOINT}"
     headers = {
-        "Authorization": f"ApiKey {API_KEY}",
+        "Authorization": f"ApiKey {api_key}",
         "Content-Type": "application/json",
+        "User-Agent": random.choice(USER_AGENTS),
     }
     resp = requests.post(url, json={"user": email, "pass": password}, headers=headers, timeout=30)
     resp.raise_for_status()
     data = resp.json()
     return data.get("user", {}).get("token", "")
+
+
+def _find_credentials():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    for candidate in [
+        os.path.join(script_dir, "credentials.json"),
+        os.path.join(project_root, "call_logger", "credentials.json"),
+        os.path.join(project_root, "agent_toolkit", "credentials.json"),
+    ]:
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def macos_notify(title, message):
+    """Fire a native macOS notification banner (silent fail on non-Mac)."""
+    try:
+        safe_msg = message.replace('"', "'")
+        safe_title = title.replace('"', "'")
+        subprocess.run(
+            ["osascript", "-e", f'display notification "{safe_msg}" with title "{safe_title}"'],
+            timeout=5, capture_output=True,
+        )
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -167,17 +265,85 @@ def fetch_token_from_api(email, password):
 
 
 class LeadsScraper:
-    def __init__(self, auth_token, callbacks, csv_dir, date_from=None, date_to=None):
+    def __init__(self, auth_token, callbacks, csv_dir, date_from=None, date_to=None,
+                 max_workers=5, upload_to_drive=False):
         self.auth_token = auth_token
         self.csv_dir = csv_dir
         self.date_from = date_from
         self.date_to = date_to
+        self.max_workers = max_workers
+        self.upload_to_drive = upload_to_drive
+
         self._stop = threading.Event()
+        self._token_lock = threading.Lock()
+        self._drive_service = None
+        self._drive_lock = threading.Lock()
+        self._csv_lock = threading.Lock()         # guard merged CSV writes
+        self._seen_lock = threading.Lock()        # guard dedup set
+        self._seen_phones: set = set()            # phone numbers already written today
+        self._refresh_stop = threading.Event()   # signals background refresh thread to exit
 
         self.on_log = callbacks.get("on_log", lambda msg, color=None: None)
         self.on_progress = callbacks.get("on_progress", lambda state, count: None)
         self.on_state_done = callbacks.get("on_state_done", lambda state, count: None)
         self.on_cycle_done = callbacks.get("on_cycle_done", lambda: None)
+
+        if self.upload_to_drive:
+            self._init_drive()
+
+    # -- Google Drive -------------------------------------------------------
+
+    def _init_drive(self):
+        if not GDRIVE_AVAILABLE:
+            self.on_log("Google Drive libraries not installed — upload disabled", "warning")
+            self.upload_to_drive = False
+            return
+        creds_path = _find_credentials()
+        if not creds_path:
+            self.on_log("No credentials.json found — Drive upload disabled", "warning")
+            self.upload_to_drive = False
+            return
+        try:
+            creds = Credentials.from_service_account_file(creds_path, scopes=DRIVE_SCOPES)
+            self._drive_service = build("drive", "v3", credentials=creds)
+            self.on_log("Google Drive connected", "success")
+        except Exception as exc:
+            self.on_log(f"Drive auth failed: {exc} — upload disabled", "error")
+            self.upload_to_drive = False
+
+    def _find_drive_file(self, filename):
+        with self._drive_lock:
+            resp = self._drive_service.files().list(
+                q=f"'{DRIVE_FOLDER_ID}' in parents and name='{filename}' and trashed=false",
+                fields="files(id, name)",
+                pageSize=1,
+            ).execute()
+        files = resp.get("files", [])
+        return files[0]["id"] if files else None
+
+    def _upload_to_drive(self, local_path):
+        if not self.upload_to_drive or not self._drive_service:
+            return
+        filename = os.path.basename(local_path)
+        try:
+            with open(local_path, "rb") as f:
+                media = MediaIoBaseUpload(f, mimetype="text/csv", resumable=True)
+                existing_id = self._find_drive_file(filename)
+                if existing_id:
+                    with self._drive_lock:
+                        self._drive_service.files().update(
+                            fileId=existing_id, media_body=media,
+                        ).execute()
+                    self.on_log(f"  ↑ Drive: updated {filename}", "success")
+                else:
+                    metadata = {"name": filename, "parents": [DRIVE_FOLDER_ID]}
+                    with self._drive_lock:
+                        self._drive_service.files().create(
+                            body=metadata, media_body=media, fields="id",
+                        ).execute()
+                    self.on_log(f"  ↑ Drive: uploaded {filename}", "success")
+        except Exception as exc:
+            self.on_log(f"  ↑ Drive upload failed ({filename}): {exc}", "error")
 
     # -- File helpers -------------------------------------------------------
 
@@ -185,6 +351,11 @@ class LeadsScraper:
         today = datetime.now().strftime("%Y-%m-%d")
         suffix = "_recent" if recent else ""
         return os.path.join(self.csv_dir, f"leads_{state}_{today}{suffix}.csv")
+
+    def _merged_csv_path(self):
+        """Daily mode writes a single merged file instead of 50 per-state files."""
+        today = datetime.now().strftime("%Y-%m-%d")
+        return os.path.join(self.csv_dir, f"leads_all_{today}.csv")
 
     def _count_leads_in_file(self, path):
         if not os.path.exists(path):
@@ -197,9 +368,24 @@ class LeadsScraper:
 
     def _existing_lead_count(self, state):
         today = datetime.now().strftime("%Y-%m-%d")
-        pattern = f"leads_{state}_{today}.csv"
-        path = os.path.join(self.csv_dir, pattern)
+        path = os.path.join(self.csv_dir, f"leads_{state}_{today}.csv")
         return self._count_leads_in_file(path)
+
+    def _load_seen_phones(self, path):
+        """Return set of phone numbers already present in a CSV file."""
+        phones = set()
+        if not os.path.exists(path):
+            return phones
+        try:
+            with open(path, "r", newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    p = str(row.get("Phone Number", "")).strip()
+                    if p:
+                        phones.add(p)
+        except OSError:
+            pass
+        return phones
 
     # -- State filtering ----------------------------------------------------
 
@@ -214,10 +400,17 @@ class LeadsScraper:
 
     # -- API ----------------------------------------------------------------
 
-    def _headers(self):
+    def _random_headers(self):
+        """Build randomised request headers to avoid bot fingerprinting."""
+        cfg = load_config()
         return {
             "Authorization": f"Bearer {self.auth_token}",
             "Content-Type": "application/json",
+            "User-Agent": random.choice(USER_AGENTS),
+            "Accept-Language": random.choice(ACCEPT_LANGUAGES),
+            "Accept": "application/json, text/plain, */*",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
         }
 
     def _fetch_page(self, state_code, page):
@@ -225,111 +418,186 @@ class LeadsScraper:
             f"{BASE_URL}{SEARCH_ENDPOINT}"
             f"?state={state_code}&page={page}&limit={PAGE_LIMIT}"
         )
-        resp = requests.get(url, headers=self._headers(), timeout=60)
+        resp = requests.get(url, headers=self._random_headers(), timeout=90)
         return resp
 
     # -- Date filtering -----------------------------------------------------
 
     def _filter_by_date(self, leads):
         if not self.date_from and not self.date_to:
-            return leads
+            return leads, False
         filtered = []
+        dated_count = 0
+        before_count = 0
         for lead in leads:
             d = parse_lead_date(lead.get("createdDate"))
             if d is None:
                 filtered.append(lead)
                 continue
+            dated_count += 1
             if self.date_from and d < self.date_from:
+                before_count += 1
                 continue
             if self.date_to and d > self.date_to:
                 continue
             filtered.append(lead)
-        return filtered
+        all_before = dated_count > 0 and before_count == dated_count
+        return filtered, all_before
 
     # -- CSV writing --------------------------------------------------------
 
-    def save_leads_to_csv(self, state, leads, recent=False):
-        path = self._csv_path(state, recent)
-        file_exists = os.path.exists(path) and os.path.getsize(path) > 0
-        with open(path, "a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction="ignore")
-            if not file_exists:
-                writer.writeheader()
+    def save_leads_to_csv(self, state, leads, recent=False, daily=False):
+        """Write leads to CSV, skipping duplicates by phone number."""
+        if daily:
+            path = self._merged_csv_path()
+            lock = self._csv_lock
+        else:
+            path = self._csv_path(state, recent)
+            lock = self._csv_lock
+
+        with lock:
+            file_exists = os.path.exists(path) and os.path.getsize(path) > 0
+            new_leads = []
             for lead in leads:
-                row = {}
-                for csv_field, api_key in FIELD_MAP.items():
-                    row[csv_field] = lead.get(api_key, "")
-                writer.writerow(row)
+                phone = str(lead.get("phoneNumber", "")).strip()
+                if not phone:
+                    new_leads.append(lead)
+                    continue
+                with self._seen_lock:
+                    if phone in self._seen_phones:
+                        continue
+                    self._seen_phones.add(phone)
+                new_leads.append(lead)
+
+            if not new_leads:
+                return path
+
+            with open(path, "a", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction="ignore")
+                if not file_exists:
+                    writer.writeheader()
+                for lead in new_leads:
+                    row = {csv_field: lead.get(api_key, "") for csv_field, api_key in FIELD_MAP.items()}
+                    writer.writerow(row)
+
         return path
+
+    # -- Token management ---------------------------------------------------
+
+    def _refresh_token(self, tag):
+        """Thread-safe token refresh with retries. Returns True on success."""
+        with self._token_lock:
+            self.on_log(f"  [{tag}] Token expired (401). Re-logging in…", "warning")
+            for attempt in range(1, RETRY_COUNT + 1):
+                if self._stop.is_set():
+                    return False
+                try:
+                    new_token = fetch_token_from_api()
+                    if new_token:
+                        self.auth_token = new_token
+                        save_token(new_token)
+                        self.on_log(f"  [{tag}] Token refreshed.", "success")
+                        return True
+                except Exception as exc:
+                    self.on_log(f"  [{tag}] Re-login attempt {attempt}/{RETRY_COUNT} failed: {exc}", "warning")
+                    if attempt < RETRY_COUNT:
+                        time.sleep(RETRY_SLEEP)
+            self.on_log(f"  [{tag}] Re-login failed after {RETRY_COUNT} attempts. Stopping.", "error")
+            self._stop.set()
+            return False
+
+    def _token_refresh_loop(self):
+        """Background thread: proactively refresh token every 12 hours."""
+        while not self._refresh_stop.wait(timeout=TOKEN_REFRESH_INTERVAL):
+            if self._stop.is_set():
+                break
+            try:
+                new_token = fetch_token_from_api()
+                if new_token:
+                    with self._token_lock:
+                        self.auth_token = new_token
+                        save_token(new_token)
+                    self.on_log("  [AUTH] Proactive token refresh succeeded.", "dim")
+            except Exception as exc:
+                self.on_log(f"  [AUTH] Proactive token refresh failed: {exc}", "warning")
 
     # -- Single state scrape ------------------------------------------------
 
-    def scrape_state(self, state_code, recent_mode=False, max_leads=None):
+    def scrape_state(self, state_code, recent_mode=False, max_leads=None, daily=False):
+        if self._stop.is_set():
+            return 0
         page = 1
         total = 0
         batch = []
         consecutive_empty = 0
+        tag = state_code
 
-        self.on_log(f"{'─' * 40}", "dim")
-        self.on_log(f"▶ Starting {'recent' if recent_mode else 'full'} scrape: {state_code}", "info")
+        self.on_log(f"  [{tag}] Starting {'daily' if daily else 'recent' if recent_mode else 'full'} scrape", "info")
+
+        # Seed dedup set from today's existing file for this state/mode
+        with self._seen_lock:
+            existing_path = self._merged_csv_path() if daily else self._csv_path(state_code, recent_mode)
+            if not self._seen_phones:
+                self._seen_phones.update(self._load_seen_phones(existing_path))
 
         while not self._stop.is_set():
             if max_leads and total >= max_leads:
-                self.on_log(f"  ✓ Hit limit of {max_leads} for {state_code}", "success")
+                self.on_log(f"  [{tag}] Hit limit of {max_leads}", "success")
                 break
 
             try:
                 resp = self._fetch_page(state_code, page)
             except requests.RequestException as exc:
-                retried = self._retry_on_error(state_code, page, str(exc))
+                self.on_log(f"  [{tag}] Request error p{page}: {exc}", "warning")
+                retried = self._retry_on_error(tag, state_code, page)
                 if retried is None:
                     break
                 resp = retried
 
             if resp.status_code == 401:
-                self.on_log("⚠ Token expired (401). Attempting re-login…", "warning")
-                try:
-                    new_token = fetch_token_from_api(DEFAULT_EMAIL, DEFAULT_PASSWORD)
-                    if new_token:
-                        self.auth_token = new_token
-                        save_token(new_token)
-                        self.on_log("  Token refreshed. Retrying page…", "success")
-                        continue
-                except Exception:
-                    pass
-                self.on_log("  Re-login failed. Stopping.", "error")
-                self._stop.set()
-                break
+                if not self._refresh_token(tag):
+                    break
+                continue
+
+            if resp.status_code == 429:
+                self.on_log(f"  [{tag}] Rate limited (429). Backing off…", "warning")
+                time.sleep(random.uniform(5, 15))
+                continue
 
             if resp.status_code != 200:
-                retried = self._retry_on_error(state_code, page, f"HTTP {resp.status_code}")
+                retried = self._retry_on_error(tag, state_code, page)
                 if retried is None:
                     break
                 if retried.status_code != 200:
-                    self.on_log(f"  ✗ Failed after retries: {state_code} page {page}", "error")
+                    self.on_log(f"  [{tag}] Failed after retries p{page}", "error")
                     break
                 resp = retried
 
             try:
                 data = resp.json()
             except ValueError:
-                self.on_log(f"  ✗ Invalid JSON on page {page}", "error")
+                self.on_log(f"  [{tag}] Invalid JSON p{page}", "error")
                 break
 
             rows = data.get("leads", {}).get("rows", [])
-            leads = [row.get("body", {}) for row in rows if row.get("body")]
-            pre_filter = len(leads)
-            leads = self._filter_by_date(leads)
+            raw_leads = [row.get("body", {}) for row in rows if row.get("body")]
+            pre_filter = len(raw_leads)
+            leads, all_before = self._filter_by_date(raw_leads)
+
+            if all_before:
+                self.on_log(f"  [{tag}] All {pre_filter} leads on p{page} before date range — stopping early", "dim")
+                break
+
             if pre_filter > 0 and not leads:
-                self.on_log(f"  Page {page}: {pre_filter} leads filtered out by date range", "dim")
+                self.on_log(f"  [{tag}] p{page}: {pre_filter} filtered out by date", "dim")
 
             if not leads:
                 consecutive_empty += 1
                 if consecutive_empty >= RETRY_COUNT:
-                    self.on_log(f"  ✓ No more leads for {state_code} (page {page})", "dim")
+                    self.on_log(f"  [{tag}] No more leads (p{page})", "dim")
                     break
-                self.on_log(f"  … Empty page {page}, retry {consecutive_empty}/{RETRY_COUNT}", "warning")
                 time.sleep(RETRY_SLEEP)
+                page += 1
                 continue
 
             consecutive_empty = 0
@@ -337,26 +605,30 @@ class LeadsScraper:
             total += len(leads)
 
             if len(batch) >= BATCH_SAVE_SIZE:
-                self.save_leads_to_csv(state_code, batch, recent=recent_mode)
+                self.save_leads_to_csv(state_code, batch, recent=recent_mode, daily=daily)
                 batch = []
 
-            self.on_log(f"  Page {page}: +{len(leads)} leads (total: {total})", "success")
+            self.on_log(f"  [{tag}] p{page}: +{len(leads)} leads (total: {total})", "success")
             self.on_progress(state_code, total)
 
             page += 1
-            time.sleep(RATE_LIMIT_SLEEP)
+            time.sleep(random.uniform(RATE_LIMIT_SLEEP_MIN, RATE_LIMIT_SLEEP_MAX))
 
         if batch:
-            self.save_leads_to_csv(state_code, batch, recent=recent_mode)
+            self.save_leads_to_csv(state_code, batch, recent=recent_mode, daily=daily)
+
+        if total > 0 and self.upload_to_drive:
+            path = self._merged_csv_path() if daily else self._csv_path(state_code, recent=recent_mode)
+            self._upload_to_drive(path)
 
         self.on_state_done(state_code, total)
         return total
 
-    def _retry_on_error(self, state_code, page, error_msg):
+    def _retry_on_error(self, tag, state_code, page):
         for attempt in range(1, RETRY_COUNT + 1):
             if self._stop.is_set():
                 return None
-            self.on_log(f"  ⟳ Retry {attempt}/{RETRY_COUNT} ({error_msg})", "warning")
+            self.on_log(f"  [{tag}] Retry {attempt}/{RETRY_COUNT}", "warning")
             time.sleep(RETRY_SLEEP)
             try:
                 resp = self._fetch_page(state_code, page)
@@ -370,12 +642,34 @@ class LeadsScraper:
 
     def start_scraping(self, states, mode="full", max_leads=None):
         self._stop.clear()
+        self._refresh_stop.clear()
         cycle = 0
+        recent = mode in ("recent", "daily")
+        daily = mode == "daily"
+
+        # Start background token refresh thread
+        refresh_thread = threading.Thread(target=self._token_refresh_loop, daemon=True)
+        refresh_thread.start()
+
+        # Small random startup delay to vary the daily run fingerprint
+        if daily:
+            time.sleep(random.uniform(3, 20))
 
         while not self._stop.is_set():
             cycle += 1
+
+            if daily:
+                today = date.today()
+                self.date_from = today
+                self.date_to = today
+                # Reset seen phones at midnight for the new day
+                with self._seen_lock:
+                    self._seen_phones.clear()
+                    merged_path = self._merged_csv_path()
+                    self._seen_phones.update(self._load_seen_phones(merged_path))
+
             self.on_log(f"\n{'═' * 50}", "dim")
-            self.on_log(f"  CYCLE {cycle} — {mode.upper()} MODE", "info")
+            self.on_log(f"  CYCLE {cycle} — {mode.upper()} MODE  ({self.max_workers} workers)", "info")
             self.on_log(f"{'═' * 50}", "dim")
 
             if mode == "full":
@@ -390,25 +684,69 @@ class LeadsScraper:
                 self.on_log("  All states complete. Waiting 60s before re-check…", "success")
                 for _ in range(60):
                     if self._stop.is_set():
-                        return
+                        break
                     time.sleep(1)
                 continue
 
-            random.shuffle(work)
-            self.on_log(f"  Processing {len(work)} state(s): {', '.join(work)}", "info")
+            if daily:
+                self.on_log(f"  Date: {self.date_from.strftime('%m/%d/%Y')} → merged CSV: leads_all_{self.date_from}.csv", "info")
+            else:
+                random.shuffle(work)
+            self.on_log(f"  Queued {len(work)} state(s): {', '.join(work)}", "info")
 
-            for state in work:
-                if self._stop.is_set():
-                    break
-                recent = mode == "recent"
-                self.scrape_state(state, recent_mode=recent, max_leads=max_leads)
+            with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
+                futures = {}
+                for state in work:
+                    if self._stop.is_set():
+                        break
+                    f = pool.submit(self.scrape_state, state,
+                                    recent_mode=recent, max_leads=max_leads, daily=daily)
+                    futures[f] = state
+                cycle_total = 0
+                for f in as_completed(futures):
+                    if self._stop.is_set():
+                        pool.shutdown(wait=False, cancel_futures=True)
+                        break
+                    try:
+                        cycle_total += f.result()
+                    except Exception as exc:
+                        self.on_log(f"  [{futures[f]}] Error: {exc}", "error")
 
             self.on_cycle_done()
 
+            if self._stop.is_set():
+                break
+
+            if daily:
+                secs = self._seconds_until_midnight()
+                h, rem = divmod(secs, 3600)
+                m = rem // 60
+                msg = f"Daily run complete — {cycle_total:,} new leads. Next run at midnight ({h}h {m}m)."
+                self.on_log(f"  {msg}", "success")
+                macos_notify("🦈 Sharktank Scraper", msg)
+                for _ in range(secs):
+                    if self._stop.is_set():
+                        break
+                    time.sleep(1)
+            elif cycle_total == 0:
+                wait_min = POLL_INTERVAL_SECS // 60
+                self.on_log(f"  No new leads this cycle. Waiting {wait_min}m before next check…", "dim")
+                for _ in range(POLL_INTERVAL_SECS):
+                    if self._stop.is_set():
+                        break
+                    time.sleep(1)
+
+        self._refresh_stop.set()
         self.on_log("\n⏹ Scraping stopped.", "warning")
 
     def stop_scraping(self):
         self._stop.set()
+        self._refresh_stop.set()
+
+    def _seconds_until_midnight(self):
+        now = datetime.now()
+        midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        return max(int((midnight - now).total_seconds()), 1)
 
 
 # ---------------------------------------------------------------------------
@@ -426,6 +764,11 @@ class LeadsScraperGUI:
         self.root.attributes("-topmost", True)
         self.root.after_idle(self.root.attributes, "-topmost", False)
 
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lumberjack_logo.png")
+        if os.path.exists(logo_path):
+            self._app_icon = tk.PhotoImage(file=logo_path)
+            self.root.iconphoto(True, self._app_icon)
+
         self.scraper = None
         self.scrape_thread = None
         self.auth_token = load_saved_token()
@@ -434,10 +777,27 @@ class LeadsScraperGUI:
         self.session_stats = {}
         self.state_vars = {}
 
+        # Open persistent log file
+        log_path = os.path.join(self.csv_dir, LOG_FILE)
+        try:
+            self._log_fh = open(log_path, "a", encoding="utf-8", buffering=1)
+        except OSError:
+            self._log_fh = None
+
         self._setup_ui()
         self._load_token_into_ui()
         if not self.auth_token:
             self.root.after(500, self._auto_login)
+
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    def _on_close(self):
+        if self._log_fh:
+            try:
+                self._log_fh.close()
+            except OSError:
+                pass
+        self.root.destroy()
 
     # -- UI construction ----------------------------------------------------
 
@@ -540,18 +900,29 @@ class LeadsScraperGUI:
         row_from.pack(fill=tk.X, padx=4, pady=(4, 2))
         tk.Label(row_from, text="From:", font=("Helvetica", 9), fg="#cdd6f4", bg="#313244", width=5, anchor=tk.W).pack(side=tk.LEFT)
         self.date_from_var = tk.StringVar(value=DEFAULT_DATE_FROM)
-        tk.Entry(row_from, textvariable=self.date_from_var, font=("Consolas", 10), bg="#45475a", fg="#a6e3a1", insertbackground="#a6e3a1", relief=tk.FLAT, bd=3, width=12).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        tk.Entry(row_from, textvariable=self.date_from_var, font=("Consolas", 10), bg="#45475a", fg="#a6e3a1",
+                 insertbackground="#a6e3a1", relief=tk.FLAT, bd=3, width=12).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         row_to = tk.Frame(date_frame, bg="#313244")
         row_to.pack(fill=tk.X, padx=4, pady=(0, 4))
         tk.Label(row_to, text="To:", font=("Helvetica", 9), fg="#cdd6f4", bg="#313244", width=5, anchor=tk.W).pack(side=tk.LEFT)
         self.date_to_var = tk.StringVar(value=datetime.now().strftime("%m/%d/%Y"))
-        tk.Entry(row_to, textvariable=self.date_to_var, font=("Consolas", 10), bg="#45475a", fg="#a6e3a1", insertbackground="#a6e3a1", relief=tk.FLAT, bd=3, width=12).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        tk.Entry(row_to, textvariable=self.date_to_var, font=("Consolas", 10), bg="#45475a", fg="#a6e3a1",
+                 insertbackground="#a6e3a1", relief=tk.FLAT, bd=3, width=12).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        tk.Label(
-            frame, text="Recent limit:", font=("Helvetica", 9),
-            fg="#cdd6f4", bg="#313244",
-        ).pack(anchor=tk.W, padx=4)
+        tk.Label(frame, text="Workers (parallel states):", font=("Helvetica", 9), fg="#cdd6f4", bg="#313244").pack(anchor=tk.W, padx=4)
+
+        self.workers_var = tk.StringVar(value="5")
+        workers_frame = tk.Frame(frame, bg="#313244")
+        workers_frame.pack(fill=tk.X, padx=4, pady=(0, 6))
+        for val in ("1", "3", "5", "8"):
+            tk.Radiobutton(
+                workers_frame, text=val, variable=self.workers_var, value=val,
+                font=("Consolas", 9), fg="#cdd6f4", bg="#313244",
+                selectcolor="#45475a", activebackground="#313244",
+            ).pack(side=tk.LEFT, padx=2)
+
+        tk.Label(frame, text="Recent limit:", font=("Helvetica", 9), fg="#cdd6f4", bg="#313244").pack(anchor=tk.W, padx=4)
 
         self.limit_var = tk.StringVar(value="500")
         limit_frame = tk.Frame(frame, bg="#313244")
@@ -562,6 +933,18 @@ class LeadsScraperGUI:
                 font=("Consolas", 9), fg="#cdd6f4", bg="#313244",
                 selectcolor="#45475a", activebackground="#313244",
             ).pack(side=tk.LEFT, padx=2)
+
+        self.drive_var = tk.BooleanVar(value=GDRIVE_AVAILABLE)
+        drive_cb = tk.Checkbutton(
+            frame, text="Upload to Google Drive", variable=self.drive_var,
+            font=("Helvetica", 9, "bold"), fg="#89b4fa", bg="#313244",
+            selectcolor="#45475a", activebackground="#313244",
+            disabledforeground="#6c7086",
+        )
+        drive_cb.pack(anchor=tk.W, padx=6, pady=(4, 6))
+        if not GDRIVE_AVAILABLE:
+            drive_cb.configure(state=tk.DISABLED)
+            self.drive_var.set(False)
 
         btn_frame = tk.Frame(frame, bg="#313244")
         btn_frame.pack(fill=tk.X, padx=4, pady=2)
@@ -579,6 +962,13 @@ class LeadsScraperGUI:
             relief=tk.FLAT, padx=10, pady=4, command=self._start_recent,
         )
         self.btn_recent.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        self.btn_daily = tk.Button(
+            frame, text="📅 Auto Daily (All States)", font=("Helvetica", 10, "bold"),
+            bg="#cba6f7", fg="#1e1e2e", activebackground="#b4befe",
+            relief=tk.FLAT, padx=10, pady=4, command=self._start_daily,
+        )
+        self.btn_daily.pack(fill=tk.X, padx=4, pady=(4, 0))
 
         self.btn_stop = tk.Button(
             frame, text="⏹ Stop", font=("Helvetica", 10, "bold"),
@@ -641,10 +1031,9 @@ class LeadsScraperGUI:
             self._log("Token saved.", "dim")
 
     def _auto_login(self):
-        """Fetch a fresh token using hardcoded credentials."""
         self._log("Fetching fresh token via login…", "info")
         try:
-            token = fetch_token_from_api(DEFAULT_EMAIL, DEFAULT_PASSWORD)
+            token = fetch_token_from_api()
             if token:
                 self.auth_token = token
                 save_token(token)
@@ -698,9 +1087,16 @@ class LeadsScraperGUI:
             self.log_console.configure(state=tk.NORMAL)
             ts = datetime.now().strftime("%H:%M:%S")
             tag = color if color else ""
-            self.log_console.insert(tk.END, f"[{ts}] {message}\n", tag)
+            line = f"[{ts}] {message}\n"
+            self.log_console.insert(tk.END, line, tag)
             self.log_console.see(tk.END)
             self.log_console.configure(state=tk.DISABLED)
+            # Write to log file
+            if self._log_fh:
+                try:
+                    self._log_fh.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+                except OSError:
+                    pass
 
         if threading.current_thread() is threading.main_thread():
             _insert()
@@ -736,8 +1132,17 @@ class LeadsScraperGUI:
         state_stop = tk.NORMAL if running else tk.DISABLED
         self.btn_full.configure(state=state_run)
         self.btn_recent.configure(state=state_run)
+        self.btn_daily.configure(state=state_run)
         self.btn_stop.configure(state=state_stop)
         self.token_text.configure(state=tk.DISABLED if running else tk.NORMAL)
+
+    def _make_callbacks(self):
+        return {
+            "on_log": self._log,
+            "on_progress": self._on_progress,
+            "on_state_done": self._on_state_done,
+            "on_cycle_done": self._on_cycle_done,
+        }
 
     def _start_full(self):
         self._save_token_from_ui()
@@ -755,14 +1160,12 @@ class LeadsScraperGUI:
         self._set_running(True)
         date_msg = f" ({d_from} → {d_to or 'now'})" if d_from or d_to else ""
         self._log(f"Starting FULL scrape{date_msg}…", "info")
-
-        callbacks = {
-            "on_log": self._log,
-            "on_progress": self._on_progress,
-            "on_state_done": self._on_state_done,
-            "on_cycle_done": self._on_cycle_done,
-        }
-        self.scraper = LeadsScraper(self.auth_token, callbacks, self.csv_dir, date_from=d_from, date_to=d_to)
+        workers = int(self.workers_var.get())
+        self.scraper = LeadsScraper(
+            self.auth_token, self._make_callbacks(), self.csv_dir,
+            date_from=d_from, date_to=d_to, max_workers=workers,
+            upload_to_drive=self.drive_var.get(),
+        )
         self.scrape_thread = threading.Thread(
             target=self._run_scraper, args=(states, "full", None), daemon=True,
         )
@@ -785,16 +1188,33 @@ class LeadsScraperGUI:
         self._set_running(True)
         date_msg = f" ({d_from} → {d_to or 'now'})" if d_from or d_to else ""
         self._log(f"Starting RECENT scrape (limit: {max_leads}){date_msg}…", "info")
-
-        callbacks = {
-            "on_log": self._log,
-            "on_progress": self._on_progress,
-            "on_state_done": self._on_state_done,
-            "on_cycle_done": self._on_cycle_done,
-        }
-        self.scraper = LeadsScraper(self.auth_token, callbacks, self.csv_dir, date_from=d_from, date_to=d_to)
+        workers = int(self.workers_var.get())
+        self.scraper = LeadsScraper(
+            self.auth_token, self._make_callbacks(), self.csv_dir,
+            date_from=d_from, date_to=d_to, max_workers=workers,
+            upload_to_drive=self.drive_var.get(),
+        )
         self.scrape_thread = threading.Thread(
             target=self._run_scraper, args=(states, "recent", max_leads), daemon=True,
+        )
+        self.scrape_thread.start()
+
+    def _start_daily(self):
+        self._save_token_from_ui()
+        if not self.auth_token:
+            messagebox.showwarning("No Token", "Paste a JWT token before starting.")
+            return
+        self.session_stats = {}
+        self._set_running(True)
+        workers = int(self.workers_var.get())
+        today = date.today().strftime("%m/%d/%Y")
+        self._log(f"Starting AUTO DAILY scrape — all 50 states, today's leads ({today}), runs daily at midnight…", "info")
+        self.scraper = LeadsScraper(
+            self.auth_token, self._make_callbacks(), self.csv_dir,
+            max_workers=workers, upload_to_drive=self.drive_var.get(),
+        )
+        self.scrape_thread = threading.Thread(
+            target=self._run_scraper, args=(list(ALL_STATES), "daily", None), daemon=True,
         )
         self.scrape_thread.start()
 
@@ -807,7 +1227,7 @@ class LeadsScraperGUI:
             self.root.after(0, lambda: self._set_running(False))
 
     def _stop(self):
-        if self.scraper:
+        if self.scraper and not self.scraper._stop.is_set():
             self.scraper.stop_scraping()
             self._log("Stop requested — finishing current page…", "warning")
 

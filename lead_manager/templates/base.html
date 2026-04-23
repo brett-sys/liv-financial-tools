@@ -11,6 +11,7 @@
         <a href="{{ url_for('files') }}" class="nav-brand">Lead Manager → CRM</a>
         <div class="nav-links">
             <a href="{{ url_for('files') }}" class="{{ 'active' if request.endpoint == 'files' }}">Files</a>
+            <a href="{{ url_for('buy_leads') }}" class="{{ 'active' if request.endpoint in ('buy_leads', 'buy_leads_submit', 'buy_leads_orders') }}">Buy Leads</a>
             <a href="{{ url_for('agents_page') }}" class="{{ 'active' if request.endpoint == 'agents_page' }}">Agents</a>
         </div>
     </nav>

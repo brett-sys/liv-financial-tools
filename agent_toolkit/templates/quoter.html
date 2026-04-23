@@ -3,48 +3,41 @@
 {% block title %}Quoter - LIFI{% endblock %}
 
 {% block content %}
-<div id="quoter-container">
-    <iframe id="quoter-iframe" src="{{ integrity_url }}" class="quoter-frame"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
-            allow="fullscreen"
-            loading="lazy"></iframe>
-</div>
+<div class="quoter-launcher">
+    <div class="quoter-hero">
+        <svg class="quoter-hero-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="4" y="2" width="16" height="20" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="8" y1="10" x2="16" y2="10"/>
+            <line x1="8" y1="14" x2="12" y2="14"/>
+            <path d="M14 18l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>Integrity Connect</h2>
+        <p class="quoter-subtitle">Life &amp; IUL quoting portal</p>
+    </div>
 
-<div id="quoter-fallback" class="quoter-fallback" style="display:none;">
-    <h2 style="margin-bottom: 0.5rem;">Integrity Connect</h2>
-    <p style="color: var(--text-muted); font-size: 0.85rem;">Open the portal in a new tab:</p>
-    <div class="quoter-links">
-        <a href="{{ integrity_url }}" target="_blank" class="btn btn-primary btn-lg btn-block">
-            Open Integrity Connect
+    <div class="quoter-actions">
+        <a href="{{ integrity_url }}" target="_blank" rel="noopener" class="quoter-btn quoter-btn-primary"
+           onclick="window.open(this.href, 'integrity', 'width=1200,height=800'); return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Open Quoter
         </a>
-        <a href="{{ integrity_url }}/agent/clients" target="_blank" class="btn btn-secondary btn-block">
+
+        <a href="{{ integrity_url }}/agent/clients" target="_blank" rel="noopener" class="quoter-btn quoter-btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                <path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
             Client List
         </a>
     </div>
+
+    <p class="quoter-hint">Opens in a new window for the best experience</p>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-var iframe = document.getElementById('quoter-iframe');
-var fallback = document.getElementById('quoter-fallback');
-var container = document.getElementById('quoter-container');
-
-iframe.addEventListener('error', function() {
-    container.style.display = 'none';
-    fallback.style.display = 'block';
-});
-
-setTimeout(function() {
-    try {
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        if (!doc || !doc.body || doc.body.innerHTML === '') {
-            container.style.display = 'none';
-            fallback.style.display = 'block';
-        }
-    } catch (e) {
-        // Cross-origin means iframe loaded (good sign), keep it
-    }
-}, 3000);
-</script>
 {% endblock %}

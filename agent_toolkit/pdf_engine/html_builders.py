@@ -1019,10 +1019,10 @@ def build_quote_comparison_html(
     logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
 ) -> str:
-    """Build a professional side-by-side quote comparison PDF.
+    """Build a professional quote comparison PDF styled like the LIV Policy Illustration.
 
-    Each carrier dict has keys: carrier, product, monthly_premium,
-    death_benefit, cash_value_10yr, rating.
+    Each carrier dict has keys: carrier, product, monthly_premium, death_benefit,
+    cash_value_10yr, cash_value_20yr, am_best, sp, moodys, about.
     """
     today_str = date.today().strftime("%B %d, %Y")
 
@@ -1037,11 +1037,42 @@ def build_quote_comparison_html(
         else ""
     )
 
-    # Build table rows for each carrier
+    # ── Summary stat boxes ──────────────────────────────────────────────────
+    stat_boxes_html = ""
+    for i, c in enumerate(carriers):
+        rec_outline = "border: 3px solid #4CAF50;" if i == recommended_idx else "border: 3px solid #0e7fa6;"
+        rec_label = '<div class="stat-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
+        stat_boxes_html += f"""
+        <div class="stat-box" style="{rec_outline}">
+            {rec_label}
+            <div class="stat-carrier">{c.get('carrier', '—')}</div>
+            <div class="stat-product">{c.get('product', '—')}</div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">DEATH BENEFIT</div>
+                    <div class="stat-value">{c.get('death_benefit', '—')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">MONTHLY PREMIUM</div>
+                    <div class="stat-value">{c.get('monthly_premium', '—')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">10-YR CASH VALUE</div>
+                    <div class="stat-value">{c.get('cash_value_10yr', '—')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">20-YR CASH VALUE</div>
+                    <div class="stat-value">{c.get('cash_value_20yr', '—')}</div>
+                </div>
+            </div>
+        </div>"""
+
+    # ── Comparison table rows ───────────────────────────────────────────────
     rows_html = ""
     for i, c in enumerate(carriers):
         rec_class = ' class="recommended"' if i == recommended_idx else ""
         rec_badge = ' <span class="rec-badge">RECOMMENDED</span>' if i == recommended_idx else ""
+        am = c.get('am_best', '') or '—'
         rows_html += f"""
         <tr{rec_class}>
             <td class="carrier-name">{c.get('carrier', '—')}{rec_badge}</td>
@@ -1049,38 +1080,91 @@ def build_quote_comparison_html(
             <td class="num">{c.get('death_benefit', '—')}</td>
             <td class="num highlight">{c.get('monthly_premium', '—')}</td>
             <td class="num">{c.get('cash_value_10yr', '—')}</td>
-            <td class="center">{c.get('rating', '—')}</td>
+            <td class="num">{c.get('cash_value_20yr', '—')}</td>
+            <td class="center">{am}</td>
         </tr>"""
 
-    # Build carrier detail cards
-    cards_html = ""
-    for i, c in enumerate(carriers):
-        rec_border = "border-left: 4px solid #4CAF50;" if i == recommended_idx else ""
-        rec_tag = '<div class="card-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
-        cards_html += f"""
-        <div class="detail-card" style="{rec_border}">
-            {rec_tag}
-            <div class="detail-carrier">{c.get('carrier', '—')}</div>
-            <div class="detail-product">{c.get('product', '—')}</div>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-label">Monthly Premium</div>
-                    <div class="detail-value">{c.get('monthly_premium', '—')}</div>
+    # ── Company info sections ───────────────────────────────────────────────
+    company_sections_html = ""
+    for c in carriers:
+        about = c.get('about', '').strip()
+        am    = c.get('am_best', '').strip()
+        sp    = c.get('sp', '').strip()
+        mdy   = c.get('moodys', '').strip()
+        if not (about or am or sp or mdy):
+            continue
+
+        ratings_html = ""
+        if am or sp or mdy:
+            ratings_html = '<div class="co-ratings">'
+            if am:
+                ratings_html += f'<div class="co-rating-item"><span class="co-rating-val">{am}</span><span class="co-rating-lbl">A.M. Best</span></div>'
+            if sp:
+                ratings_html += f'<div class="co-rating-item"><span class="co-rating-val">{sp}</span><span class="co-rating-lbl">Standard &amp; Poor\'s</span></div>'
+            if mdy:
+                ratings_html += f'<div class="co-rating-item"><span class="co-rating-val">{mdy}</span><span class="co-rating-lbl">Moody\'s</span></div>'
+            ratings_html += '</div>'
+
+        company_sections_html += f"""
+        <div class="company-section">
+            <h2 class="section-title">{c.get('carrier', '')}</h2>
+            <div class="co-body">
+                <div class="co-story">
+                    <p>{about}</p>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Death Benefit</div>
-                    <div class="detail-value">{c.get('death_benefit', '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">10-Year Cash Value</div>
-                    <div class="detail-value">{c.get('cash_value_10yr', '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Rating</div>
-                    <div class="detail-value">{c.get('rating', '—')}</div>
-                </div>
+                {ratings_html}
             </div>
+            <p class="co-tagline">Plan today, protect what matters most for a lifetime.</p>
         </div>"""
+
+    # ── Living benefits section ─────────────────────────────────────────────
+    living_benefits_html = """
+    <div class="page-break"></div>
+    <h2 class="section-title">Living Benefits</h2>
+    <p class="lb-intro">Benefits that can pay out <strong>while you're alive</strong> if you experience a qualifying event.</p>
+    <p class="lb-subhead">Coverage in case of a qualifying illness or injury</p>
+    <div class="lb-cards">
+        <div class="lb-card">
+            <div class="lb-icon">&#10084;</div>
+            <div class="lb-card-title">Terminal Illness</div>
+            <p>Access a portion of your death benefit early if you are diagnosed with a qualifying terminal illness and your life expectancy is limited.</p>
+            <p class="lb-use">This benefit can help cover medical expenses, pay off debt, or support your family during a difficult time.</p>
+        </div>
+        <div class="lb-card">
+            <div class="lb-icon">&#9786;</div>
+            <div class="lb-card-title">Chronic Illness</div>
+            <p>If you're unable to perform basic activities of daily living or experience severe cognitive impairment, a portion of the benefit can be paid out while you are living.</p>
+            <p class="lb-use">Funds can be used for caregiving, home modifications, or other support needs.</p>
+        </div>
+        <div class="lb-card">
+            <div class="lb-icon">&#10010;</div>
+            <div class="lb-card-title">Critical Illness</div>
+            <p>Provides a lump-sum benefit after a qualifying diagnosis such as heart attack, stroke, cancer, or other major illnesses defined in the policy.</p>
+            <p class="lb-use">Gives you financial flexibility during treatment and recovery.</p>
+        </div>
+        <div class="lb-card">
+            <div class="lb-icon">&#128737;</div>
+            <div class="lb-card-title">Critical Injury</div>
+            <p>Helps cover expenses if you suffer a serious injury like paralysis, severe burns, or traumatic brain injury, subject to policy definitions.</p>
+            <p class="lb-use">Benefits can be used for rehabilitation, lost income, or everyday bills.</p>
+        </div>
+    </div>
+    <div class="lb-summary-row">
+        <div class="lb-summary-item">
+            <span class="lb-sum-icon">&#10084;</span>
+            <strong>Terminal &amp; Chronic<br>Illness Support</strong>
+        </div>
+        <div class="lb-summary-item">
+            <span class="lb-sum-icon">&#10010;</span>
+            <strong>Critical Illness &amp;<br>Injury Protection</strong>
+        </div>
+        <div class="lb-summary-item">
+            <span class="lb-sum-icon">&#128106;</span>
+            <strong>Extra Safety Net for<br>You and Your Family</strong>
+        </div>
+    </div>
+    <p class="lb-disclaimer">This living benefits summary is for illustration only. Actual eligibility, covered conditions, and benefit amounts are determined by the specific policy contract.</p>
+    """
 
     prepared_for_html = ""
     if client_name.strip():
@@ -1093,7 +1177,7 @@ def build_quote_comparison_html(
 <meta charset="UTF-8" />
 <style>
     @page {{
-        margin-bottom: 40px;
+        margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
             content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1107,193 +1191,172 @@ def build_quote_comparison_html(
         background: #ffffff;
         color: #123047;
         line-height: 1.6;
+        font-size: 12px;
     }}
+    /* ── Header ── */
     .hero {{
-        background: #0e7fa6;
+        background: #123047;
         color: #ffffff;
-        padding: 16px 36px 20px 36px;
+        padding: 18px 36px 22px 36px;
     }}
     .hero-top {{
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
-    }}
-    .logo {{
-        height: 50px;
-        width: auto;
-        max-width: 160px;
-        display: block;
-    }}
-    .agent-info {{
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-align: left;
-    }}
-    .agent-photo {{
-        width: 80px;
-        height: 80px;
-        border-radius: 6px;
-        border: 2px solid #ffffff;
-        object-fit: cover;
-        object-position: top center;
-        flex-shrink: 0;
-    }}
-    .agent-details {{ line-height: 1.3; }}
-    .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
-    .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.9); }}
-    .hero-bottom {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }}
-    .hero-title {{ font-size: 22px; font-weight: 500; margin-bottom: 4px; }}
-    .hero-subtitle {{ font-size: 14px; opacity: 0.9; }}
-    .prepared-for {{ font-size: 14px; color: #fff; margin-top: 6px; }}
-    .prepared-for strong {{ font-weight: 700; }}
-    .date-stamp {{ font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 4px; }}
-    .content {{ padding: 24px 32px 32px 32px; }}
-    h2.section-title {{
-        font-size: 18px;
-        color: #0e7fa6;
-        border-bottom: 2px solid #0e7fa6;
-        padding-bottom: 6px;
         margin-bottom: 16px;
-        font-weight: 600;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding-bottom: 14px;
     }}
-    /* Comparison table */
-    table.compare {{
-        width: 100%;
-        border-collapse: collapse;
-        margin: 16px 0;
-        font-size: 12px;
+    .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
+    .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
+    .agent-photo {{
+        width: 72px; height: 72px; border-radius: 6px;
+        border: 2px solid rgba(255,255,255,0.6);
+        object-fit: cover; object-position: top center; flex-shrink: 0;
     }}
-    table.compare thead {{
-        background: #0e7fa6;
-        color: #ffffff;
+    .agent-details {{ line-height: 1.35; }}
+    .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
+    .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
+    .hero-bottom {{ display: flex; justify-content: space-between; align-items: flex-end; }}
+    .hero-title {{ font-size: 24px; font-weight: 400; letter-spacing: -0.01em; color: #fff; margin-bottom: 4px; }}
+    .hero-subtitle {{ font-size: 13px; color: rgba(255,255,255,0.8); }}
+    .prepared-for {{ font-size: 13px; color: rgba(255,255,255,0.95); margin-top: 6px; }}
+    .prepared-for strong {{ font-weight: 700; }}
+    .date-stamp {{ font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px; }}
+    .notice-bar {{
+        background: #e8f4f8;
+        border-left: 4px solid #0e7fa6;
+        padding: 8px 36px;
+        font-size: 9.5px;
+        color: #476072;
     }}
-    table.compare th {{
-        padding: 10px 8px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }}
-    table.compare td {{
-        padding: 10px 8px;
-        border-bottom: 1px solid #e0edf3;
-    }}
-    table.compare td.num {{
-        text-align: right;
-        font-family: "Courier New", monospace;
-        font-weight: 600;
-    }}
-    table.compare td.center {{ text-align: center; }}
-    table.compare td.highlight {{
-        color: #0e7fa6;
-        font-size: 14px;
-        font-weight: 700;
-    }}
-    table.compare td.carrier-name {{
-        font-weight: 600;
+    /* ── Content ── */
+    .content {{ padding: 22px 36px 30px 36px; }}
+    h2.section-title {{
+        font-size: 16px;
         color: #123047;
+        border-bottom: 2px solid #0e7fa6;
+        padding-bottom: 5px;
+        margin: 22px 0 14px 0;
+        font-weight: 600;
     }}
-    table.compare tr.recommended {{
-        background: #eef9ee;
-    }}
-    .rec-badge {{
-        display: inline-block;
-        background: #4CAF50;
-        color: #fff;
-        font-size: 8px;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 3px;
-        margin-left: 8px;
-        vertical-align: middle;
-        letter-spacing: 0.04em;
-    }}
-    /* Detail cards */
-    .detail-cards {{
+    h2.section-title:first-child {{ margin-top: 0; }}
+    /* ── Stat boxes ── */
+    .stat-boxes {{
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin: 20px 0;
+        grid-template-columns: repeat({min(len(carriers), 4)}, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
     }}
-    .detail-card {{
-        border: 1px solid #d1e2ea;
+    .stat-box {{
         border-radius: 8px;
-        padding: 16px;
-        background: #f9fcfe;
+        padding: 14px 16px;
+        background: #f4f9fc;
         position: relative;
     }}
-    .card-rec-tag {{
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #4CAF50;
-        color: #fff;
-        font-size: 8px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 3px;
-        letter-spacing: 0.04em;
+    .stat-rec-tag {{
+        position: absolute; top: -1px; right: 10px;
+        background: #4CAF50; color: #fff;
+        font-size: 7.5px; font-weight: 700;
+        padding: 2px 8px; border-radius: 0 0 4px 4px;
+        letter-spacing: 0.05em; text-transform: uppercase;
     }}
-    .detail-carrier {{
-        font-size: 16px;
-        font-weight: 700;
-        color: #123047;
-        margin-bottom: 2px;
+    .stat-carrier {{ font-size: 14px; font-weight: 700; color: #123047; margin-bottom: 1px; }}
+    .stat-product {{ font-size: 10px; color: #476072; margin-bottom: 10px; }}
+    .stat-grid {{
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
     }}
-    .detail-product {{
-        font-size: 12px;
-        color: #476072;
-        margin-bottom: 12px;
+    .stat-label {{
+        font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: #0e7fa6; font-weight: 700; margin-bottom: 2px;
     }}
-    .detail-grid {{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+    .stat-value {{ font-size: 15px; font-weight: 700; color: #123047; }}
+    /* ── Comparison table ── */
+    table.compare {{
+        width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
     }}
-    .detail-label {{
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #0e7fa6;
-        font-weight: 600;
-        margin-bottom: 2px;
+    table.compare thead {{ background: #123047; color: #fff; }}
+    table.compare th {{
+        padding: 9px 8px; text-align: left;
+        font-weight: 600; font-size: 10px;
+        text-transform: uppercase; letter-spacing: 0.04em;
     }}
-    .detail-value {{
-        font-size: 14px;
-        font-weight: 600;
-        color: #123047;
+    table.compare td {{ padding: 9px 8px; border-bottom: 1px solid #dde9f0; }}
+    table.compare tbody tr:last-child td {{ border-bottom: none; }}
+    table.compare td.num {{ text-align: right; font-weight: 600; }}
+    table.compare td.center {{ text-align: center; }}
+    table.compare td.highlight {{ color: #0e7fa6; font-size: 13px; font-weight: 700; }}
+    table.compare td.carrier-name {{ font-weight: 700; color: #123047; }}
+    table.compare tr.recommended {{ background: #eef9ee; }}
+    .rec-badge {{
+        display: inline-block; background: #4CAF50; color: #fff;
+        font-size: 7.5px; font-weight: 700; padding: 2px 6px;
+        border-radius: 3px; margin-left: 6px; vertical-align: middle;
+        letter-spacing: 0.05em;
     }}
-    .disclaimer {{
-        margin-top: 24px;
-        font-size: 10px;
-        color: #6b7f8f;
-        line-height: 1.5;
+    /* ── Company sections ── */
+    .company-section {{ margin-bottom: 22px; }}
+    .co-body {{ display: flex; gap: 20px; margin-bottom: 10px; }}
+    .co-story {{ flex: 2; }}
+    .co-story p {{ font-size: 11px; color: #2c4a63; line-height: 1.65; }}
+    .co-ratings {{
+        flex: 1; display: flex; flex-direction: column;
+        gap: 8px; justify-content: flex-start;
     }}
+    .co-rating-item {{
+        background: #f4f9fc; border-left: 3px solid #0e7fa6;
+        padding: 6px 10px; border-radius: 0 4px 4px 0;
+    }}
+    .co-rating-val {{ font-size: 13px; font-weight: 700; color: #123047; display: block; }}
+    .co-rating-lbl {{ font-size: 9px; color: #6b7f8f; text-transform: uppercase; letter-spacing: 0.04em; }}
+    .co-tagline {{
+        font-size: 11px; font-style: italic; color: #476072;
+        border-top: 1px solid #dde9f0; padding-top: 8px; margin-top: 4px;
+    }}
+    /* ── Living benefits ── */
+    .lb-intro {{ font-size: 12px; color: #2c4a63; margin-bottom: 6px; }}
+    .lb-subhead {{
+        font-size: 11px; font-weight: 600; color: #0e7fa6;
+        margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em;
+    }}
+    .lb-cards {{
+        display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;
+    }}
+    .lb-card {{
+        border: 1px solid #dde9f0; border-radius: 8px; padding: 14px 16px;
+        background: #f9fcfe;
+    }}
+    .lb-icon {{ font-size: 20px; margin-bottom: 6px; }}
+    .lb-card-title {{ font-size: 13px; font-weight: 700; color: #123047; margin-bottom: 6px; }}
+    .lb-card p {{ font-size: 11px; color: #2c4a63; line-height: 1.6; margin-bottom: 4px; }}
+    .lb-use {{ font-style: italic; color: #476072 !important; }}
+    .lb-summary-row {{
+        display: flex; gap: 0; margin-bottom: 14px;
+        border: 1px solid #dde9f0; border-radius: 8px; overflow: hidden;
+    }}
+    .lb-summary-item {{
+        flex: 1; padding: 14px 16px; text-align: center;
+        border-right: 1px solid #dde9f0; background: #eef6fb;
+        font-size: 11px; color: #123047; line-height: 1.5;
+    }}
+    .lb-summary-item:last-child {{ border-right: none; }}
+    .lb-sum-icon {{ font-size: 20px; display: block; margin-bottom: 6px; }}
+    .lb-disclaimer {{
+        font-size: 9.5px; color: #6b7f8f; line-height: 1.5;
+        border-top: 1px solid #dde9f0; padding-top: 10px;
+    }}
+    /* ── Next steps ── */
     .next-steps {{
-        margin-top: 20px;
-        background: #e8f4f8;
-        border-radius: 8px;
-        padding: 16px 20px;
-        border: 1px solid #d1e2ea;
+        background: #eef6fb; border-radius: 8px;
+        padding: 14px 18px; border: 1px solid #c8dfe9; margin-top: 20px;
     }}
-    .next-steps h3 {{
-        font-size: 14px;
-        font-weight: 600;
-        color: #0e7fa6;
-        margin-bottom: 8px;
+    .next-steps h3 {{ font-size: 13px; font-weight: 600; color: #0e7fa6; margin-bottom: 8px; }}
+    .next-steps p {{ font-size: 11px; color: #2c4a63; margin: 3px 0; }}
+    .disclaimer {{
+        margin-top: 20px; font-size: 9.5px; color: #6b7f8f; line-height: 1.55;
+        border-top: 1px solid #dde9f0; padding-top: 10px;
     }}
-    .next-steps p {{
-        font-size: 12px;
-        color: #2c4a63;
-        margin: 4px 0;
-    }}
+    .page-break {{ page-break-before: always; }}
 </style>
 </head>
 <body>
@@ -1313,15 +1376,24 @@ def build_quote_comparison_html(
         </div>
         <div class="hero-bottom">
             <div>
-                <div class="hero-title">Quote Comparison</div>
-                <div class="hero-subtitle">Side-by-side carrier comparison to help you choose the best fit.</div>
+                <div class="hero-title">IUL Quote Comparison</div>
+                <div class="hero-subtitle">Side-by-side carrier comparison</div>
                 {prepared_for_html}
                 <div class="date-stamp">{today_str}</div>
             </div>
         </div>
     </header>
+    <div class="notice-bar">
+        This information is for agent use only. Only complete illustrations may be shown to the public.
+    </div>
     <div class="content">
-        <h2 class="section-title">Carrier Comparison</h2>
+
+        <h2 class="section-title">Quote Summary</h2>
+        <div class="stat-boxes">
+            {stat_boxes_html}
+        </div>
+
+        <h2 class="section-title">Side-by-Side Comparison</h2>
         <table class="compare">
             <thead>
                 <tr>
@@ -1330,7 +1402,8 @@ def build_quote_comparison_html(
                     <th>Death Benefit</th>
                     <th>Monthly Premium</th>
                     <th>10-Yr Cash Value</th>
-                    <th>Rating</th>
+                    <th>20-Yr Cash Value</th>
+                    <th>AM Best</th>
                 </tr>
             </thead>
             <tbody>
@@ -1338,10 +1411,9 @@ def build_quote_comparison_html(
             </tbody>
         </table>
 
-        <h2 class="section-title">Detailed Breakdown</h2>
-        <div class="detail-cards">
-            {cards_html}
-        </div>
+        {company_sections_html}
+
+        {living_benefits_html}
 
         <div class="next-steps">
             <h3>Next Steps</h3>
@@ -1353,10 +1425,9 @@ def build_quote_comparison_html(
 
         <div class="disclaimer">
             This quote comparison is for illustration purposes only and is not an offer or contract.
-            Premiums shown are estimates based on the information provided and may change based on
-            underwriting. Cash value projections are non-guaranteed and based on current assumptions.
-            Actual results may vary. Please review each carrier's full illustration for guaranteed values
-            and complete policy details.
+            Premiums shown are estimates based on the information provided and may change based on underwriting.
+            Cash value projections are non-guaranteed and based on current assumptions. Actual results may vary.
+            Please review each carrier&rsquo;s full illustration for guaranteed values and complete policy details.
         </div>
     </div>
 </body>

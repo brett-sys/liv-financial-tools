@@ -225,7 +225,11 @@ def quote_comparison():
                     "monthly_premium": request.form.get(f"premium_{i}", "").strip() or "—",
                     "death_benefit": request.form.get(f"death_benefit_{i}", "").strip() or "—",
                     "cash_value_10yr": request.form.get(f"cash_value_{i}", "").strip() or "—",
-                    "rating": request.form.get(f"rating_{i}", "").strip() or "—",
+                    "cash_value_20yr": request.form.get(f"cash_value_20yr_{i}", "").strip() or "—",
+                    "am_best": request.form.get(f"am_best_{i}", "").strip() or "",
+                    "sp": request.form.get(f"sp_{i}", "").strip() or "",
+                    "moodys": request.form.get(f"moodys_{i}", "").strip() or "",
+                    "about": request.form.get(f"about_{i}", "").strip() or "",
                 })
 
         if not client_name or not carriers:

@@ -35,6 +35,9 @@ GHL_LOCATION_ID = os.getenv("GHL_LOCATION_ID", "")
 # Agents config file
 AGENTS_FILE = BASE_DIR / "agents.json"
 
+# Local leads folder (from sharktank_scraper)
+LOCAL_LEADS_DIR = PROJECT_ROOT / "sharktank_scraper" / "Leads"
+
 # CSV column mapping — maps our internal keys to CSV header names
 CSV_COLUMNS = {
     "full_name": "Full Name",
