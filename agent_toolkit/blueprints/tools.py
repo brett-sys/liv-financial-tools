@@ -393,6 +393,14 @@ def _load_scripts():
     return scripts
 
 
+# ---------------------------------------------------------------------------
+# Underwriting Assessment (UI)
+# ---------------------------------------------------------------------------
+@tools_bp.route("/underwriting")
+def underwriting():
+    return render_template("underwriting.html")
+
+
 def _default_cold_call_script():
     return """<p><strong>Opening:</strong></p>
 <p>Hi, this is [Your Name] with LIV Financial Group. I'm reaching out because I help families like yours protect their financial future with tax-advantaged life insurance strategies.</p>

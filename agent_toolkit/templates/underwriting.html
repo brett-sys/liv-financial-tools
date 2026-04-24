@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Underwriting - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Underwriting Assessment</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        Enter client info to see which carriers will approve them and at what rating.
+    </p>
+
+    <form id="uwForm" class="call-form" autocomplete="off">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" min="18" max="85" placeholder="35" required>
+            </div>
+            <div class="form-group">
+                <label>Product Type</label>
+                <select id="product_type" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:0.6rem 0.7rem;font-size:16px;width:100%;">
+                    <option value="IUL">IUL</option>
+                    <option value="Term">Term</option>
+                    <option value="Final Expense">Final Expense</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="height">Height (inches)</label>
+                <input type="number" id="height" min="48" max="84" placeholder="70" step="0.5">
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight (lbs)</label>
+                <input type="number" id="weight" min="80" max="500" placeholder="180">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Health Conditions</label>
+            <div class="uw-toggles">
+                <label class="uw-toggle">
+                    <input type="checkbox" id="tobacco">
+                    <span>Tobacco</span>
+                </label>
+                <label class="uw-toggle">
+                    <input type="checkbox" id="diabetes">
+                    <span>Diabetes</span>
+                </label>
+                <label class="uw-toggle">
+                    <input type="checkbox" id="hypertension">
+                    <span>Hypertension</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cancer">Cancer (years ago)</label>
+                <input type="number" id="cancer" min="0" max="50" placeholder="None">
+            </div>
+            <div class="form-group">
+                <label for="dui">DUI (years ago)</label>
+                <input type="number" id="dui" min="0" max="50" placeholder="None">
+            </div>
+        </div>
+
+        <div class="form-group" id="conditionsGroup" style="display:none;">
+            <label>Additional Conditions</label>
+            <div class="uw-toggles" id="conditionsList"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="assessBtn">
+            Run Assessment
+        </button>
+    </form>
+
+    <div id="results" style="display:none; margin-top: 1.25rem;"></div>
+</div>
+
+<style>
+.uw-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.uw-toggle {
+    cursor: pointer;
+}
+.uw-toggle input { display: none; }
+.uw-toggle span {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.15s;
+}
+.uw-toggle input:checked + span {
+    background: rgba(255, 69, 58, 0.15);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.uw-result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.uw-result-card.declined {
+    opacity: 0.5;
+    border-left: 3px solid var(--danger);
+}
+.uw-result-card.approved {
+    border-left: 3px solid var(--success);
+}
+.uw-carrier { font-weight: 700; font-size: 0.9rem; }
+.uw-notes { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+.uw-rating {
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+.uw-rating-preferred { background: rgba(52, 199, 89, 0.15); color: var(--success); }
+.uw-rating-standard { background: rgba(79, 140, 255, 0.15); color: var(--primary); }
+.uw-rating-substandard { background: rgba(255, 159, 10, 0.15); color: var(--warning); }
+.uw-rating-declined { background: rgba(255, 69, 58, 0.15); color: var(--danger); }
+
+.uw-bmi { margin-top: 0.75rem; padding: 0.65rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; text-align: center; }
+.uw-summary { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.uw-stat { flex: 1; min-width: 80px; text-align: center; padding: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.uw-stat-num { font-size: 1.3rem; font-weight: 700; }
+.uw-stat-label { font-size: 0.65rem; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    fetch('/underwriting/conditions')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success || !data.conditions || !data.conditions.length) return;
+            var group = document.getElementById('conditionsGroup');
+            var list = document.getElementById('conditionsList');
+            group.style.display = 'flex';
+            data.conditions.forEach(function(c) {
+                var label = document.createElement('label');
+                label.className = 'uw-toggle';
+                label.innerHTML = '<input type="checkbox" value="' + c + '"><span>' +
+                    c.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) + '</span>';
+                list.appendChild(label);
+            });
+        })
+        .catch(function() {});
+
+    document.getElementById('uwForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('assessBtn');
+        btn.disabled = true;
+        btn.textContent = 'Assessing...';
+
+        var conditions = [];
+        document.querySelectorAll('#conditionsList input:checked').forEach(function(cb) {
+            conditions.push(cb.value);
+        });
+
+        var payload = {
+            age: parseInt(document.getElementById('age').value),
+            product_type: document.getElementById('product_type').value,
+            height_inches: document.getElementById('height').value ? parseFloat(document.getElementById('height').value) : null,
+            weight_lbs: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
+            tobacco: document.getElementById('tobacco').checked,
+            diabetes: document.getElementById('diabetes').checked,
+            hypertension: document.getElementById('hypertension').checked,
+            cancer_years_ago: document.getElementById('cancer').value ? parseInt(document.getElementById('cancer').value) : null,
+            dui_years_ago: document.getElementById('dui').value ? parseInt(document.getElementById('dui').value) : null,
+            conditions: conditions,
+        };
+
+        fetch('/underwriting/assess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btn.disabled = false;
+            btn.textContent = 'Run Assessment';
+            var box = document.getElementById('results');
+            box.style.display = 'block';
+
+            if (!data.success) {
+                box.innerHTML = '<div class="flash flash-error">' + (data.error || 'Assessment failed') + '</div>';
+                return;
+            }
+
+            var results = data.results || [];
+            var client = data.client || {};
+            var approved = results.filter(function(r) { return !r.declined; }).length;
+            var declined = results.filter(function(r) { return r.declined; }).length;
+
+            var html = '';
+
+            if (client.bmi) {
+                html += '<div class="uw-bmi">BMI: <strong>' + client.bmi + '</strong></div>';
+            }
+
+            html += '<div class="uw-summary">';
+            html += '<div class="uw-stat"><div class="uw-stat-num" style="color:var(--success)">' + approved + '</div><div class="uw-stat-label">Approved</div></div>';
+            html += '<div class="uw-stat"><div class="uw-stat-num" style="color:var(--danger)">' + declined + '</div><div class="uw-stat-label">Declined</div></div>';
+            html += '<div class="uw-stat"><div class="uw-stat-num" style="color:var(--primary)">' + results.length + '</div><div class="uw-stat-label">Carriers</div></div>';
+            html += '</div>';
+
+            results.sort(function(a, b) { return (a.declined ? 1 : 0) - (b.declined ? 1 : 0); });
+
+            results.forEach(function(r) {
+                var ratingClass = 'uw-rating-standard';
+                var rating = r.rating || 'Unknown';
+                var lower = rating.toLowerCase();
+                if (r.declined) ratingClass = 'uw-rating-declined';
+                else if (lower.indexOf('preferred') >= 0) ratingClass = 'uw-rating-preferred';
+                else if (lower.indexOf('sub') >= 0 || lower.indexOf('table') >= 0) ratingClass = 'uw-rating-substandard';
+
+                html += '<div class="uw-result-card ' + (r.declined ? 'declined' : 'approved') + '">';
+                html += '<div><div class="uw-carrier">' + r.carrier + '</div>';
+                if (r.notes) html += '<div class="uw-notes">' + r.notes + '</div>';
+                html += '</div>';
+                html += '<div class="uw-rating ' + ratingClass + '">' + (r.declined ? 'Declined' : rating) + '</div>';
+                html += '</div>';
+            });
+
+            if (!results.length) {
+                html += '<div class="empty-state">No carriers found for this product type.</div>';
+            }
+
+            box.innerHTML = html;
+        })
+        .catch(function(err) {
+            btn.disabled = false;
+            btn.textContent = 'Run Assessment';
+            document.getElementById('results').innerHTML = '<div class="flash flash-error">Error: ' + err.message + '</div>';
+            document.getElementById('results').style.display = 'block';
+        });
+    });
+})();
+</script>
+{% endblock %}
