@@ -8,12 +8,7 @@
     <form method="POST" action="{{ url_for('calls.log_call_route') }}" class="call-form" autocomplete="off">
         <div class="form-group">
             <label>Agent</label>
-            <div class="btn-group btn-group-wrap" data-field="agent_name">
-                {% for a in agents %}
-                <button type="button" class="btn-toggle {% if a == agent_pref %}active{% endif %}"
-                        data-value="{{ a }}">{{ a }}</button>
-                {% endfor %}
-            </div>
+            <div class="agent-locked">{{ agent_pref }}</div>
             <input type="hidden" name="agent_name" id="agent_name" value="{{ agent_pref }}">
         </div>
 

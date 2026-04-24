@@ -16,18 +16,11 @@
 
     <form method="POST" action="{{ url_for('scoreboard.log') }}" class="log-form" id="logForm">
 
-        <!-- Agent -->
+        <!-- Agent (locked to cookie) -->
         <div class="form-group">
             <label class="form-label">Agent</label>
-            <div class="agent-pills">
-                {% for agent in agents %}
-                <label class="agent-pill">
-                    <input type="radio" name="agent_name" value="{{ agent }}"
-                           {% if agent == default_agent %}checked{% endif %}>
-                    <span>{{ agent }}</span>
-                </label>
-                {% endfor %}
-            </div>
+            <div class="agent-locked">{{ default_agent }}</div>
+            <input type="hidden" name="agent_name" value="{{ default_agent }}">
         </div>
 
         <!-- Activity Type -->

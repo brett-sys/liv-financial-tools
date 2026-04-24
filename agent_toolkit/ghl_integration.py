@@ -75,6 +75,41 @@ def upsert_contact(name, email=None, phone=None):
     raise GHLError(f"GHL upsert failed (HTTP {resp.status_code}): {resp.text}")
 
 
+def upsert_opportunity(contact_id, pipeline_id, stage_id, name, status="open"):
+    """Create or update an opportunity in the GHL pipeline."""
+    err = _check_config()
+    if err:
+        raise GHLError(err)
+    if not pipeline_id or not stage_id:
+        raise GHLError("Pipeline ID or Stage ID not configured.")
+
+    payload = {
+        "pipelineId": pipeline_id,
+        "pipelineStageId": stage_id,
+        "contactId": contact_id,
+        "name": name,
+        "status": status,
+        "locationId": config.GHL_LOCATION_ID,
+    }
+    try:
+        resp = requests.post(
+            f"{config.GHL_BASE_URL}/opportunities/upsert",
+            json=payload,
+            headers={**_headers(), "Content-Type": "application/json"},
+            timeout=15,
+        )
+    except requests.ConnectionError:
+        raise GHLError("Could not connect to GHL for pipeline update.")
+    except requests.Timeout:
+        raise GHLError("GHL pipeline update timed out.")
+
+    if resp.status_code in (200, 201):
+        return resp.json()
+    if resp.status_code == 401:
+        raise GHLError("GHL auth failed during pipeline update.")
+    raise GHLError(f"GHL pipeline update failed (HTTP {resp.status_code}): {resp.text}")
+
+
 def upload_pdf_to_contact(contact_id, pdf_path, filename="illustration.pdf"):
     if not config.GHL_FILE_CUSTOM_FIELD_ID or config.GHL_FILE_CUSTOM_FIELD_ID == "your_custom_field_id_here":
         raise GHLError("GHL file custom field ID not configured.")

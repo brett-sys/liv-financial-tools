@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Pipeline - LIFI{% endblock %}
+
+{% block content %}
+<style>
+    .pipeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.85rem;
+    }
+    .pipeline-header h1 { font-size: 1.3rem; }
+    .pipeline-board {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+        scroll-snap-type: x proximity;
+    }
+    .pipeline-board::-webkit-scrollbar { height: 4px; }
+    .pipeline-board::-webkit-scrollbar-track { background: var(--bg); }
+    .pipeline-board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .pipeline-col {
+        min-width: 260px;
+        max-width: 300px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+    }
+    .pipeline-col-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.75rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        font-weight: 700;
+        font-size: 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .pipeline-count {
+        background: var(--bg);
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+    }
+    .pipeline-col-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        min-height: 80px;
+    }
+    .pipeline-card {
+        display: block;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 0.75rem;
+        text-decoration: none;
+        color: var(--text);
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .pipeline-card:hover {
+        border-color: var(--primary);
+        background: var(--surface-hover);
+    }
+    .pipeline-card:active { transform: scale(0.98); }
+    .pipeline-card-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 0.15rem;
+    }
+    .pipeline-card-phone {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.35rem;
+    }
+    .pipeline-card-agent {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--primary);
+        background: var(--primary-glow);
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        margin-bottom: 0.3rem;
+    }
+    .pipeline-card-notes {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.2rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .pipeline-card-time {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        opacity: 0.7;
+    }
+    .stage-sale .pipeline-col-header { border-bottom: 2px solid var(--success); }
+    .stage-callback .pipeline-col-header { border-bottom: 2px solid var(--primary); }
+    .stage-no-answer .pipeline-col-header { border-bottom: 2px solid var(--warning); }
+    .stage-voicemail .pipeline-col-header { border-bottom: 2px solid #af52de; }
+    .stage-not-interested .pipeline-col-header { border-bottom: 2px solid var(--danger); }
+    .stage-other .pipeline-col-header { border-bottom: 2px solid var(--text-muted); }
+    .pipeline-empty {
+        text-align: center;
+        padding: 1.5rem 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+</style>
+
+<div class="pipeline-header">
+    <h1>Pipeline</h1>
+    <a href="{{ url_for('tools.tools_menu') }}" class="btn btn-ghost btn-sm">&larr; Tools</a>
+</div>
+
+<div class="pipeline-board">
+    {% set stage_classes = {
+        'Sale': 'stage-sale',
+        'Callback': 'stage-callback',
+        'No Answer': 'stage-no-answer',
+        'Voicemail': 'stage-voicemail',
+        'Not Interested': 'stage-not-interested',
+        'Other': 'stage-other'
+    } %}
+    {% for stage in stages %}
+    {% set cards = pipeline_data.get(stage, []) %}
+    <div class="pipeline-col {{ stage_classes.get(stage, '') }}">
+        <div class="pipeline-col-header">
+            <span>{{ stage }}</span>
+            <span class="pipeline-count">{{ cards|length }}</span>
+        </div>
+        <div class="pipeline-col-body">
+            {% if cards %}
+                {% for card in cards %}
+                <a href="{{ url_for('calls.edit_call_route', call_id=card.id) }}" class="pipeline-card">
+                    <div class="pipeline-card-name">{{ card.contact_name or 'Unknown' }}</div>
+                    <div class="pipeline-card-phone">{{ card.phone_number or '' }}</div>
+                    <span class="pipeline-card-agent">{{ card.agent_name or '' }}</span>
+                    {% if card.notes %}
+                    <div class="pipeline-card-notes">{{ card.notes[:60] }}{% if card.notes|length > 60 %}&hellip;{% endif %}</div>
+                    {% endif %}
+                    {% if card.time_ago %}
+                    <div class="pipeline-card-time">{{ card.time_ago }}</div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="pipeline-empty">No calls</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 """Calls blueprint – leaderboard, call logging, history, GHL sync."""
 
+import threading
 from datetime import datetime
 
 from flask import (
@@ -10,9 +11,10 @@ from flask import (
 import config
 from models.calls import (
     log_call as db_log_call, update_call, delete_call, get_call,
-    get_calls, get_stats, get_contact_suggestions,
+    get_calls, get_stats, get_contact_suggestions, get_follow_up_dates,
 )
 from calendar_integration import get_calendar_urls, generate_ics
+import ghl_integration
 from ghl_integration import upsert_contact, GHLError
 from push import save_subscription
 
@@ -24,8 +26,20 @@ calls_bp = Blueprint("calls", __name__)
 # ---------------------------------------------------------------------------
 @calls_bp.route("/dashboard")
 def leaderboard():
-    stats = get_stats()
-    return render_template("leaderboard.html", stats=stats, now=datetime.now())
+    agent_pref = request.cookies.get("agent_pref", "Brett")
+    stats = get_stats(agent_name=agent_pref)
+    follow_up_dates = get_follow_up_dates(agent_pref)
+    return render_template(
+        "leaderboard.html",
+        stats=stats,
+        now=datetime.now(),
+        follow_up_dates=follow_up_dates,
+        calendar_id=config.AGENT_CALENDAR_IDS.get(agent_pref, ""),
+        calendar_type=config.AGENT_CALENDAR_TYPES.get(agent_pref, "google"),
+        social_links=config.SOCIAL_LINKS,
+        app_store_url=config.APP_STORE_URL,
+        play_store_url=config.PLAY_STORE_URL,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +51,9 @@ def log_call_route():
         agent = request.form.get("agent_name", "").strip()
         contact = request.form.get("contact_name", "").strip()
         phone = request.form.get("phone_number", "").strip()
+        agent = request.cookies.get("agent_pref", agent) or agent
+
+        outcome = request.form.get("outcome", "Other")
 
         db_log_call(
             agent_name=agent,
@@ -46,10 +63,30 @@ def log_call_route():
                 "call_datetime", datetime.now().strftime("%Y-%m-%d %H:%M")
             ),
             direction=request.form.get("direction", "Outbound"),
-            outcome=request.form.get("outcome", "Other"),
+            outcome=outcome,
             notes=request.form.get("notes", "").strip(),
             follow_up_date=request.form.get("follow_up_date") or None,
         )
+
+        if config.GHL_ENABLED and outcome in config.GHL_STAGE_MAP:
+            def _ghl_pipeline_sync():
+                try:
+                    contact_id = ghl_integration.upsert_contact(
+                        name=contact, phone=phone,
+                    )
+                    stage_id = config.GHL_STAGE_MAP.get(outcome)
+                    if stage_id and config.GHL_PIPELINE_ID:
+                        ghl_integration.upsert_opportunity(
+                            contact_id=contact_id,
+                            pipeline_id=config.GHL_PIPELINE_ID,
+                            stage_id=stage_id,
+                            name=f"{contact} — {outcome}",
+                        )
+                except Exception as e:
+                    print(f"[GHL] Background pipeline sync failed: {e}")
+
+            t = threading.Thread(target=_ghl_pipeline_sync, daemon=True)
+            t.start()
 
         follow_up = request.form.get("follow_up_date")
         if follow_up:

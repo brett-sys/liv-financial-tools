@@ -1,4 +1,4 @@
-"""Tools blueprint – Illustration, Illustration Comparison, Policy Submitted, Quote Comparison."""
+"""Tools blueprint – Illustration, Comparison, Policy Submitted, Quote Comparison, Pipeline, Quick Quote, Teleprompter."""
 
 import json
 import tempfile
@@ -8,6 +8,9 @@ from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     send_file, jsonify,
 )
+
+import config
+from models.calls import get_pipeline_data
 
 tools_bp = Blueprint("tools", __name__)
 
@@ -345,3 +348,80 @@ def api_illustration():
         "message": f"Illustration PDF emailed to {client_email}",
         "filename": filename,
     })
+
+
+# ---------------------------------------------------------------------------
+# Pipeline (Kanban Board)
+# ---------------------------------------------------------------------------
+@tools_bp.route("/pipeline")
+def pipeline():
+    pipeline_data = get_pipeline_data()
+    stages = config.OUTCOME_CHOICES
+    return render_template("pipeline.html", pipeline_data=pipeline_data, stages=stages)
+
+
+# ---------------------------------------------------------------------------
+# Quick Quote (IUL Calculator)
+# ---------------------------------------------------------------------------
+@tools_bp.route("/quick-quote")
+def quick_quote():
+    return render_template("quick_quote.html")
+
+
+# ---------------------------------------------------------------------------
+# Teleprompter
+# ---------------------------------------------------------------------------
+@tools_bp.route("/teleprompter")
+def teleprompter():
+    scripts = _load_scripts()
+    return render_template("teleprompter.html", scripts=scripts)
+
+
+def _load_scripts():
+    """Load call scripts from the scripts directory."""
+    scripts = []
+    scripts_dir = config.SCRIPTS_DIR
+    if not scripts_dir.exists():
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+    for f in sorted(scripts_dir.glob("*.html")):
+        scripts.append({"name": f.stem.replace("_", " ").title(), "content": f.read_text()})
+    if not scripts:
+        scripts.append({
+            "name": "Cold Call Intro",
+            "content": _default_cold_call_script(),
+        })
+    return scripts
+
+
+def _default_cold_call_script():
+    return """<p><strong>Opening:</strong></p>
+<p>Hi, this is [Your Name] with LIV Financial Group. I'm reaching out because I help families like yours protect their financial future with tax-advantaged life insurance strategies.</p>
+
+<p><strong>Permission:</strong></p>
+<p>Do you have just 2 minutes? I won't take much of your time.</p>
+
+<p><strong>Discovery:</strong></p>
+<p>Quick question — do you currently have any life insurance in place?</p>
+<p><em>If yes:</em> Great! Is it through your employer or a personal policy?</p>
+<p><em>If no:</em> That's actually very common. Most people know they need it but haven't gotten around to it yet.</p>
+
+<p><strong>Value Prop:</strong></p>
+<p>What makes what we do different is we focus on <strong>Indexed Universal Life</strong> policies that not only provide a death benefit for your family, but also build <strong>tax-free cash value</strong> you can access during your lifetime — for retirement, emergencies, or opportunities.</p>
+
+<p><strong>Close for Appointment:</strong></p>
+<p>I'd love to run a quick illustration for you — it takes about 15 minutes and there's zero obligation. Would tomorrow at [time] work, or is [alternative time] better?</p>
+
+<p data-objection="too-expensive"><strong>Objection — "Too Expensive":</strong></p>
+<p>I totally understand that concern. The good news is we can design a policy that fits your budget — even starting at $100-200/month. And unlike term insurance that expires worthless, every dollar builds real cash value. Would it help if I showed you what $150/month could grow to over 20 years?</p>
+
+<p data-objection="need-to-think"><strong>Objection — "Need to Think About It":</strong></p>
+<p>Absolutely, this is an important decision. What specifically would you want to think over? I ask because sometimes I can answer those questions right now and save you some time.</p>
+
+<p data-objection="already-have-coverage"><strong>Objection — "Already Have Coverage":</strong></p>
+<p>That's great that you're already protected! Most of my clients actually had some coverage already — what we found is their employer policy wouldn't be enough for their family, or they were missing the wealth-building component. Would it be worth 15 minutes to see if there's a gap?</p>
+
+<p data-objection="not-interested"><strong>Objection — "Not Interested":</strong></p>
+<p>I respect that. Quick question before I go — is it the timing, or is life insurance in general not a priority right now? I ask because a lot of folks say the same thing, and then when I show them the tax-free retirement angle, they realize it's more than just a death benefit.</p>
+
+<p data-objection="talk-to-spouse"><strong>Objection — "Need to Talk to My Spouse":</strong></p>
+<p>That makes total sense — it's a decision you should absolutely make together. What if we set up a quick call with both of you? That way you're both hearing the same information and can make a decision together. Would an evening call this week work?</p>"""

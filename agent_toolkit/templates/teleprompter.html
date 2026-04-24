@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Teleprompter - LIFI{% endblock %}
+
+{% block content %}
+<style>
+    .tp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.65rem;
+    }
+    .tp-header h1 { font-size: 1.3rem; }
+    .tp-selector {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.65rem;
+    }
+    .tp-selector select {
+        flex: 1;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        padding: 0.5rem 0.65rem;
+        font-size: 0.85rem;
+        font-family: inherit;
+    }
+    .tp-selector select:focus { outline: none; border-color: var(--primary); }
+    .tp-script-area {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem 1rem;
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: var(--text);
+        overflow-y: auto;
+        margin-bottom: 0.65rem;
+        min-height: 200px;
+        max-height: calc(100vh - var(--top-bar-height) - var(--bottom-nav-height) - var(--safe-top) - var(--safe-bottom) - 280px);
+        scroll-behavior: smooth;
+    }
+    .tp-script-area b, .tp-script-area strong { color: var(--primary); }
+    .tp-script-content { display: none; }
+    .tp-script-content.active { display: block; }
+    .tp-objections {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.65rem;
+    }
+    .tp-objection-btn {
+        padding: 0.4rem 0.65rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--warning);
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+    }
+    .tp-objection-btn:hover {
+        border-color: var(--warning);
+        background: rgba(255, 159, 10, 0.08);
+    }
+    .tp-objection-btn:active { transform: scale(0.96); }
+    .tp-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.6rem 0.75rem;
+        flex-wrap: wrap;
+    }
+    .tp-ctrl-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.7rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        gap: 0.3rem;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .tp-ctrl-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .tp-ctrl-btn:active { transform: scale(0.96); }
+    .tp-ctrl-btn.active {
+        background: var(--primary-glow);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    .tp-ctrl-btn svg { width: 16px; height: 16px; }
+    .tp-speed-group {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex: 1;
+        min-width: 120px;
+    }
+    .tp-speed-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+    .tp-speed-slider {
+        flex: 1;
+        -webkit-appearance: none;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        outline: none;
+    }
+    .tp-speed-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+    }
+    .tp-speed-val {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary);
+        min-width: 26px;
+        text-align: center;
+    }
+    .tp-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+    .tp-overlay.visible { display: flex; }
+    .tp-overlay-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        max-width: 480px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .tp-overlay-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--warning);
+        margin-bottom: 0.75rem;
+    }
+    .tp-overlay-body {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--text);
+    }
+    .tp-overlay-close {
+        display: block;
+        margin-top: 1rem;
+        padding: 0.55rem 1rem;
+        background: var(--primary);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+    }
+    .tp-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+</style>
+
+<div class="tp-header">
+    <h1>Teleprompter</h1>
+    <a href="{{ url_for('tools.tools_menu') }}" class="btn btn-ghost btn-sm">&larr; Tools</a>
+</div>
+
+{% if scripts %}
+<div class="tp-selector">
+    <select id="tp-script-select">
+        {% for script in scripts %}
+        <option value="{{ loop.index0 }}">{{ script.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="tp-objections">
+    <button class="tp-objection-btn" data-obj="expensive">Too expensive</button>
+    <button class="tp-objection-btn" data-obj="think">Need to think</button>
+    <button class="tp-objection-btn" data-obj="coverage">Already have coverage</button>
+    <button class="tp-objection-btn" data-obj="not-interested">Not interested</button>
+    <button class="tp-objection-btn" data-obj="spouse">Talk to spouse</button>
+</div>
+
+<div class="tp-script-area" id="tp-scroll-area">
+    {% for script in scripts %}
+    <div class="tp-script-content {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}">
+        {{ script.content|safe }}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="tp-controls">
+    <button class="tp-ctrl-btn" id="tp-toggle" title="Start auto-scroll">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+        <span id="tp-toggle-label">Play</span>
+    </button>
+    <button class="tp-ctrl-btn" id="tp-slower" title="Slower">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11,17 6,12 11,7"/><polyline points="18,17 13,12 18,7"/></svg>
+    </button>
+    <div class="tp-speed-group">
+        <span class="tp-speed-label">Speed</span>
+        <input type="range" min="1" max="5" step="0.5" value="2" class="tp-speed-slider" id="tp-speed">
+        <span class="tp-speed-val" id="tp-speed-val">2x</span>
+    </div>
+    <button class="tp-ctrl-btn" id="tp-faster" title="Faster">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13,17 18,12 13,7"/><polyline points="6,17 11,12 6,7"/></svg>
+    </button>
+</div>
+
+<!-- Objection overlay -->
+<div class="tp-overlay" id="tp-overlay">
+    <div class="tp-overlay-card">
+        <div class="tp-overlay-title" id="tp-overlay-title"></div>
+        <div class="tp-overlay-body" id="tp-overlay-body"></div>
+        <button class="tp-overlay-close" id="tp-overlay-close">Got it</button>
+    </div>
+</div>
+
+{% else %}
+<div class="tp-empty">
+    <p>No scripts available.</p>
+    <p style="font-size:0.8rem;margin-top:0.5rem;">Scripts are configured by your admin.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if scripts %}
+<script>
+(function() {
+    var scrollArea = document.getElementById('tp-scroll-area');
+    var speedSlider = document.getElementById('tp-speed');
+    var speedVal = document.getElementById('tp-speed-val');
+    var toggleBtn = document.getElementById('tp-toggle');
+    var toggleLabel = document.getElementById('tp-toggle-label');
+    var isScrolling = false;
+    var scrollTimer = null;
+
+    var rebuttals = {
+        'expensive': {
+            title: 'Objection: "Too Expensive"',
+            body: '<b>Acknowledge:</b> "I completely understand — budget matters. Let me ask you this…"<br><br>' +
+                  '<b>Reframe:</b> "If I could show you a plan where you\'re putting money aside that grows tax-free, protects your family, AND you can access it — would that change how you see the cost?"<br><br>' +
+                  '<b>Compare:</b> "Most people spend more on their car payment. This is about paying yourself first."<br><br>' +
+                  '<b>Close:</b> "What if we started with an amount that fits comfortably, and scaled up as you see it working?"'
+        },
+        'think': {
+            title: 'Objection: "I Need to Think About It"',
+            body: '<b>Validate:</b> "Of course — this is an important decision."<br><br>' +
+                  '<b>Isolate:</b> "Just so I can help, what specifically do you want to think about — is it the cost, the coverage, or something else?"<br><br>' +
+                  '<b>Urgency:</b> "The reason I ask is that your health and age lock in your rate. Every month that passes, the cost goes up."<br><br>' +
+                  '<b>Soft close:</b> "How about we get the paperwork started so we lock in today\'s rate — there\'s a free-look period where you can cancel with no obligation."'
+        },
+        'coverage': {
+            title: 'Objection: "I Already Have Coverage"',
+            body: '<b>Acknowledge:</b> "That\'s great — you\'re ahead of most people."<br><br>' +
+                  '<b>Probe:</b> "Is that through your employer? Because if you leave that job, that coverage stays behind."<br><br>' +
+                  '<b>Differentiate:</b> "What we\'re talking about is different — this is permanent, portable, and builds cash value you can use while you\'re alive."<br><br>' +
+                  '<b>Bridge:</b> "Think of it as a supplement — your group plan handles the basics, this handles the wealth-building."'
+        },
+        'not-interested': {
+            title: 'Objection: "Not Interested"',
+            body: '<b>Stay calm:</b> "I appreciate your honesty."<br><br>' +
+                  '<b>Curiosity:</b> "Can I ask — is it life insurance in general, or just not the right time?"<br><br>' +
+                  '<b>Pivot:</b> "A lot of my clients felt the same way until they saw how this works as a savings vehicle, not just insurance."<br><br>' +
+                  '<b>Permission:</b> "Would you be open to a 2-minute explanation? If it\'s still not for you, I\'ll respect that 100%."'
+        },
+        'spouse': {
+            title: 'Objection: "I Need to Talk to My Spouse"',
+            body: '<b>Respect it:</b> "Absolutely — big decisions should be made together."<br><br>' +
+                  '<b>Include them:</b> "Is your spouse available now? I\'d love to walk through it with both of you — that way they get the full picture."<br><br>' +
+                  '<b>If not now:</b> "Let\'s schedule a quick 15-minute call with both of you. What evening works best this week?"<br><br>' +
+                  '<b>Arm them:</b> "In the meantime, the key points to share: it\'s tax-free growth, it\'s permanent, and the rate is locked in at today\'s age."'
+        }
+    };
+
+    // Script switching
+    var select = document.getElementById('tp-script-select');
+    if (select) {
+        select.addEventListener('change', function() {
+            document.querySelectorAll('.tp-script-content').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            var target = document.querySelector('.tp-script-content[data-idx="' + this.value + '"]');
+            if (target) target.classList.add('active');
+            scrollArea.scrollTop = 0;
+        });
+    }
+
+    // Objection buttons
+    document.querySelectorAll('.tp-objection-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var key = this.dataset.obj;
+            var data = rebuttals[key];
+            if (!data) return;
+
+            var section = scrollArea.querySelector('[data-objection="' + key + '"]');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                section.style.outline = '2px solid var(--warning)';
+                section.style.borderRadius = 'var(--radius-sm)';
+                setTimeout(function() { section.style.outline = 'none'; }, 2000);
+            } else {
+                document.getElementById('tp-overlay-title').textContent = data.title;
+                document.getElementById('tp-overlay-body').innerHTML = data.body;
+                document.getElementById('tp-overlay').classList.add('visible');
+            }
+        });
+    });
+
+    // Overlay close
+    document.getElementById('tp-overlay-close').addEventListener('click', function() {
+        document.getElementById('tp-overlay').classList.remove('visible');
+    });
+    document.getElementById('tp-overlay').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('visible');
+    });
+
+    // Auto-scroll
+    function getScrollSpeed() {
+        return parseFloat(speedSlider.value);
+    }
+
+    function startScroll() {
+        if (scrollTimer) return;
+        isScrolling = true;
+        toggleBtn.classList.add('active');
+        toggleLabel.textContent = 'Pause';
+        toggleBtn.querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        scrollTimer = setInterval(function() {
+            scrollArea.scrollTop += getScrollSpeed() * 0.8;
+        }, 30);
+    }
+
+    function stopScroll() {
+        isScrolling = false;
+        toggleBtn.classList.remove('active');
+        toggleLabel.textContent = 'Play';
+        toggleBtn.querySelector('svg').innerHTML = '<polygon points="5,3 19,12 5,21"/>';
+        clearInterval(scrollTimer);
+        scrollTimer = null;
+    }
+
+    toggleBtn.addEventListener('click', function() {
+        if (isScrolling) stopScroll();
+        else startScroll();
+    });
+
+    speedSlider.addEventListener('input', function() {
+        speedVal.textContent = this.value + 'x';
+    });
+
+    document.getElementById('tp-slower').addEventListener('click', function() {
+        var v = parseFloat(speedSlider.value) - 0.5;
+        if (v < 1) v = 1;
+        speedSlider.value = v;
+        speedVal.textContent = v + 'x';
+    });
+
+    document.getElementById('tp-faster').addEventListener('click', function() {
+        var v = parseFloat(speedSlider.value) + 0.5;
+        if (v > 5) v = 5;
+        speedSlider.value = v;
+        speedVal.textContent = v + 'x';
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

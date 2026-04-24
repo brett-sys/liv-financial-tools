@@ -141,21 +141,33 @@ def get_today_calls():
     return get_calls(limit=9999, date_from=today, date_to=today)
 
 
-def get_stats():
+def get_stats(agent_name=None):
     today = datetime.now().strftime("%Y-%m-%d")
     mon, fri = _week_bounds()
 
     with get_db() as conn:
-        today_count = conn.execute(
-            "SELECT COUNT(*) FROM calls WHERE call_datetime >= ? AND call_datetime <= ?",
-            (today, today + " 23:59:59"),
-        ).fetchone()[0]
+        if agent_name:
+            today_count = conn.execute(
+                "SELECT COUNT(*) FROM calls WHERE agent_name = ? AND call_datetime >= ? AND call_datetime <= ?",
+                (agent_name, today, today + " 23:59:59"),
+            ).fetchone()[0]
 
-        week_count = conn.execute(
-            "SELECT COUNT(*) FROM calls WHERE call_datetime >= ? AND call_datetime <= ?",
-            (mon, fri + " 23:59:59"),
-        ).fetchone()[0]
+            week_count = conn.execute(
+                "SELECT COUNT(*) FROM calls WHERE agent_name = ? AND call_datetime >= ? AND call_datetime <= ?",
+                (agent_name, mon, fri + " 23:59:59"),
+            ).fetchone()[0]
+        else:
+            today_count = conn.execute(
+                "SELECT COUNT(*) FROM calls WHERE call_datetime >= ? AND call_datetime <= ?",
+                (today, today + " 23:59:59"),
+            ).fetchone()[0]
 
+            week_count = conn.execute(
+                "SELECT COUNT(*) FROM calls WHERE call_datetime >= ? AND call_datetime <= ?",
+                (mon, fri + " 23:59:59"),
+            ).fetchone()[0]
+
+        # Team-wide outcome breakdown (no agent filter)
         outcomes = conn.execute(
             """SELECT outcome, COUNT(*) as cnt FROM calls
                WHERE call_datetime >= ? AND call_datetime <= ?
@@ -163,14 +175,22 @@ def get_stats():
             (mon, fri + " 23:59:59"),
         ).fetchall()
 
-        follow_ups = conn.execute(
-            """SELECT * FROM calls
-               WHERE follow_up_date IS NOT NULL AND follow_up_date >= ?
-               ORDER BY follow_up_date ASC LIMIT 10""",
-            (today,),
-        ).fetchall()
+        if agent_name:
+            follow_ups = conn.execute(
+                """SELECT * FROM calls
+                   WHERE agent_name = ? AND follow_up_date IS NOT NULL AND follow_up_date >= ?
+                   ORDER BY follow_up_date ASC LIMIT 10""",
+                (agent_name, today),
+            ).fetchall()
+        else:
+            follow_ups = conn.execute(
+                """SELECT * FROM calls
+                   WHERE follow_up_date IS NOT NULL AND follow_up_date >= ?
+                   ORDER BY follow_up_date ASC LIMIT 10""",
+                (today,),
+            ).fetchall()
 
-        # Per-agent stats for leaderboard
+        # Team-wide per-agent stats for leaderboard (no agent filter)
         agent_stats = conn.execute(
             """SELECT agent_name, COUNT(*) as cnt FROM calls
                WHERE call_datetime >= ? AND call_datetime <= ?
@@ -179,13 +199,20 @@ def get_stats():
             (mon, fri + " 23:59:59"),
         ).fetchall()
 
-        # Due today follow-ups
-        due_today = conn.execute(
-            """SELECT * FROM calls
-               WHERE follow_up_date = ?
-               ORDER BY contact_name ASC""",
-            (today,),
-        ).fetchall()
+        if agent_name:
+            due_today = conn.execute(
+                """SELECT * FROM calls
+                   WHERE agent_name = ? AND follow_up_date = ?
+                   ORDER BY contact_name ASC""",
+                (agent_name, today),
+            ).fetchall()
+        else:
+            due_today = conn.execute(
+                """SELECT * FROM calls
+                   WHERE follow_up_date = ?
+                   ORDER BY contact_name ASC""",
+                (today,),
+            ).fetchall()
 
     return {
         "today_count": today_count,
@@ -195,6 +222,61 @@ def get_stats():
         "agent_stats": [{"agent": r["agent_name"], "count": r["cnt"]} for r in agent_stats],
         "due_today": [dict(r) for r in due_today],
     }
+
+
+def get_follow_up_dates(agent_name=None):
+    """Return a dict mapping date strings to follow-up counts for the current month."""
+    now = datetime.now()
+    month_start = now.strftime("%Y-%m-01")
+    if now.month == 12:
+        month_end = f"{now.year + 1}-01-01"
+    else:
+        month_end = f"{now.year}-{now.month + 1:02d}-01"
+
+    with get_db() as conn:
+        if agent_name:
+            rows = conn.execute(
+                """SELECT follow_up_date, COUNT(*) as cnt FROM calls
+                   WHERE agent_name = ? AND follow_up_date IS NOT NULL
+                   AND follow_up_date >= ? AND follow_up_date < ?
+                   GROUP BY follow_up_date""",
+                (agent_name, month_start, month_end),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """SELECT follow_up_date, COUNT(*) as cnt FROM calls
+                   WHERE follow_up_date IS NOT NULL
+                   AND follow_up_date >= ? AND follow_up_date < ?
+                   GROUP BY follow_up_date""",
+                (month_start, month_end),
+            ).fetchall()
+
+    return {r["follow_up_date"]: r["cnt"] for r in rows}
+
+
+def get_pipeline_data():
+    """Return calls grouped by outcome for the Kanban board (max 50 per outcome)."""
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM calls ORDER BY call_datetime DESC"
+        ).fetchall()
+
+    pipeline = {}
+    for r in rows:
+        outcome = r["outcome"]
+        if outcome not in pipeline:
+            pipeline[outcome] = []
+        if len(pipeline[outcome]) < 50:
+            pipeline[outcome].append({
+                "id": r["id"],
+                "contact_name": r["contact_name"],
+                "phone_number": r["phone_number"],
+                "notes": r["notes"],
+                "call_datetime": r["call_datetime"],
+                "agent_name": r["agent_name"],
+            })
+
+    return pipeline
 
 
 def get_contact_suggestions(query, limit=8):

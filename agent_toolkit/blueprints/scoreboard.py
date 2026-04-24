@@ -78,6 +78,7 @@ def scoreboard():
         periods=PERIODS,
         metrics=METRICS,
         agents=config.AGENT_CHOICES,
+        commission_rate=config.COMMISSION_FIRST_YEAR_PCT,
     )
 
 
@@ -87,6 +88,7 @@ def log():
 
     if request.method == "POST":
         agent = request.form.get("agent_name", "").strip()
+        agent = request.cookies.get("agent_pref", agent) or agent
         activity_type = request.form.get("activity_type", "").strip()
         count = max(1, int(request.form.get("count", 1) or 1))
         notes = request.form.get("notes", "").strip()

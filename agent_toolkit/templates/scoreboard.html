@@ -43,6 +43,32 @@
     </div>
     {% endif %}
 
+    <!-- Estimated Earnings -->
+    {% if ranked and commission_rate is defined and commission_rate %}
+    <div class="earnings-section">
+        <div class="earnings-header">
+            <span class="earnings-title">💵 Estimated Earnings</span>
+            <span class="earnings-note">Based on {{ commission_rate }}% first-year commission</span>
+        </div>
+        <div class="earnings-list">
+            {% set top_ap = ranked|map(attribute='ap')|max %}
+            {% for agent in ranked if agent.ap %}
+            {% set commission = (agent.ap * commission_rate / 100) %}
+            <div class="earnings-row {% if agent.ap == top_ap %}earnings-top{% endif %}">
+                <div class="earnings-agent">
+                    {% if agent.ap == top_ap %}<span class="earnings-crown">👑</span>{% endif %}
+                    {{ agent.agent }}
+                </div>
+                <div class="earnings-figures">
+                    <span class="earnings-ap">${{ "{:,.0f}".format(agent.ap) }} AP</span>
+                    <span class="earnings-commission">${{ "{:,.0f}".format(commission) }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Leaderboard -->
     <div class="lb-list">
         {% set metric_label = metrics[metric][0] %}
@@ -196,6 +222,46 @@
 .feed-action { font-size: 0.82rem; color: var(--text-muted); margin-left: 0.25rem; }
 .feed-notes { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; font-style: italic; }
 .feed-time { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+
+/* Earnings */
+.earnings-section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; margin-bottom: 1rem;
+}
+.earnings-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border);
+}
+.earnings-title {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+}
+.earnings-note {
+    font-size: 0.65rem; color: var(--text-muted); font-style: italic;
+}
+.earnings-list { }
+.earnings-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+.earnings-row:last-child { border-bottom: none; }
+.earnings-top {
+    background: color-mix(in srgb, #ffd700 8%, var(--surface));
+    border-left: 3px solid #ffd700;
+}
+.earnings-agent {
+    font-size: 0.9rem; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 0.35rem;
+}
+.earnings-crown { font-size: 1rem; }
+.earnings-figures {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 1px;
+}
+.earnings-ap { font-size: 0.72rem; color: var(--text-muted); }
+.earnings-commission {
+    font-size: 1.1rem; font-weight: 800; color: var(--success);
+}
 
 .btn-ghost {
     background: transparent; color: var(--text-muted); border: 1px solid var(--border);

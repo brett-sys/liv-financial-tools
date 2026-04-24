@@ -1,6 +1,7 @@
 """LIFI Agent Toolkit – unified configuration."""
 
 import os
+import json
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -44,24 +45,28 @@ AGENTS = [
         "email": "brett@fflliv.com",
         "theme": "brett",
         "calendar": "google",
+        "calendar_id": "brett@fflliv.com",
     },
     {
         "name": "Kevin Nelson",
         "email": "kevinnelsonk2@outlook.com",
         "theme": "kevin",
         "calendar": "outlook",
+        "calendar_id": "",
     },
     {
         "name": "Easton",
         "email": "",
         "theme": "easton",
         "calendar": "google",
+        "calendar_id": "",
     },
     {
         "name": "Joe",
         "email": "",
         "theme": "joe",
         "calendar": "google",
+        "calendar_id": "",
     },
 ]
 
@@ -69,6 +74,7 @@ AGENT_CHOICES = [a["name"] for a in AGENTS]
 AGENT_EMAILS = {a["name"]: a["email"] for a in AGENTS}
 AGENT_THEMES = {a["name"]: a["theme"] for a in AGENTS}
 AGENT_CALENDAR_TYPES = {a["name"]: a["calendar"] for a in AGENTS}
+AGENT_CALENDAR_IDS = {a["name"]: a.get("calendar_id", "") for a in AGENTS}
 
 # ---------------------------------------------------------------------------
 # Call field options
@@ -87,6 +93,8 @@ GHL_WORKFLOW_ID = os.getenv("GHL_WORKFLOW_ID", "")
 GHL_FILE_CUSTOM_FIELD_ID = os.getenv("GHL_FILE_CUSTOM_FIELD_ID", "")
 GHL_ENABLED = os.getenv("GHL_ENABLED", "false").lower() in ("true", "1", "yes")
 GHL_BASE_URL = "https://services.leadconnectorhq.com"
+GHL_PIPELINE_ID = os.getenv("GHL_PIPELINE_ID", "")
+GHL_STAGE_MAP = json.loads(os.getenv("GHL_STAGE_MAP", "{}"))  # {"Sale": "stage_id", ...}
 
 # ---------------------------------------------------------------------------
 # SMTP (Gmail) – used to email illustration PDFs to clients
@@ -133,3 +141,33 @@ SCOREBOARD_DB_PATH = BASE_DIR / "scoreboard.db"
 VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "")
 VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "")
 VAPID_CLAIMS_EMAIL = os.getenv("VAPID_CLAIMS_EMAIL", "brett@fflliv.com")
+
+# ---------------------------------------------------------------------------
+# Commission Tracking
+# ---------------------------------------------------------------------------
+COMMISSION_FIRST_YEAR_PCT = float(os.getenv("COMMISSION_FIRST_YEAR_PCT", "100"))
+COMMISSION_RENEWAL_PCT = float(os.getenv("COMMISSION_RENEWAL_PCT", "5"))
+
+# ---------------------------------------------------------------------------
+# Daily Reminders
+# ---------------------------------------------------------------------------
+REMINDER_HOUR = int(os.getenv("REMINDER_HOUR", "8"))
+REMINDER_MINUTE = int(os.getenv("REMINDER_MINUTE", "0"))
+REMINDER_ENABLED = os.getenv("REMINDER_ENABLED", "true").lower() in ("true", "1", "yes")
+
+# ---------------------------------------------------------------------------
+# Social Links & App Store
+# ---------------------------------------------------------------------------
+SOCIAL_LINKS = {
+    "instagram": os.getenv("SOCIAL_INSTAGRAM", "https://instagram.com/livfinancialgroup"),
+    "facebook": os.getenv("SOCIAL_FACEBOOK", "https://facebook.com/livfinancialgroup"),
+    "youtube": os.getenv("SOCIAL_YOUTUBE", ""),
+    "tiktok": os.getenv("SOCIAL_TIKTOK", ""),
+}
+APP_STORE_URL = os.getenv("APP_STORE_URL", "")
+PLAY_STORE_URL = os.getenv("PLAY_STORE_URL", "")
+
+# ---------------------------------------------------------------------------
+# Call Scripts (Teleprompter)
+# ---------------------------------------------------------------------------
+SCRIPTS_DIR = BASE_DIR / "scripts"

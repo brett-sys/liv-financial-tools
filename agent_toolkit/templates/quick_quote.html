@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Quick Quote - LIFI{% endblock %}
+
+{% block content %}
+<style>
+    .qq-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.85rem;
+    }
+    .qq-header h1 { font-size: 1.3rem; }
+    .qq-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .qq-card h2 {
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        color: var(--text);
+    }
+    .qq-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .qq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .qq-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .qq-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+    .qq-group input[type="number"] {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        padding: 0.6rem 0.7rem;
+        font-size: 16px;
+        font-family: inherit;
+        -webkit-appearance: none;
+        width: 100%;
+    }
+    .qq-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+    .qq-toggle-group { display: flex; gap: 0.4rem; }
+    .qq-toggle {
+        flex: 1;
+        padding: 0.55rem 0.75rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .qq-toggle:hover { border-color: var(--primary); color: var(--text); }
+    .qq-toggle.active {
+        background: var(--primary-glow);
+        border-color: var(--primary);
+        color: var(--primary);
+        font-weight: 600;
+    }
+    .qq-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 0.25rem;
+    }
+    .qq-results {
+        display: none;
+    }
+    .qq-results.visible { display: block; }
+    .qq-result-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .qq-result-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: var(--bg);
+        border-radius: var(--radius-sm);
+    }
+    .qq-result-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .qq-result-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 0.1rem;
+    }
+    .qq-result-full {
+        grid-column: 1 / -1;
+    }
+    .qq-disclaimer {
+        background: rgba(255, 159, 10, 0.08);
+        border: 1px solid rgba(255, 159, 10, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 0.75rem;
+        font-size: 0.75rem;
+        color: var(--warning);
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+    }
+    .qq-illust-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    @media (max-width: 380px) {
+        .qq-row { grid-template-columns: 1fr; }
+        .qq-result-grid { grid-template-columns: 1fr; }
+        .qq-result-full { grid-column: 1; }
+    }
+</style>
+
+<div class="qq-header">
+    <h1>Quick Quote</h1>
+    <a href="{{ url_for('tools.tools_menu') }}" class="btn btn-ghost btn-sm">&larr; Tools</a>
+</div>
+
+<div class="qq-card">
+    <h2>IUL Estimate</h2>
+    <div class="qq-form">
+        <div class="qq-row">
+            <div class="qq-group">
+                <label for="qq-age">Age</label>
+                <input type="number" id="qq-age" min="18" max="75" value="35" inputmode="numeric">
+            </div>
+            <div class="qq-group">
+                <label for="qq-premium">Monthly Premium ($)</label>
+                <input type="number" id="qq-premium" min="50" step="25" value="500" inputmode="decimal">
+            </div>
+        </div>
+        <div class="qq-row">
+            <div class="qq-group">
+                <label>Gender</label>
+                <div class="qq-toggle-group">
+                    <button class="qq-toggle active" data-field="gender" data-value="male">Male</button>
+                    <button class="qq-toggle" data-field="gender" data-value="female">Female</button>
+                </div>
+            </div>
+            <div class="qq-group">
+                <label>Health Class</label>
+                <div class="qq-toggle-group">
+                    <button class="qq-toggle active" data-field="health" data-value="preferred">Preferred</button>
+                    <button class="qq-toggle" data-field="health" data-value="standard">Standard</button>
+                </div>
+            </div>
+        </div>
+        <div class="qq-group">
+            <label for="qq-db">Death Benefit Target ($) <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+            <input type="number" id="qq-db" min="0" step="10000" placeholder="e.g. 500000" inputmode="decimal">
+        </div>
+        <div class="qq-actions">
+            <button class="btn btn-primary btn-block btn-lg" id="qq-calc">Calculate</button>
+        </div>
+    </div>
+</div>
+
+<div class="qq-results" id="qq-results">
+    <div class="qq-card">
+        <h2>Estimated Values</h2>
+        <div class="qq-disclaimer">
+            This is a rough estimate only. Actual values depend on carrier, product, and underwriting. Contact your agent for a full illustration.
+        </div>
+        <div class="qq-result-grid">
+            <div class="qq-result-item">
+                <div class="qq-result-value" id="res-cv10">—</div>
+                <div class="qq-result-label">10-Year Cash Value</div>
+            </div>
+            <div class="qq-result-item">
+                <div class="qq-result-value" id="res-cv20">—</div>
+                <div class="qq-result-label">20-Year Cash Value</div>
+            </div>
+            <div class="qq-result-item">
+                <div class="qq-result-value" id="res-cv30">—</div>
+                <div class="qq-result-label">30-Year Cash Value</div>
+            </div>
+            <div class="qq-result-item">
+                <div class="qq-result-value" id="res-breakeven">—</div>
+                <div class="qq-result-label">Breakeven Year</div>
+            </div>
+            <div class="qq-result-item qq-result-full">
+                <div class="qq-result-value" id="res-coi">—</div>
+                <div class="qq-result-label">Est. Monthly COI</div>
+            </div>
+        </div>
+        <a href="{{ url_for('tools.illustration') }}" class="btn btn-primary btn-block btn-lg qq-illust-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Get Full Illustration
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var gender = 'male';
+    var health = 'preferred';
+
+    document.querySelectorAll('.qq-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var field = this.dataset.field;
+            var group = this.parentElement;
+            group.querySelectorAll('.qq-toggle').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            if (field === 'gender') gender = this.dataset.value;
+            if (field === 'health') health = this.dataset.value;
+        });
+    });
+
+    function fmt(n) {
+        if (n >= 1000000) return '$' + (n / 1000000).toFixed(2) + 'M';
+        if (n >= 1000) return '$' + (n / 1000).toFixed(1) + 'K';
+        return '$' + n.toFixed(0);
+    }
+
+    function calcCOI(age, isMale, isStandard) {
+        var base = 1.50 * Math.pow(1.08, age - 25);
+        if (isMale) base *= 1.20;
+        if (isStandard) base *= 1.30;
+        return base;
+    }
+
+    document.getElementById('qq-calc').addEventListener('click', function() {
+        var age = parseInt(document.getElementById('qq-age').value) || 35;
+        var premium = parseFloat(document.getElementById('qq-premium').value) || 500;
+        var isMale = gender === 'male';
+        var isStandard = health === 'standard';
+
+        var deathBenefitInput = document.getElementById('qq-db').value;
+        var deathBenefit = deathBenefitInput ? parseFloat(deathBenefitInput) : premium * 12 * 30;
+
+        var creditRate = 0.065;
+        var monthlyRate = creditRate / 12;
+        var expenseRate = 0.015 / 12;
+        var cashValue = 0;
+        var totalPaid = 0;
+        var breakeven = null;
+        var cv10 = 0, cv20 = 0, cv30 = 0;
+        var initialCOI = calcCOI(age, isMale, isStandard);
+
+        for (var month = 1; month <= 360; month++) {
+            var currentAge = age + (month / 12);
+            var coiPer1000 = calcCOI(currentAge, isMale, isStandard);
+            var monthlyCOI = (deathBenefit / 1000) * coiPer1000;
+
+            var netPremium = premium - monthlyCOI;
+            if (netPremium < 0) netPremium = 0;
+
+            cashValue += netPremium;
+            cashValue *= (1 + monthlyRate);
+            cashValue -= cashValue * expenseRate;
+
+            if (cashValue < 0) cashValue = 0;
+            totalPaid += premium;
+
+            if (breakeven === null && cashValue >= totalPaid && month > 12) {
+                breakeven = Math.ceil(month / 12);
+            }
+            if (month === 120) cv10 = cashValue;
+            if (month === 240) cv20 = cashValue;
+            if (month === 360) cv30 = cashValue;
+        }
+
+        document.getElementById('res-cv10').textContent = fmt(cv10);
+        document.getElementById('res-cv20').textContent = fmt(cv20);
+        document.getElementById('res-cv30').textContent = fmt(cv30);
+        document.getElementById('res-breakeven').textContent = breakeven ? 'Year ' + breakeven : 'N/A';
+
+        var displayCOI = (deathBenefit / 1000) * initialCOI;
+        document.getElementById('res-coi').textContent = '$' + displayCOI.toFixed(2) + '/mo';
+
+        document.getElementById('qq-results').classList.add('visible');
+        document.getElementById('qq-results').scrollIntoView({ behavior: 'smooth' });
+    });
+})();
+</script>
+{% endblock %}
