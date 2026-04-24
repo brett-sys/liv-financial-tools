@@ -656,6 +656,33 @@ textarea { resize: vertical; }
 .theme-joe .top-bar { border-bottom-color: #1a3d22; background: #081210; }
 .theme-joe .bottom-nav { border-top-color: #1a3d22; background: #081210; }
 
+/* ===== Cye Theme (Red) ===== */
+.theme-cye {
+    --bg: #0a0608;
+    --surface: #140c10;
+    --surface-hover: #1e1218;
+    --border: #2e1a24;
+    --text: #f0e4ea;
+    --text-muted: #b07a94;
+    --primary: #ff3b5c;
+    --primary-hover: #e63350;
+    --primary-glow: rgba(255, 59, 92, 0.15);
+    --success: #ff3b5c;
+    --danger: #ff453a;
+    --warning: #ff6b81;
+}
+.theme-cye .top-brand { color: #ff3b5c; }
+.theme-cye .flash-success { background: rgba(255, 59, 92, 0.15); color: #ff3b5c; }
+.theme-cye .outcome-sale { background: #ff3b5c; }
+.theme-cye .outcome-callback { background: #ff6b81; }
+.theme-cye .fu-date { background: #ff3b5c; }
+.theme-cye .badge-inbound { background: rgba(255, 59, 92, 0.15); color: #ff3b5c; }
+.theme-cye .badge-callback { color: #ff3b5c; }
+.theme-cye .call-agent { color: #ff3b5c; }
+.theme-cye .agent-bar-fill { background: #ff3b5c; }
+.theme-cye .top-bar { border-bottom-color: #2e1a24; background: #100810; }
+.theme-cye .bottom-nav { border-top-color: #2e1a24; background: #100810; }
+
 /* ===== Agent Locked Badge ===== */
 .agent-locked {
     display: inline-flex;

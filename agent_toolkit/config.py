@@ -68,6 +68,13 @@ AGENTS = [
         "calendar": "google",
         "calendar_id": "",
     },
+    {
+        "name": "Cye",
+        "email": "",
+        "theme": "cye",
+        "calendar": "google",
+        "calendar_id": "",
+    },
 ]
 
 AGENT_CHOICES = [a["name"] for a in AGENTS]
