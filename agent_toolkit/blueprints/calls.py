@@ -159,7 +159,7 @@ def delete_call_route(call_id):
 # ---------------------------------------------------------------------------
 @calls_bp.route("/history")
 def history():
-    agent_name = request.args.get("agent_name", "")
+    agent_pref = request.cookies.get("agent_pref", "Brett")
     direction = request.args.get("direction", "")
     outcome = request.args.get("outcome", "")
     search = request.args.get("search", "")
@@ -167,7 +167,7 @@ def history():
     date_to = request.args.get("date_to", "")
 
     calls = get_calls(
-        agent_name=agent_name or None,
+        agent_name=agent_pref,
         direction=direction or None,
         outcome=outcome or None,
         search=search or None,
@@ -180,7 +180,7 @@ def history():
         directions=config.DIRECTION_CHOICES,
         outcomes=config.OUTCOME_CHOICES,
         filters={
-            "agent_name": agent_name,
+            "agent_name": agent_pref,
             "direction": direction,
             "outcome": outcome,
             "search": search,
