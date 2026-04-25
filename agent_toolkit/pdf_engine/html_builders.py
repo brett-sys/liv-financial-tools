@@ -262,7 +262,7 @@ def generate_pdf_html(
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #e6f2f5;
+            background: #ffffff;
             color: #123047;
             line-height: 1.6;
         }}
@@ -275,7 +275,7 @@ def generate_pdf_html(
             overflow: hidden;
         }}
         .hero {{
-            background: #0e7fa6;
+            background: #123047;
             color: #ffffff;
             padding: 16px 36px 20px 36px;
         }}
@@ -284,6 +284,8 @@ def generate_pdf_html(
             justify-content: space-between;
             align-items: center;
             margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 14px;
         }}
         .hero-logo-left {{
             flex: 0 0 auto;
@@ -397,7 +399,7 @@ def generate_pdf_html(
             padding: 8px 6px;
             text-align: left;
             font-weight: 600;
-            border: 1px solid #d1e2ea;
+            border: 1px solid #dde9f0;
         }}
         table.data-table td {{
             padding: 6px 6px;
@@ -432,7 +434,7 @@ def generate_pdf_html(
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            border-bottom: 1px solid #d1e2ea;
+            border-bottom: 1px solid #dde9f0;
             padding-bottom: 4px;
         }}
         .info-item span {{
@@ -455,7 +457,7 @@ def generate_pdf_html(
         .page-graphs {{
             page-break-before: always;
             padding: 32px 40px 40px 40px;
-            background: #f5fafc;
+            background: #f4f9fc;
             color: #123047;
         }}
         .cv-header {{
@@ -488,7 +490,7 @@ def generate_pdf_html(
         .cv-body {{
             margin-top: 8px;
             border-radius: 10px;
-            border: 1px solid #d1e2ea;
+            border: 1px solid #dde9f0;
             padding: 18px 20px 22px 20px;
             background: #ffffff;
         }}
@@ -593,7 +595,7 @@ def generate_pdf_html(
         .page-living {{
             page-break-before: always;
             padding: 40px 46px 44px 46px;
-            background: #f5fafc;
+            background: #f4f9fc;
             color: #123047;
             font-size: 12px;
         }}
@@ -627,7 +629,7 @@ def generate_pdf_html(
         .lb-card {{
             background: #ffffff;
             border-radius: 8px;
-            border: 1px solid #d1e2ea;
+            border: 1px solid #dde9f0;
             padding: 14px 16px 16px 16px;
         }}
         .lb-card h3 {{
@@ -648,7 +650,7 @@ def generate_pdf_html(
         .lb-icon {{
             flex: 1;
             border-radius: 8px;
-            border: 1px solid #d1e2ea;
+            border: 1px solid #dde9f0;
             padding: 10px 8px;
             text-align: center;
             color: #0e7fa6;
@@ -691,10 +693,10 @@ def generate_pdf_html(
             margin-top: 16px;
         }}
         .nlg-section .nlg-col {{
-            background: #e8f4f8;
+            background: #f4f9fc;
             border-radius: 8px;
             padding: 14px 16px;
-            border: 1px solid #d1e2ea;
+            border: 1px solid #dde9f0;
         }}
         .nlg-section .nlg-col h3 {{
             font-size: 13px;
@@ -825,21 +827,20 @@ POLICY_SUBMITTED_HTML = """<!DOCTYPE html>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #e6f2f5;
+      background: #ffffff;
       color: #123047;
       line-height: 1.6;
     }
     .page {
       width: 100%;
-      max-width: 900px;
-      margin: 24px auto;
+      max-width: 100%;
+      margin: 0;
       background: #ffffff;
-      border-radius: 10px;
+      border-radius: 0;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
     .hero {
-      background: #0e7fa6;
+      background: #123047;
       color: #ffffff;
       padding: 18px 32px;
     }
@@ -879,10 +880,10 @@ POLICY_SUBMITTED_HTML = """<!DOCTYPE html>
       margin-bottom: 20px;
     }
     .card {
-      border: 1px solid #d1e2ea;
+      border: 1px solid #dde9f0;
       border-radius: 8px;
       padding: 12px 14px;
-      background: #f9fcfe;
+      background: #f4f9fc;
     }
     .card-label {
       font-size: 11px;
@@ -891,7 +892,7 @@ POLICY_SUBMITTED_HTML = """<!DOCTYPE html>
       color: #0e7fa6;
       font-weight: 600;
       margin-bottom: 4px;
-      border-bottom: 1px solid #d1e2ea;
+      border-bottom: 1px solid #dde9f0;
       padding-bottom: 4px;
     }
     .card-value {
