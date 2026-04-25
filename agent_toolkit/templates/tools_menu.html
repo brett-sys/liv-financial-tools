@@ -15,7 +15,7 @@
             <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
         <span class="tool-card-title">Illustration</span>
-        <span class="tool-card-desc">IUL PDF from paste</span>
+        <span class="tool-card-desc">Create client IUL PDF</span>
     </a>
 
     <a href="{{ url_for('tools.illustration_comparison') }}" class="tool-card">
@@ -24,10 +24,19 @@
             <line x1="6" y1="20" x2="6" y2="14"/>
         </svg>
         <span class="tool-card-title">Compare</span>
-        <span class="tool-card-desc">Side-by-side policies</span>
+        <span class="tool-card-desc">Compare multiple policies</span>
     </a>
 
     <a href="{{ url_for('tools.policy_submitted') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span class="tool-card-title">Policy Submitted</span>
+        <span class="tool-card-desc">Confirmation PDF</span>
+    </a>
+
+    <a href="{{ url_for('tools.quick_quote') }}" class="tool-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="4" y="2" width="16" height="20" rx="2"/>
             <line x1="8" y1="6" x2="16" y2="6"/>
@@ -37,7 +46,7 @@
             <path d="M17.5 19.5L20 22"/>
         </svg>
         <span class="tool-card-title">Quick Quote</span>
-        <span class="tool-card-desc">IUL estimate calculator</span>
+        <span class="tool-card-desc">Estimate IUL values fast</span>
     </a>
 
     <a href="{{ url_for('tools.teleprompter') }}" class="tool-card">
@@ -49,7 +58,7 @@
             <path d="M10 9l2 2 4-4"/>
         </svg>
         <span class="tool-card-title">Teleprompter</span>
-        <span class="tool-card-desc">Call scripts</span>
+        <span class="tool-card-desc">Guided call scripts</span>
     </a>
 
     <a href="{{ url_for('tools.underwriting') }}" class="tool-card">
@@ -59,7 +68,7 @@
             <path d="M12 8v0"/>
         </svg>
         <span class="tool-card-title">Underwriting</span>
-        <span class="tool-card-desc">Carrier risk check</span>
+        <span class="tool-card-desc">Check carrier eligibility</span>
     </a>
 
     <a href="{{ url_for('referrals.referrals_page') }}" class="tool-card">
