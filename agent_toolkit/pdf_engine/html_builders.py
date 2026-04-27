@@ -1065,10 +1065,9 @@ def build_quote_comparison_html(
     # ── Summary stat boxes ──────────────────────────────────────────────────
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
-        rec_outline = "border: 3px solid #4CAF50;" if i == recommended_idx else "border: 3px solid #0e7fa6;"
         rec_label = '<div class="stat-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
         stat_boxes_html += f"""
-        <div class="stat-box" style="{rec_outline}">
+        <div class="stat-box">
             {rec_label}
             <div class="stat-carrier">{c.get('carrier', '—')}</div>
             <div class="stat-product">{c.get('product', '—')}</div>
@@ -1103,7 +1102,7 @@ def build_quote_comparison_html(
             <td class="carrier-name">{c.get('carrier', '—')}{rec_badge}</td>
             <td>{c.get('product', '—')}</td>
             <td class="num">{c.get('death_benefit', '—')}</td>
-            <td class="num highlight">{c.get('monthly_premium', '—')}</td>
+            <td class="num">{c.get('monthly_premium', '—')}</td>
             <td class="num">{c.get('cash_value_10yr', '—')}</td>
             <td class="num">{c.get('cash_value_20yr', '—')}</td>
             <td class="center">{am}</td>
@@ -1274,6 +1273,7 @@ def build_quote_comparison_html(
         margin-bottom: 24px;
     }}
     .stat-box {{
+        border: 1px solid #dde9f0;
         border-radius: 8px;
         padding: 14px 16px;
         background: #f4f9fc;
@@ -1281,7 +1281,7 @@ def build_quote_comparison_html(
     }}
     .stat-rec-tag {{
         position: absolute; top: -1px; right: 10px;
-        background: #4CAF50; color: #fff;
+        background: #0e7fa6; color: #fff;
         font-size: 7.5px; font-weight: 700;
         padding: 2px 8px; border-radius: 0 0 4px 4px;
         letter-spacing: 0.05em; text-transform: uppercase;
@@ -1295,26 +1295,25 @@ def build_quote_comparison_html(
         font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em;
         color: #0e7fa6; font-weight: 700; margin-bottom: 2px;
     }}
-    .stat-value {{ font-size: 15px; font-weight: 700; color: #123047; }}
+    .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; }}
     /* ── Comparison table ── */
     table.compare {{
         width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
     }}
     table.compare thead {{ background: #123047; color: #fff; }}
     table.compare th {{
-        padding: 9px 8px; text-align: left;
+        padding: 9px 8px; text-align: center;
         font-weight: 600; font-size: 10px;
         text-transform: uppercase; letter-spacing: 0.04em;
     }}
-    table.compare td {{ padding: 9px 8px; border-bottom: 1px solid #dde9f0; }}
-    table.compare tbody tr:last-child td {{ border-bottom: none; }}
-    table.compare td.num {{ text-align: right; font-weight: 600; }}
+    table.compare td {{ padding: 9px 8px; text-align: center; border-bottom: 1px solid #dde9f0; }}
+    table.compare tbody tr:nth-child(even) {{ background: #f4f9fc; }}
+    table.compare td.num {{ font-weight: 600; }}
     table.compare td.center {{ text-align: center; }}
-    table.compare td.highlight {{ color: #0e7fa6; font-size: 13px; font-weight: 700; }}
     table.compare td.carrier-name {{ font-weight: 700; color: #123047; }}
-    table.compare tr.recommended {{ background: #eef9ee; }}
+    table.compare tr.recommended {{ background: #eef6fb; }}
     .rec-badge {{
-        display: inline-block; background: #4CAF50; color: #fff;
+        display: inline-block; background: #0e7fa6; color: #fff;
         font-size: 7.5px; font-weight: 700; padding: 2px 6px;
         border-radius: 3px; margin-left: 6px; vertical-align: middle;
         letter-spacing: 0.05em;
@@ -1490,8 +1489,6 @@ def build_business_card_html(card_data_uri: str) -> str:
 </html>"""
 
 
-COLORS = ["#0e7fa6", "#e88c0a", "#34a853", "#7b61ff"]
-COLORS_LIGHT = ["#e3f2f8", "#fff3e0", "#e6f5ea", "#ede7ff"]
 
 
 def build_term_comparison_html(
@@ -1526,10 +1523,9 @@ def build_term_comparison_html(
 
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
-        color = COLORS[i % len(COLORS)]
         stat_boxes_html += f"""
-        <div class="stat-box" style="border-color: {color};">
-            <div class="stat-label-title" style="color: {color};">{c.get('carrier', '—')}</div>
+        <div class="stat-box">
+            <div class="stat-label-title">{c.get('carrier', '—')}</div>
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-label">TERM LENGTH</div>
@@ -1541,7 +1537,7 @@ def build_term_comparison_html(
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">MONTHLY PREMIUM</div>
-                    <div class="stat-value" style="color: #34a853;">{c.get('monthly_premium', '—')}</div>
+                    <div class="stat-value">{c.get('monthly_premium', '—')}</div>
                 </div>
             </div>
         </div>"""
@@ -1549,12 +1545,11 @@ def build_term_comparison_html(
     header_cells = "<th>Carrier</th><th>Term</th><th>Death Benefit</th><th>Monthly Premium</th>"
     rows = ""
     for i, c in enumerate(carriers):
-        color = COLORS[i % len(COLORS)]
         rows += f"""<tr>
-            <td class="year" style="color: {color};">{c.get('carrier', '—')}</td>
+            <td class="carrier">{c.get('carrier', '—')}</td>
             <td class="num">{c.get('term', '—')} Yr</td>
             <td class="num">{c.get('death_benefit', '—')}</td>
-            <td class="num" style="font-weight:700;">{c.get('monthly_premium', '—')}</td>
+            <td class="num">{c.get('monthly_premium', '—')}</td>
         </tr>"""
     table_html = f'<table class="compare"><thead><tr>{header_cells}</tr></thead><tbody>{rows}</tbody></table>'
 
@@ -1626,7 +1621,7 @@ def build_term_comparison_html(
         margin-bottom: 24px;
     }}
     .stat-box {{
-        border: 3px solid #0e7fa6;
+        border: 1px solid #dde9f0;
         border-radius: 8px;
         padding: 14px 16px;
         background: #f4f9fc;
@@ -1634,6 +1629,7 @@ def build_term_comparison_html(
     .stat-label-title {{
         font-size: 14px;
         font-weight: 700;
+        color: #123047;
         margin-bottom: 10px;
     }}
     .stat-grid {{
@@ -1645,20 +1641,20 @@ def build_term_comparison_html(
     }}
     .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; }}
     table.compare {{
-        width: 100%; border-collapse: collapse; font-size: 10px; margin: 0 0 22px 0;
+        width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
     }}
     table.compare thead {{ background: #123047; color: #fff; }}
     table.compare th {{
-        padding: 8px 6px; text-align: center;
-        font-weight: 600; font-size: 9px;
+        padding: 9px 8px; text-align: center;
+        font-weight: 600; font-size: 10px;
         text-transform: uppercase; letter-spacing: 0.04em;
     }}
     table.compare td {{
-        padding: 7px 6px; text-align: center; border-bottom: 1px solid #dde9f0;
+        padding: 9px 8px; text-align: center; border-bottom: 1px solid #dde9f0;
     }}
     table.compare tbody tr:nth-child(even) {{ background: #f4f9fc; }}
     table.compare td.num {{ font-weight: 600; }}
-    table.compare td.year {{ font-weight: 700; color: #123047; }}
+    table.compare td.carrier {{ font-weight: 700; color: #123047; }}
     .disclaimer {{
         margin-top: 20px; font-size: 9.5px; color: #6b7f8f; line-height: 1.55;
         border-top: 1px solid #dde9f0; padding-top: 10px;
@@ -1742,10 +1738,9 @@ def build_final_expense_comparison_html(
 
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
-        color = COLORS[i % len(COLORS)]
         stat_boxes_html += f"""
-        <div class="stat-box" style="border-color: {color};">
-            <div class="stat-label-title" style="color: {color};">{c.get('carrier', '—')}</div>
+        <div class="stat-box">
+            <div class="stat-label-title">{c.get('carrier', '—')}</div>
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-label">DEATH BENEFIT</div>
@@ -1753,7 +1748,7 @@ def build_final_expense_comparison_html(
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">MONTHLY PREMIUM</div>
-                    <div class="stat-value" style="color: #34a853;">{c.get('monthly_premium', '—')}</div>
+                    <div class="stat-value">{c.get('monthly_premium', '—')}</div>
                 </div>
             </div>
         </div>"""
@@ -1761,11 +1756,10 @@ def build_final_expense_comparison_html(
     header_cells = "<th>Carrier</th><th>Death Benefit</th><th>Monthly Premium</th>"
     rows = ""
     for i, c in enumerate(carriers):
-        color = COLORS[i % len(COLORS)]
         rows += f"""<tr>
-            <td class="year" style="color: {color};">{c.get('carrier', '—')}</td>
+            <td class="carrier">{c.get('carrier', '—')}</td>
             <td class="num">{c.get('death_benefit', '—')}</td>
-            <td class="num" style="font-weight:700;">{c.get('monthly_premium', '—')}</td>
+            <td class="num">{c.get('monthly_premium', '—')}</td>
         </tr>"""
     table_html = f'<table class="compare"><thead><tr>{header_cells}</tr></thead><tbody>{rows}</tbody></table>'
 
@@ -1837,7 +1831,7 @@ def build_final_expense_comparison_html(
         margin-bottom: 24px;
     }}
     .stat-box {{
-        border: 3px solid #0e7fa6;
+        border: 1px solid #dde9f0;
         border-radius: 8px;
         padding: 14px 16px;
         background: #f4f9fc;
@@ -1845,6 +1839,7 @@ def build_final_expense_comparison_html(
     .stat-label-title {{
         font-size: 14px;
         font-weight: 700;
+        color: #123047;
         margin-bottom: 10px;
     }}
     .stat-grid {{
@@ -1856,20 +1851,20 @@ def build_final_expense_comparison_html(
     }}
     .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; }}
     table.compare {{
-        width: 100%; border-collapse: collapse; font-size: 10px; margin: 0 0 22px 0;
+        width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
     }}
     table.compare thead {{ background: #123047; color: #fff; }}
     table.compare th {{
-        padding: 8px 6px; text-align: center;
-        font-weight: 600; font-size: 9px;
+        padding: 9px 8px; text-align: center;
+        font-weight: 600; font-size: 10px;
         text-transform: uppercase; letter-spacing: 0.04em;
     }}
     table.compare td {{
-        padding: 7px 6px; text-align: center; border-bottom: 1px solid #dde9f0;
+        padding: 9px 8px; text-align: center; border-bottom: 1px solid #dde9f0;
     }}
     table.compare tbody tr:nth-child(even) {{ background: #f4f9fc; }}
     table.compare td.num {{ font-weight: 600; }}
-    table.compare td.year {{ font-weight: 700; color: #123047; }}
+    table.compare td.carrier {{ font-weight: 700; color: #123047; }}
     .disclaimer {{
         margin-top: 20px; font-size: 9.5px; color: #6b7f8f; line-height: 1.55;
         border-top: 1px solid #dde9f0; padding-top: 10px;

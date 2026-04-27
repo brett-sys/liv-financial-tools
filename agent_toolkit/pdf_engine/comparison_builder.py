@@ -14,8 +14,7 @@ AGENT_EMAIL = _cfg.AGENT_EMAIL_DISPLAY
 AGENT_LICENSE = _cfg.AGENT_LICENSE
 AGENT_WEBSITE = _cfg.AGENT_WEBSITE
 
-COLORS = ["#0e7fa6", "#e88c0a", "#34a853", "#7b61ff"]
-COLORS_LIGHT = ["#e3f2f8", "#fff3e0", "#e6f5ea", "#ede7ff"]
+BAR_SHADES = ["#0e7fa6", "#1a9fc4", "#74c0d8", "#b3dbe8"]
 
 
 _DEFAULT_AGENT_INFO = {
@@ -66,8 +65,6 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     stat_boxes_html = ""
     for i, p in enumerate(policies):
         s = p["summary"] or {}
-        color = COLORS[i % len(COLORS)]
-        bg = COLORS_LIGHT[i % len(COLORS_LIGHT)]
 
         death_benefit = s.get("death_benefit", "—")
         annual_prem = f"${s['annual_premium']:,.0f}" if s.get("annual_premium") else "—"
@@ -77,8 +74,8 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         last_cash = f"${s['last_cash']:,.0f}" if s.get("last_cash") else "—"
 
         stat_boxes_html += f"""
-        <div class="stat-box" style="border-color: {color};">
-            <div class="stat-label-title" style="color: {color};">{p['label']}</div>
+        <div class="stat-box">
+            <div class="stat-label-title">{p['label']}</div>
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-label">DEATH BENEFIT</div>
@@ -94,7 +91,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">CASH VALUE (YR {last_year})</div>
-                    <div class="stat-value" style="color: #34a853;">{last_cash}</div>
+                    <div class="stat-value">{last_cash}</div>
                 </div>
             </div>
         </div>"""
@@ -173,7 +170,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         margin-bottom: 24px;
     }}
     .stat-box {{
-        border: 3px solid #0e7fa6;
+        border: 1px solid #dde9f0;
         border-radius: 8px;
         padding: 14px 16px;
         background: #f4f9fc;
@@ -181,6 +178,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     .stat-label-title {{
         font-size: 14px;
         font-weight: 700;
+        color: #123047;
         margin-bottom: 10px;
     }}
     .stat-grid {{
@@ -316,8 +314,8 @@ def _build_comparison_chart(policies):
             bar_h = (val / max_val) * usable_h if max_val else 0
             bx = group_x + 4 + pi * bar_w
             by = chart_h - padding_b - bar_h
-            color = COLORS[pi % len(COLORS)]
-            bars += f'<rect x="{bx}" y="{by}" width="{bar_w - 2}" height="{bar_h}" fill="{color}" rx="3"/>'
+            shade = BAR_SHADES[pi % len(BAR_SHADES)]
+            bars += f'<rect x="{bx}" y="{by}" width="{bar_w - 2}" height="{bar_h}" fill="{shade}" rx="3"/>'
 
     y_labels = ""
     for i in range(5):
@@ -336,8 +334,8 @@ def _build_comparison_chart(policies):
     legend = ""
     for i, p in enumerate(policies):
         lx = padding_l + i * 160
-        color = COLORS[i % len(COLORS)]
-        legend += f'<rect x="{lx}" y="0" width="12" height="12" fill="{color}" rx="3"/>'
+        shade = BAR_SHADES[i % len(BAR_SHADES)]
+        legend += f'<rect x="{lx}" y="0" width="12" height="12" fill="{shade}" rx="3"/>'
         legend += (
             f'<text x="{lx + 16}" y="10" fill="#123047" font-size="11" '
             f'font-weight="600" font-family="-apple-system, BlinkMacSystemFont, sans-serif">'
@@ -370,21 +368,19 @@ def _build_comparison_table(policies):
 
     header_cells = "<th>Year</th>"
     for i, p in enumerate(policies):
-        color = COLORS[i % len(COLORS)]
         header_cells += f'<th>{p["label"]}<br/>Premiums Paid</th>'
-        header_cells += f'<th style="border-left: 2px solid {color};">{p["label"]}<br/>Cash Value</th>'
+        header_cells += f'<th>{p["label"]}<br/>Cash Value</th>'
 
     rows = ""
     for yr in years:
         cells = f'<td class="year">{yr}</td>'
         for i, pd in enumerate(policy_data):
-            color = COLORS[i % len(COLORS)]
             pt = pd.get(yr)
             if pt:
                 cells += f'<td class="num">${pt["premium_paid"]:,.0f}</td>'
-                cells += f'<td class="num" style="border-left: 2px solid {color}; font-weight:700;">${pt["cash_value"]:,.0f}</td>'
+                cells += f'<td class="num" style="font-weight:700;">${pt["cash_value"]:,.0f}</td>'
             else:
-                cells += f'<td>—</td><td style="border-left: 2px solid {color};">—</td>'
+                cells += '<td>—</td><td>—</td>'
         rows += f"<tr>{cells}</tr>"
 
     return f'<table class="compare"><thead><tr>{header_cells}</tr></thead><tbody>{rows}</tbody></table>'
