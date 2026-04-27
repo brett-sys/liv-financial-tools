@@ -137,6 +137,13 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         border-bottom: 1px solid rgba(255,255,255,0.2);
         padding-bottom: 14px;
     }}
+    .hero-logo-wrap {{
+        display: inline-block;
+        background: #f0f2f5;
+        padding: 8px 14px;
+        border-radius: 6px;
+        line-height: 0;
+    }}
     .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
@@ -221,7 +228,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
 <body>
     <header class="hero">
         <div class="hero-top">
-            <span>{logo_html}</span>
+            <span class="hero-logo-wrap">{logo_html}</span>
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">

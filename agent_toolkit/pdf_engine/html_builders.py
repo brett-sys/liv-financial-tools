@@ -311,6 +311,11 @@ def generate_pdf_html(
         }}
         .hero-logo-left {{
             flex: 0 0 auto;
+            display: inline-block;
+            background: #f0f2f5;
+            padding: 8px 14px;
+            border-radius: 6px;
+            line-height: 0;
         }}
         .logo {{
             height: 50px;
@@ -1231,6 +1236,13 @@ def build_quote_comparison_html(
         border-bottom: 1px solid rgba(255,255,255,0.2);
         padding-bottom: 14px;
     }}
+    .hero-logo-wrap {{
+        display: inline-block;
+        background: #f0f2f5;
+        padding: 8px 14px;
+        border-radius: 6px;
+        line-height: 0;
+    }}
     .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
@@ -1388,7 +1400,7 @@ def build_quote_comparison_html(
 <body>
     <header class="hero">
         <div class="hero-top">
-            <span>{logo_html}</span>
+            <span class="hero-logo-wrap">{logo_html}</span>
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
@@ -1590,6 +1602,13 @@ def build_term_comparison_html(
         border-bottom: 1px solid rgba(255,255,255,0.2);
         padding-bottom: 14px;
     }}
+    .hero-logo-wrap {{
+        display: inline-block;
+        background: #f0f2f5;
+        padding: 8px 14px;
+        border-radius: 6px;
+        line-height: 0;
+    }}
     .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
@@ -1666,7 +1685,7 @@ def build_term_comparison_html(
 <body>
     <header class="hero">
         <div class="hero-top">
-            <span>{logo_html}</span>
+            <span class="hero-logo-wrap">{logo_html}</span>
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
@@ -1800,6 +1819,13 @@ def build_final_expense_comparison_html(
         border-bottom: 1px solid rgba(255,255,255,0.2);
         padding-bottom: 14px;
     }}
+    .hero-logo-wrap {{
+        display: inline-block;
+        background: #f0f2f5;
+        padding: 8px 14px;
+        border-radius: 6px;
+        line-height: 0;
+    }}
     .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
@@ -1876,7 +1902,7 @@ def build_final_expense_comparison_html(
 <body>
     <header class="hero">
         <div class="hero-top">
-            <span>{logo_html}</span>
+            <span class="hero-logo-wrap">{logo_html}</span>
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
