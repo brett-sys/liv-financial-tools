@@ -1466,6 +1466,337 @@ def build_business_card_html(card_data_uri: str) -> str:
 </html>"""
 
 
+def _comparison_shell(title, subtitle, client_name, client_age, carriers,
+                      recommended_idx, logo_data_uri, agent_photo_data_uri,
+                      stat_boxes_html, table_html):
+    """Shared PDF shell for Term and Final Expense comparison PDFs."""
+    today_str = date.today().strftime("%B %d, %Y")
+    logo_html = (
+        f'<img class="logo" src="{logo_data_uri}" alt="LIV Financial Logo" />'
+        if logo_data_uri else ""
+    )
+    agent_photo_html = (
+        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        if agent_photo_data_uri else ""
+    )
+    prepared_for_html = ""
+    if client_name.strip():
+        age_part = f", Age {client_age}" if client_age.strip() else ""
+        prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}{age_part}</strong></div>'
+
+    n = len(carriers)
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+    @page {{
+        margin: 0.6in 0.5in 0.7in 0.5in;
+        @bottom-center {{
+            content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 8px;
+            color: #6b7f8f;
+        }}
+    }}
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #ffffff;
+        color: #123047;
+        line-height: 1.6;
+        font-size: 12px;
+    }}
+    .hero {{
+        background: #123047;
+        color: #ffffff;
+        padding: 18px 36px 22px 36px;
+    }}
+    .hero-top {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding-bottom: 14px;
+    }}
+    .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
+    .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
+    .agent-photo {{
+        width: 72px; height: 72px; border-radius: 6px;
+        border: 2px solid rgba(255,255,255,0.6);
+        object-fit: cover; object-position: top center; flex-shrink: 0;
+    }}
+    .agent-details {{ line-height: 1.35; }}
+    .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
+    .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
+    .hero-bottom {{ display: flex; justify-content: space-between; align-items: flex-end; }}
+    .hero-title {{ font-size: 24px; font-weight: 400; letter-spacing: -0.01em; color: #fff; margin-bottom: 4px; }}
+    .hero-subtitle {{ font-size: 13px; color: rgba(255,255,255,0.8); }}
+    .prepared-for {{ font-size: 13px; color: rgba(255,255,255,0.95); margin-top: 6px; }}
+    .prepared-for strong {{ font-weight: 700; }}
+    .date-stamp {{ font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px; }}
+    .content {{ padding: 22px 36px 30px 36px; }}
+    h2.section-title {{
+        font-size: 16px;
+        color: #123047;
+        border-bottom: 2px solid #0e7fa6;
+        padding-bottom: 5px;
+        margin: 22px 0 14px 0;
+        font-weight: 600;
+    }}
+    h2.section-title:first-child {{ margin-top: 0; }}
+    .stat-boxes {{
+        display: grid;
+        grid-template-columns: repeat({min(n, 4)}, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }}
+    .stat-box {{
+        border-radius: 8px;
+        padding: 14px 16px;
+        background: #f4f9fc;
+        position: relative;
+    }}
+    .stat-rec-tag {{
+        position: absolute; top: -1px; right: 10px;
+        background: #4CAF50; color: #fff;
+        font-size: 7.5px; font-weight: 700;
+        padding: 2px 8px; border-radius: 0 0 4px 4px;
+        letter-spacing: 0.05em; text-transform: uppercase;
+    }}
+    .stat-carrier {{ font-size: 14px; font-weight: 700; color: #123047; margin-bottom: 1px; }}
+    .stat-product {{ font-size: 10px; color: #476072; margin-bottom: 10px; }}
+    .stat-grid {{
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }}
+    .stat-label {{
+        font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: #0e7fa6; font-weight: 700; margin-bottom: 2px;
+    }}
+    .stat-value {{ font-size: 15px; font-weight: 700; color: #123047; }}
+    table.compare {{
+        width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
+    }}
+    table.compare thead {{ background: #123047; color: #fff; }}
+    table.compare th {{
+        padding: 9px 8px; text-align: left;
+        font-weight: 600; font-size: 10px;
+        text-transform: uppercase; letter-spacing: 0.04em;
+    }}
+    table.compare td {{ padding: 9px 8px; border-bottom: 1px solid #dde9f0; }}
+    table.compare tbody tr:last-child td {{ border-bottom: none; }}
+    table.compare td.num {{ text-align: right; font-weight: 600; }}
+    table.compare td.highlight {{ color: #0e7fa6; font-size: 13px; font-weight: 700; }}
+    table.compare td.carrier-name {{ font-weight: 700; color: #123047; }}
+    table.compare tr.recommended {{ background: #eef9ee; }}
+    .rec-badge {{
+        display: inline-block; background: #4CAF50; color: #fff;
+        font-size: 7.5px; font-weight: 700; padding: 2px 6px;
+        border-radius: 3px; margin-left: 6px; vertical-align: middle;
+        letter-spacing: 0.05em;
+    }}
+    .next-steps {{
+        background: #eef6fb; border-radius: 8px;
+        padding: 14px 18px; border: 1px solid #c8dfe9; margin-top: 20px;
+    }}
+    .next-steps h3 {{ font-size: 13px; font-weight: 600; color: #0e7fa6; margin-bottom: 8px; }}
+    .next-steps p {{ font-size: 11px; color: #2c4a63; margin: 3px 0; }}
+    .disclaimer {{
+        margin-top: 20px; font-size: 9.5px; color: #6b7f8f; line-height: 1.55;
+        border-top: 1px solid #dde9f0; padding-top: 10px;
+    }}
+</style>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-top">
+            <span>{logo_html}</span>
+            <div class="agent-info">
+                {agent_photo_html}
+                <div class="agent-details">
+                    <div class="agent-name">{AGENT_NAME}</div>
+                    <div class="agent-detail">{AGENT_TITLE}</div>
+                    <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
+                    <div class="agent-detail">{AGENT_LICENSE}</div>
+                    <div class="agent-detail">{AGENT_WEBSITE}</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bottom">
+            <div>
+                <div class="hero-title">{title}</div>
+                <div class="hero-subtitle">{subtitle}</div>
+                {prepared_for_html}
+                <div class="date-stamp">{today_str}</div>
+            </div>
+        </div>
+    </header>
+    <div class="content">
+        <h2 class="section-title">Quote Summary</h2>
+        <div class="stat-boxes">
+            {stat_boxes_html}
+        </div>
+
+        <h2 class="section-title">Side-by-Side Comparison</h2>
+        {table_html}
+
+        <div class="next-steps">
+            <h3>Next Steps</h3>
+            <p>1. Review the options above and consider which best fits your goals and budget.</p>
+            <p>2. Ask me any questions about the differences between carriers or products.</p>
+            <p>3. Once you decide, I will submit the application and guide you through every step.</p>
+            <p>Contact me anytime: <strong>{AGENT_PHONE}</strong> or <strong>{AGENT_EMAIL}</strong></p>
+        </div>
+
+        <div class="disclaimer">
+            This quote comparison is for illustration purposes only and is not an offer or contract.
+            Premiums shown are estimates based on the information provided and may change based on underwriting.
+            Please review each carrier&rsquo;s full illustration for guaranteed values and complete policy details.
+        </div>
+    </div>
+</body>
+</html>"""
+
+
+def build_term_comparison_html(
+    client_name: str,
+    client_age: str,
+    carriers: list[dict],
+    recommended_idx: int | None = None,
+    logo_data_uri: str | None = None,
+    agent_photo_data_uri: str | None = None,
+) -> str:
+    """Build a Term Life comparison PDF.
+
+    Each carrier dict: carrier, term, death_benefit, monthly_premium.
+    """
+    stat_boxes_html = ""
+    for i, c in enumerate(carriers):
+        rec_outline = "border: 3px solid #4CAF50;" if i == recommended_idx else "border: 3px solid #0e7fa6;"
+        rec_label = '<div class="stat-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
+        stat_boxes_html += f"""
+        <div class="stat-box" style="{rec_outline}">
+            {rec_label}
+            <div class="stat-carrier">{c.get('carrier', '—')}</div>
+            <div class="stat-product">Term Life</div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">TERM LENGTH</div>
+                    <div class="stat-value">{c.get('term', '—')} Years</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">DEATH BENEFIT</div>
+                    <div class="stat-value">{c.get('death_benefit', '—')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">MONTHLY PREMIUM</div>
+                    <div class="stat-value highlight" style="color:#0e7fa6;">{c.get('monthly_premium', '—')}</div>
+                </div>
+            </div>
+        </div>"""
+
+    rows_html = ""
+    for i, c in enumerate(carriers):
+        rec_class = ' class="recommended"' if i == recommended_idx else ""
+        rec_badge = ' <span class="rec-badge">RECOMMENDED</span>' if i == recommended_idx else ""
+        rows_html += f"""
+        <tr{rec_class}>
+            <td class="carrier-name">{c.get('carrier', '—')}{rec_badge}</td>
+            <td class="num">{c.get('term', '—')} Yr</td>
+            <td class="num">{c.get('death_benefit', '—')}</td>
+            <td class="num highlight">{c.get('monthly_premium', '—')}</td>
+        </tr>"""
+
+    table_html = f"""
+    <table class="compare">
+        <thead>
+            <tr><th>Carrier</th><th>Term</th><th>Death Benefit</th><th>Monthly Premium</th></tr>
+        </thead>
+        <tbody>{rows_html}</tbody>
+    </table>"""
+
+    return _comparison_shell(
+        title="Term Life Comparison",
+        subtitle="Side-by-side term life quotes",
+        client_name=client_name,
+        client_age=client_age,
+        carriers=carriers,
+        recommended_idx=recommended_idx,
+        logo_data_uri=logo_data_uri,
+        agent_photo_data_uri=agent_photo_data_uri,
+        stat_boxes_html=stat_boxes_html,
+        table_html=table_html,
+    )
+
+
+def build_final_expense_comparison_html(
+    client_name: str,
+    client_age: str,
+    carriers: list[dict],
+    recommended_idx: int | None = None,
+    logo_data_uri: str | None = None,
+    agent_photo_data_uri: str | None = None,
+) -> str:
+    """Build a Final Expense (Whole Life) comparison PDF.
+
+    Each carrier dict: carrier, death_benefit, monthly_premium.
+    """
+    stat_boxes_html = ""
+    for i, c in enumerate(carriers):
+        rec_outline = "border: 3px solid #4CAF50;" if i == recommended_idx else "border: 3px solid #0e7fa6;"
+        rec_label = '<div class="stat-rec-tag">RECOMMENDED</div>' if i == recommended_idx else ""
+        stat_boxes_html += f"""
+        <div class="stat-box" style="{rec_outline}">
+            {rec_label}
+            <div class="stat-carrier">{c.get('carrier', '—')}</div>
+            <div class="stat-product">Whole Life / Final Expense</div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">DEATH BENEFIT</div>
+                    <div class="stat-value">{c.get('death_benefit', '—')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">MONTHLY PREMIUM</div>
+                    <div class="stat-value highlight" style="color:#0e7fa6;">{c.get('monthly_premium', '—')}</div>
+                </div>
+            </div>
+        </div>"""
+
+    rows_html = ""
+    for i, c in enumerate(carriers):
+        rec_class = ' class="recommended"' if i == recommended_idx else ""
+        rec_badge = ' <span class="rec-badge">RECOMMENDED</span>' if i == recommended_idx else ""
+        rows_html += f"""
+        <tr{rec_class}>
+            <td class="carrier-name">{c.get('carrier', '—')}{rec_badge}</td>
+            <td class="num">{c.get('death_benefit', '—')}</td>
+            <td class="num highlight">{c.get('monthly_premium', '—')}</td>
+        </tr>"""
+
+    table_html = f"""
+    <table class="compare">
+        <thead>
+            <tr><th>Carrier</th><th>Death Benefit</th><th>Monthly Premium</th></tr>
+        </thead>
+        <tbody>{rows_html}</tbody>
+    </table>"""
+
+    return _comparison_shell(
+        title="Final Expense Comparison",
+        subtitle="Side-by-side whole life quotes",
+        client_name=client_name,
+        client_age=client_age,
+        carriers=carriers,
+        recommended_idx=recommended_idx,
+        logo_data_uri=logo_data_uri,
+        agent_photo_data_uri=agent_photo_data_uri,
+        stat_boxes_html=stat_boxes_html,
+        table_html=table_html,
+    )
+
+
 def build_policy_submitted_html(payload: dict, logo_data_uri: str | None = None) -> str:
     """Build Policy Submitted HTML from parsed payload."""
     logo_html = ""

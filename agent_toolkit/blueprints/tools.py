@@ -24,6 +24,8 @@ def _get_pdf_engine():
     from pdf_engine.html_builders import (
         generate_pdf_html, build_policy_submitted_html,
         build_quote_comparison_html,
+        build_term_comparison_html,
+        build_final_expense_comparison_html,
     )
     from pdf_engine.pdf_gen import generate_pdf_bytes
     from pdf_engine.assets import (
@@ -39,6 +41,8 @@ def _get_pdf_engine():
         "generate_pdf_html": generate_pdf_html,
         "build_policy_submitted_html": build_policy_submitted_html,
         "build_quote_comparison_html": build_quote_comparison_html,
+        "build_term_comparison_html": build_term_comparison_html,
+        "build_final_expense_comparison_html": build_final_expense_comparison_html,
         "generate_pdf_bytes": generate_pdf_bytes,
         "load_logo_data_uri": load_logo_data_uri,
         "load_nlg_logo_data_uri": load_nlg_logo_data_uri,
@@ -358,6 +362,135 @@ def pipeline():
     pipeline_data = get_pipeline_data()
     stages = config.OUTCOME_CHOICES
     return render_template("pipeline.html", pipeline_data=pipeline_data, stages=stages)
+
+
+# ---------------------------------------------------------------------------
+# Term Life Comparison
+# ---------------------------------------------------------------------------
+@tools_bp.route("/term-comparison", methods=["GET", "POST"])
+def term_comparison():
+    if request.method == "POST":
+        client_name = request.form.get("client_name", "").strip()
+        client_age = request.form.get("client_age", "").strip()
+        recommended = request.form.get("recommended", "1").strip()
+
+        carriers = []
+        for i in range(1, 5):
+            carrier = request.form.get(f"carrier_{i}", "").strip()
+            if carrier:
+                carriers.append({
+                    "carrier": carrier,
+                    "term": request.form.get(f"term_{i}", "").strip() or "20",
+                    "death_benefit": request.form.get(f"death_benefit_{i}", "").strip() or "—",
+                    "monthly_premium": request.form.get(f"premium_{i}", "").strip() or "—",
+                })
+
+        if not client_name or not carriers:
+            flash("Enter client name and at least one carrier.", "error")
+            return redirect(url_for("tools.term_comparison"))
+
+        recommended_idx = None
+        try:
+            rec = int(recommended)
+            if 1 <= rec <= len(carriers):
+                recommended_idx = rec - 1
+        except (ValueError, TypeError):
+            pass
+
+        try:
+            eng = _get_pdf_engine()
+            logo = eng["load_logo_data_uri"]()
+            agent_photo = eng["load_agent_photo_data_uri"]()
+
+            html_content = eng["build_term_comparison_html"](
+                client_name=client_name,
+                client_age=client_age,
+                carriers=carriers,
+                recommended_idx=recommended_idx,
+                logo_data_uri=logo,
+                agent_photo_data_uri=agent_photo,
+            )
+
+            pdf_bytes = eng["generate_pdf_bytes"](html_content)
+            filename = f"{client_name}_term_comparison.pdf".replace(" ", "_")
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+            tmp.write(pdf_bytes)
+            tmp.close()
+
+            return send_file(
+                tmp.name, mimetype="application/pdf",
+                as_attachment=True, download_name=filename,
+            )
+        except Exception as e:
+            flash(f"PDF generation failed: {e}", "error")
+            return redirect(url_for("tools.term_comparison"))
+
+    return render_template("term_comparison.html")
+
+
+# ---------------------------------------------------------------------------
+# Final Expense Comparison
+# ---------------------------------------------------------------------------
+@tools_bp.route("/final-expense-comparison", methods=["GET", "POST"])
+def final_expense_comparison():
+    if request.method == "POST":
+        client_name = request.form.get("client_name", "").strip()
+        client_age = request.form.get("client_age", "").strip()
+        recommended = request.form.get("recommended", "1").strip()
+
+        carriers = []
+        for i in range(1, 5):
+            carrier = request.form.get(f"carrier_{i}", "").strip()
+            if carrier:
+                carriers.append({
+                    "carrier": carrier,
+                    "death_benefit": request.form.get(f"death_benefit_{i}", "").strip() or "—",
+                    "monthly_premium": request.form.get(f"premium_{i}", "").strip() or "—",
+                })
+
+        if not client_name or not carriers:
+            flash("Enter client name and at least one carrier.", "error")
+            return redirect(url_for("tools.final_expense_comparison"))
+
+        recommended_idx = None
+        try:
+            rec = int(recommended)
+            if 1 <= rec <= len(carriers):
+                recommended_idx = rec - 1
+        except (ValueError, TypeError):
+            pass
+
+        try:
+            eng = _get_pdf_engine()
+            logo = eng["load_logo_data_uri"]()
+            agent_photo = eng["load_agent_photo_data_uri"]()
+
+            html_content = eng["build_final_expense_comparison_html"](
+                client_name=client_name,
+                client_age=client_age,
+                carriers=carriers,
+                recommended_idx=recommended_idx,
+                logo_data_uri=logo,
+                agent_photo_data_uri=agent_photo,
+            )
+
+            pdf_bytes = eng["generate_pdf_bytes"](html_content)
+            filename = f"{client_name}_final_expense_comparison.pdf".replace(" ", "_")
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+            tmp.write(pdf_bytes)
+            tmp.close()
+
+            return send_file(
+                tmp.name, mimetype="application/pdf",
+                as_attachment=True, download_name=filename,
+            )
+        except Exception as e:
+            flash(f"PDF generation failed: {e}", "error")
+            return redirect(url_for("tools.final_expense_comparison"))
+
+    return render_template("final_expense_comparison.html")
 
 
 # ---------------------------------------------------------------------------
