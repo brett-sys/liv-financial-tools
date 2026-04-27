@@ -216,7 +216,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         </div>
         <div class="hero-bottom">
             <div>
-                <div class="hero-title">Illustration Comparison</div>
+                <div class="hero-title">IUL Comparison</div>
                 <div class="hero-subtitle">Side-by-side policy comparison</div>
                 {prepared_for_html}
                 <div class="date-stamp">{today}</div>
