@@ -1082,15 +1082,15 @@ def build_quote_comparison_html(
                     <div class="stat-value">{c.get('death_benefit', '—')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">MONTHLY PREMIUM</div>
+                    <div class="stat-label">MONTHLY&nbsp;PREMIUM</div>
                     <div class="stat-value">{c.get('monthly_premium', '—')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">10-YR CASH VALUE</div>
+                    <div class="stat-label">10-YR&nbsp;CASH&nbsp;VALUE</div>
                     <div class="stat-value">{c.get('cash_value_10yr', '—')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">20-YR CASH VALUE</div>
+                    <div class="stat-label">20-YR&nbsp;CASH&nbsp;VALUE</div>
                     <div class="stat-value">{c.get('cash_value_20yr', '—')}</div>
                 </div>
             </div>
@@ -1105,7 +1105,7 @@ def build_quote_comparison_html(
         rows_html += f"""
         <tr{rec_class}>
             <td class="carrier-name">{c.get('carrier', '—')}{rec_badge}</td>
-            <td>{c.get('product', '—')}</td>
+            <td class="product-cell">{c.get('product', '—')}</td>
             <td class="num">{c.get('death_benefit', '—')}</td>
             <td class="num">{c.get('monthly_premium', '—')}</td>
             <td class="num">{c.get('cash_value_10yr', '—')}</td>
@@ -1255,15 +1255,14 @@ def build_quote_comparison_html(
     .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
     .hero-bottom {{ display: flex; justify-content: space-between; align-items: flex-end; }}
     .hero-title {{ font-size: 24px; font-weight: 400; letter-spacing: -0.01em; color: #fff; margin-bottom: 4px; }}
-    .hero-subtitle {{ font-size: 13px; color: rgba(255,255,255,0.8); }}
-    .prepared-for {{ font-size: 13px; color: rgba(255,255,255,0.95); margin-top: 6px; }}
+    .hero-subtitle {{ font-size: 13px; color: #e2e5eb; }}
+    .prepared-for {{ font-size: 13px; color: #ffffff; margin-top: 6px; }}
     .prepared-for strong {{ font-weight: 700; }}
-    .date-stamp {{ font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px; }}
+    .date-stamp {{ font-size: 10px; color: #c5cad3; margin-top: 6px; }}
     .notice-bar {{
-        background: #f0f2f5;
-        border-top: 1px solid rgba(255,255,255,0.12);
+        background: #f4f5f7;
+        border: none;
         border-bottom: 1px solid #dde9f0;
-        border-left: none;
         padding: 10px 36px;
         font-size: 9.5px;
         color: #5a6b7a;
@@ -1282,8 +1281,8 @@ def build_quote_comparison_html(
     /* ── Stat boxes ── */
     .stat-boxes {{
         display: grid;
-        grid-template-columns: repeat({min(len(carriers), 4)}, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat({min(len(carriers), 4)}, minmax(148px, 1fr));
+        gap: 14px;
         margin-bottom: 24px;
     }}
     .stat-box {{
@@ -1306,25 +1305,33 @@ def build_quote_comparison_html(
         display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
     }}
     .stat-label {{
-        font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em;
-        color: #6b7f8f; font-weight: 700; margin-bottom: 2px;
+        font-size: 7px; text-transform: uppercase; letter-spacing: 0.04em;
+        color: #5a6b7a; font-weight: 700; margin-bottom: 3px;
+        line-height: 1.25;
     }}
-    .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; }}
+    .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; line-height: 1.2; }}
     /* ── Comparison table ── */
     table.compare {{
-        width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 22px 0;
+        width: 100%; border-collapse: collapse; font-size: 10px; margin: 0 0 22px 0;
+        table-layout: fixed;
     }}
     table.compare thead {{ background: #123047; color: #fff; }}
     table.compare th {{
-        padding: 9px 8px; text-align: center;
-        font-weight: 600; font-size: 10px;
-        text-transform: uppercase; letter-spacing: 0.04em;
+        padding: 8px 6px; text-align: center;
+        font-weight: 600; font-size: 8px;
+        text-transform: uppercase; letter-spacing: 0.03em;
     }}
-    table.compare td {{ padding: 9px 8px; text-align: center; border-bottom: 1px solid #dde9f0; }}
+    table.compare th:nth-child(1),
+    table.compare th:nth-child(2) {{ text-align: left; padding-left: 10px; }}
+    table.compare td {{ padding: 8px 6px; text-align: center; border-bottom: 1px solid #dde9f0; vertical-align: top; }}
     table.compare tbody tr:nth-child(even) {{ background: #f7f8fa; }}
     table.compare td.num {{ font-weight: 600; }}
     table.compare td.center {{ text-align: center; }}
-    table.compare td.carrier-name {{ font-weight: 700; color: #123047; }}
+    table.compare td.carrier-name {{
+        font-weight: 700; color: #123047; text-align: left; padding-left: 10px;
+        word-wrap: break-word;
+    }}
+    table.compare td.product-cell {{ text-align: left; padding-left: 10px; word-wrap: break-word; }}
     table.compare tr.recommended {{ background: #e8ecf0; }}
     .rec-badge {{
         display: inline-block; background: #123047; color: #fff;
