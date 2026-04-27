@@ -15,6 +15,12 @@ from models.calls import get_pipeline_data
 tools_bp = Blueprint("tools", __name__)
 
 
+def _current_agent_info() -> dict:
+    """Get agent_info dict for the currently logged-in agent (from cookie)."""
+    agent_name = request.cookies.get("agent_pref", "Brett")
+    return config.get_agent_info(agent_name)
+
+
 def _get_pdf_engine():
     """Lazy import the pdf engine modules."""
     from pdf_engine.parsers import (
@@ -87,6 +93,7 @@ def illustration():
                 nlg_logo_data_uri=nlg_logo,
                 agent_photo_data_uri=agent_photo,
                 client_name=client_name,
+                agent_info=_current_agent_info(),
             )
 
             pdf_bytes = eng["generate_pdf_bytes"](html_content)
@@ -148,6 +155,7 @@ def illustration_comparison():
                 policies=parsed,
                 logo_data_uri=logo,
                 agent_photo_data_uri=agent_photo,
+                agent_info=_current_agent_info(),
             )
 
             pdf_bytes = eng["generate_pdf_bytes"](html_content)
@@ -263,6 +271,7 @@ def quote_comparison():
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
                 agent_photo_data_uri=agent_photo,
+                agent_info=_current_agent_info(),
             )
 
             pdf_bytes = eng["generate_pdf_bytes"](html_content)
@@ -409,6 +418,7 @@ def term_comparison():
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
                 agent_photo_data_uri=agent_photo,
+                agent_info=_current_agent_info(),
             )
 
             pdf_bytes = eng["generate_pdf_bytes"](html_content)
@@ -473,6 +483,7 @@ def final_expense_comparison():
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
                 agent_photo_data_uri=agent_photo,
+                agent_info=_current_agent_info(),
             )
 
             pdf_bytes = eng["generate_pdf_bytes"](html_content)

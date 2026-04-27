@@ -42,6 +42,10 @@ REPORT_MINUTE = 0
 AGENTS = [
     {
         "name": "Brett",
+        "full_name": "Brett Dunham",
+        "title": "Agency Owner",
+        "phone": "(714) 335-1412",
+        "license": "License #21114292",
         "email": "brett@fflliv.com",
         "theme": "brett",
         "calendar": "google",
@@ -49,6 +53,10 @@ AGENTS = [
     },
     {
         "name": "Kevin Nelson",
+        "full_name": "Kevin Nelson",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
         "email": "kevinnelsonk2@outlook.com",
         "theme": "kevin",
         "calendar": "outlook",
@@ -56,6 +64,10 @@ AGENTS = [
     },
     {
         "name": "Easton",
+        "full_name": "Easton",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
         "email": "",
         "theme": "easton",
         "calendar": "google",
@@ -63,6 +75,10 @@ AGENTS = [
     },
     {
         "name": "Joe",
+        "full_name": "Joe",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
         "email": "",
         "theme": "joe",
         "calendar": "google",
@@ -70,6 +86,10 @@ AGENTS = [
     },
     {
         "name": "Cye",
+        "full_name": "Cye",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
         "email": "",
         "theme": "cye",
         "calendar": "google",
@@ -82,6 +102,20 @@ AGENT_EMAILS = {a["name"]: a["email"] for a in AGENTS}
 AGENT_THEMES = {a["name"]: a["theme"] for a in AGENTS}
 AGENT_CALENDAR_TYPES = {a["name"]: a["calendar"] for a in AGENTS}
 AGENT_CALENDAR_IDS = {a["name"]: a.get("calendar_id", "") for a in AGENTS}
+_AGENTS_BY_NAME = {a["name"]: a for a in AGENTS}
+
+
+def get_agent_info(agent_name: str) -> dict:
+    """Return PDF-ready agent info dict for the given agent name."""
+    a = _AGENTS_BY_NAME.get(agent_name, _AGENTS_BY_NAME.get("Brett", {}))
+    return {
+        "name": a.get("full_name", a.get("name", AGENT_NAME)),
+        "title": a.get("title", "") or AGENT_TITLE,
+        "phone": a.get("phone", "") or AGENT_PHONE,
+        "email": a.get("email", "") or AGENT_EMAIL_DISPLAY,
+        "license": a.get("license", "") or AGENT_LICENSE,
+        "website": AGENT_WEBSITE,
+    }
 
 # ---------------------------------------------------------------------------
 # Call field options

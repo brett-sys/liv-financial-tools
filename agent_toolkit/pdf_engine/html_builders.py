@@ -14,6 +14,26 @@ AGENT_EMAIL = _cfg.AGENT_EMAIL_DISPLAY
 AGENT_LICENSE = _cfg.AGENT_LICENSE
 AGENT_WEBSITE = _cfg.AGENT_WEBSITE
 
+_DEFAULT_AGENT_INFO = {
+    "name": AGENT_NAME,
+    "title": AGENT_TITLE,
+    "phone": AGENT_PHONE,
+    "email": AGENT_EMAIL,
+    "license": AGENT_LICENSE,
+    "website": AGENT_WEBSITE,
+}
+
+
+def _resolve_agent(agent_info: dict | None) -> dict:
+    """Merge provided agent_info over defaults."""
+    if not agent_info:
+        return _DEFAULT_AGENT_INFO
+    merged = dict(_DEFAULT_AGENT_INFO)
+    for k, v in agent_info.items():
+        if v:
+            merged[k] = v
+    return merged
+
 
 def generate_pdf_html(
     html_body: str,
@@ -23,8 +43,10 @@ def generate_pdf_html(
     nlg_logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
     client_name: str = "",
+    agent_info: dict | None = None,
 ):
     """Create complete HTML document styled to match livfinancialgroup.com vibe."""
+    ai = _resolve_agent(agent_info)
     # Inject NLG company info into html_body at the placeholder
     nlg_section_html = """
         <div class="nlg-section">
@@ -71,7 +93,7 @@ def generate_pdf_html(
 
     # Build agent info HTML
     agent_photo_html = (
-        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
         if agent_photo_data_uri
         else ""
     )
@@ -79,11 +101,11 @@ def generate_pdf_html(
         <div class="agent-info">
             {agent_photo_html}
             <div class="agent-details">
-                <div class="agent-name">{AGENT_NAME}</div>
-                <div class="agent-detail">{AGENT_TITLE}</div>
-                <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
-                <div class="agent-detail">{AGENT_LICENSE}</div>
-                <div class="agent-detail">{AGENT_WEBSITE}</div>
+                <div class="agent-name">{ai['name']}</div>
+                <div class="agent-detail">{ai['title']}</div>
+                <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
+                <div class="agent-detail">{ai['license']}</div>
+                <div class="agent-detail">{ai['website']}</div>
             </div>
         </div>
     """
@@ -253,7 +275,7 @@ def generate_pdf_html(
         @page {{
             margin-bottom: 40px;
             @bottom-center {{
-                content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+                content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 font-size: 8px;
                 color: #6b7f8f;
@@ -1019,12 +1041,14 @@ def build_quote_comparison_html(
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
+    agent_info: dict | None = None,
 ) -> str:
     """Build a professional quote comparison PDF styled like the LIV Policy Illustration.
 
     Each carrier dict has keys: carrier, product, monthly_premium, death_benefit,
     cash_value_10yr, cash_value_20yr, am_best, sp, moodys, about.
     """
+    ai = _resolve_agent(agent_info)
     today_str = date.today().strftime("%B %d, %Y")
 
     logo_html = (
@@ -1033,7 +1057,7 @@ def build_quote_comparison_html(
         else ""
     )
     agent_photo_html = (
-        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
         if agent_photo_data_uri
         else ""
     )
@@ -1180,7 +1204,7 @@ def build_quote_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1367,11 +1391,11 @@ def build_quote_comparison_html(
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
-                    <div class="agent-name">{AGENT_NAME}</div>
-                    <div class="agent-detail">{AGENT_TITLE}</div>
-                    <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
-                    <div class="agent-detail">{AGENT_LICENSE}</div>
-                    <div class="agent-detail">{AGENT_WEBSITE}</div>
+                    <div class="agent-name">{ai['name']}</div>
+                    <div class="agent-detail">{ai['title']}</div>
+                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
+                    <div class="agent-detail">{ai['license']}</div>
+                    <div class="agent-detail">{ai['website']}</div>
                 </div>
             </div>
         </div>
@@ -1421,7 +1445,7 @@ def build_quote_comparison_html(
             <p>1. Review the options above and consider which best fits your goals and budget.</p>
             <p>2. Ask me any questions about the differences between carriers or products.</p>
             <p>3. Once you decide, I will submit the application and guide you through every step.</p>
-            <p>Contact me anytime: <strong>{AGENT_PHONE}</strong> or <strong>{AGENT_EMAIL}</strong></p>
+            <p>Contact me anytime: <strong>{ai['phone']}</strong> or <strong>{ai['email']}</strong></p>
         </div>
 
         <div class="disclaimer">
@@ -1477,11 +1501,13 @@ def build_term_comparison_html(
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
+    agent_info: dict | None = None,
 ) -> str:
     """Build a Term Life comparison PDF matching the IUL Comparison layout.
 
     Each carrier dict: carrier, term, death_benefit, monthly_premium.
     """
+    ai = _resolve_agent(agent_info)
     today = date.today().strftime("%B %d, %Y")
     n = len(carriers)
 
@@ -1491,7 +1517,7 @@ def build_term_comparison_html(
 
     agent_photo_html = ""
     if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
 
     prepared_for_html = ""
     if client_name and client_name.strip():
@@ -1540,7 +1566,7 @@ def build_term_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1646,11 +1672,11 @@ def build_term_comparison_html(
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
-                    <div class="agent-name">{AGENT_NAME}</div>
-                    <div class="agent-detail">{AGENT_TITLE}</div>
-                    <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
-                    <div class="agent-detail">{AGENT_LICENSE}</div>
-                    <div class="agent-detail">{AGENT_WEBSITE}</div>
+                    <div class="agent-name">{ai['name']}</div>
+                    <div class="agent-detail">{ai['title']}</div>
+                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
+                    <div class="agent-detail">{ai['license']}</div>
+                    <div class="agent-detail">{ai['website']}</div>
                 </div>
             </div>
         </div>
@@ -1677,7 +1703,7 @@ def build_term_comparison_html(
             This comparison is for illustrative purposes only and is not an offer or contract.
             Premiums shown are estimates based on the information provided and may change based on
             underwriting. Please review each carrier&rsquo;s full policy details before making a decision.<br/>
-            {AGENT_NAME} &bull; {AGENT_PHONE} &bull; {AGENT_WEBSITE}
+            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
         </div>
     </div>
 </body>
@@ -1691,11 +1717,13 @@ def build_final_expense_comparison_html(
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
     agent_photo_data_uri: str | None = None,
+    agent_info: dict | None = None,
 ) -> str:
     """Build a Final Expense (Whole Life) comparison PDF matching the IUL Comparison layout.
 
     Each carrier dict: carrier, death_benefit, monthly_premium.
     """
+    ai = _resolve_agent(agent_info)
     today = date.today().strftime("%B %d, %Y")
     n = len(carriers)
 
@@ -1705,7 +1733,7 @@ def build_final_expense_comparison_html(
 
     agent_photo_html = ""
     if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
 
     prepared_for_html = ""
     if client_name and client_name.strip():
@@ -1749,7 +1777,7 @@ def build_final_expense_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1855,11 +1883,11 @@ def build_final_expense_comparison_html(
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
-                    <div class="agent-name">{AGENT_NAME}</div>
-                    <div class="agent-detail">{AGENT_TITLE}</div>
-                    <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
-                    <div class="agent-detail">{AGENT_LICENSE}</div>
-                    <div class="agent-detail">{AGENT_WEBSITE}</div>
+                    <div class="agent-name">{ai['name']}</div>
+                    <div class="agent-detail">{ai['title']}</div>
+                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
+                    <div class="agent-detail">{ai['license']}</div>
+                    <div class="agent-detail">{ai['website']}</div>
                 </div>
             </div>
         </div>
@@ -1886,7 +1914,7 @@ def build_final_expense_comparison_html(
             This comparison is for illustrative purposes only and is not an offer or contract.
             Premiums shown are estimates based on the information provided and may change based on
             underwriting. Please review each carrier&rsquo;s full policy details before making a decision.<br/>
-            {AGENT_NAME} &bull; {AGENT_PHONE} &bull; {AGENT_WEBSITE}
+            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
         </div>
     </div>
 </body>

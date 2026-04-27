@@ -18,7 +18,27 @@ COLORS = ["#0e7fa6", "#e88c0a", "#34a853", "#7b61ff"]
 COLORS_LIGHT = ["#e3f2f8", "#fff3e0", "#e6f5ea", "#ede7ff"]
 
 
-def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo_data_uri=None):
+_DEFAULT_AGENT_INFO = {
+    "name": AGENT_NAME,
+    "title": AGENT_TITLE,
+    "phone": AGENT_PHONE,
+    "email": AGENT_EMAIL,
+    "license": AGENT_LICENSE,
+    "website": AGENT_WEBSITE,
+}
+
+
+def _resolve_agent(agent_info):
+    if not agent_info:
+        return _DEFAULT_AGENT_INFO
+    merged = dict(_DEFAULT_AGENT_INFO)
+    for k, v in agent_info.items():
+        if v:
+            merged[k] = v
+    return merged
+
+
+def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo_data_uri=None, agent_info=None):
     """Build a multi-page comparison PDF from parsed policy data.
 
     policies: list of dicts with keys:
@@ -26,6 +46,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         - summary: dict from parse_summary_data (or None)
         - graph: list of dicts from parse_graph_points
     """
+    ai = _resolve_agent(agent_info)
     today = date.today().strftime("%B %d, %Y")
     n = len(policies)
 
@@ -35,7 +56,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
 
     agent_photo_html = ""
     if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{AGENT_NAME}" />'
+        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
 
     prepared_for_html = ""
     if client_name and client_name.strip():
@@ -92,7 +113,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {AGENT_LICENSE}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -206,11 +227,11 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
             <div class="agent-info">
                 {agent_photo_html}
                 <div class="agent-details">
-                    <div class="agent-name">{AGENT_NAME}</div>
-                    <div class="agent-detail">{AGENT_TITLE}</div>
-                    <div class="agent-detail">{AGENT_PHONE} | {AGENT_EMAIL}</div>
-                    <div class="agent-detail">{AGENT_LICENSE}</div>
-                    <div class="agent-detail">{AGENT_WEBSITE}</div>
+                    <div class="agent-name">{ai['name']}</div>
+                    <div class="agent-detail">{ai['title']}</div>
+                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
+                    <div class="agent-detail">{ai['license']}</div>
+                    <div class="agent-detail">{ai['website']}</div>
                 </div>
             </div>
         </div>
@@ -244,7 +265,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
             Non-guaranteed projections are hypothetical and may not apply to an actual policy.
             Actual results may be more or less favorable. Please review each carrier&rsquo;s
             full illustration for guaranteed values and complete policy details.<br/>
-            {AGENT_NAME} &bull; {AGENT_PHONE} &bull; {AGENT_WEBSITE}
+            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
         </div>
     </div>
 </body>
