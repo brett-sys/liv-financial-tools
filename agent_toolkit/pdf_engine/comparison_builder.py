@@ -144,7 +144,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         border-radius: 0;
         line-height: 0;
     }}
-    .logo {{ height: 56px; width: auto; max-width: 240px; display: block; }}
+    .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
         width: 72px; height: 72px; border-radius: 6px;

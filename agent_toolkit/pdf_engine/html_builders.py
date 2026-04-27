@@ -318,9 +318,9 @@ def generate_pdf_html(
             line-height: 0;
         }}
         .logo {{
-            height: 58px;
+            height: 96px;
             width: auto;
-            max-width: 220px;
+            max-width: 380px;
             border-radius: 0;
             background: transparent;
             padding: 0;
@@ -1243,7 +1243,7 @@ def build_quote_comparison_html(
         border-radius: 0;
         line-height: 0;
     }}
-    .logo {{ height: 56px; width: auto; max-width: 240px; display: block; }}
+    .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
         width: 72px; height: 72px; border-radius: 6px;
@@ -1616,7 +1616,7 @@ def build_term_comparison_html(
         border-radius: 0;
         line-height: 0;
     }}
-    .logo {{ height: 56px; width: auto; max-width: 240px; display: block; }}
+    .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
         width: 72px; height: 72px; border-radius: 6px;
@@ -1833,7 +1833,7 @@ def build_final_expense_comparison_html(
         border-radius: 0;
         line-height: 0;
     }}
-    .logo {{ height: 56px; width: auto; max-width: 240px; display: block; }}
+    .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
         width: 72px; height: 72px; border-radius: 6px;
