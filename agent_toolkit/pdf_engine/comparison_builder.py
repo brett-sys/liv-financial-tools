@@ -134,7 +134,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
         justify-content: space-between;
         align-items: center;
         margin-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: none;
         padding-bottom: 14px;
     }}
     .hero-logo-wrap {{

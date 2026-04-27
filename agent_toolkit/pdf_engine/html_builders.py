@@ -306,7 +306,7 @@ def generate_pdf_html(
             justify-content: space-between;
             align-items: center;
             margin-bottom: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            border-bottom: none;
             padding-bottom: 14px;
         }}
         .hero-logo-left {{
@@ -1233,7 +1233,7 @@ def build_quote_comparison_html(
         justify-content: space-between;
         align-items: center;
         margin-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: none;
         padding-bottom: 14px;
     }}
     .hero-logo-wrap {{
@@ -1599,7 +1599,7 @@ def build_term_comparison_html(
         justify-content: space-between;
         align-items: center;
         margin-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: none;
         padding-bottom: 14px;
     }}
     .hero-logo-wrap {{
@@ -1816,7 +1816,7 @@ def build_final_expense_comparison_html(
         justify-content: space-between;
         align-items: center;
         margin-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: none;
         padding-bottom: 14px;
     }}
     .hero-logo-wrap {{
