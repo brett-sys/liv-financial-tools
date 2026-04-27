@@ -139,12 +139,12 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     }}
     .hero-logo-wrap {{
         display: inline-block;
-        background: #f0f2f5;
-        padding: 8px 14px;
-        border-radius: 6px;
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
         line-height: 0;
     }}
-    .logo {{ height: 48px; width: auto; max-width: 160px; display: block; }}
+    .logo {{ height: 56px; width: auto; max-width: 240px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
     .agent-photo {{
         width: 72px; height: 72px; border-radius: 6px;
