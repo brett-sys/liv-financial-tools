@@ -1248,18 +1248,20 @@ def build_quote_comparison_html(
     .prepared-for strong {{ font-weight: 700; }}
     .date-stamp {{ font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px; }}
     .notice-bar {{
-        background: #e8f4f8;
-        border-left: 4px solid #0e7fa6;
-        padding: 8px 36px;
+        background: #f0f2f5;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        border-bottom: 1px solid #dde9f0;
+        border-left: none;
+        padding: 10px 36px;
         font-size: 9.5px;
-        color: #476072;
+        color: #5a6b7a;
     }}
     /* ── Content ── */
     .content {{ padding: 22px 36px 30px 36px; }}
     h2.section-title {{
         font-size: 16px;
         color: #123047;
-        border-bottom: 2px solid #0e7fa6;
+        border-bottom: 1px solid #c5d0d8;
         padding-bottom: 5px;
         margin: 22px 0 14px 0;
         font-weight: 600;
@@ -1276,12 +1278,12 @@ def build_quote_comparison_html(
         border: 1px solid #dde9f0;
         border-radius: 8px;
         padding: 14px 16px;
-        background: #f4f9fc;
+        background: #fafbfc;
         position: relative;
     }}
     .stat-rec-tag {{
         position: absolute; top: -1px; right: 10px;
-        background: #0e7fa6; color: #fff;
+        background: #123047; color: #fff;
         font-size: 7.5px; font-weight: 700;
         padding: 2px 8px; border-radius: 0 0 4px 4px;
         letter-spacing: 0.05em; text-transform: uppercase;
@@ -1293,7 +1295,7 @@ def build_quote_comparison_html(
     }}
     .stat-label {{
         font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em;
-        color: #0e7fa6; font-weight: 700; margin-bottom: 2px;
+        color: #6b7f8f; font-weight: 700; margin-bottom: 2px;
     }}
     .stat-value {{ font-size: 14px; font-weight: 700; color: #123047; }}
     /* ── Comparison table ── */
@@ -1307,13 +1309,13 @@ def build_quote_comparison_html(
         text-transform: uppercase; letter-spacing: 0.04em;
     }}
     table.compare td {{ padding: 9px 8px; text-align: center; border-bottom: 1px solid #dde9f0; }}
-    table.compare tbody tr:nth-child(even) {{ background: #f4f9fc; }}
+    table.compare tbody tr:nth-child(even) {{ background: #f7f8fa; }}
     table.compare td.num {{ font-weight: 600; }}
     table.compare td.center {{ text-align: center; }}
     table.compare td.carrier-name {{ font-weight: 700; color: #123047; }}
-    table.compare tr.recommended {{ background: #eef6fb; }}
+    table.compare tr.recommended {{ background: #e8ecf0; }}
     .rec-badge {{
-        display: inline-block; background: #0e7fa6; color: #fff;
+        display: inline-block; background: #123047; color: #fff;
         font-size: 7.5px; font-weight: 700; padding: 2px 6px;
         border-radius: 3px; margin-left: 6px; vertical-align: middle;
         letter-spacing: 0.05em;
@@ -1328,7 +1330,7 @@ def build_quote_comparison_html(
         gap: 8px; justify-content: flex-start;
     }}
     .co-rating-item {{
-        background: #f4f9fc; border-left: 3px solid #0e7fa6;
+        background: #f4f5f7; border-left: 3px solid #123047;
         padding: 6px 10px; border-radius: 0 4px 4px 0;
     }}
     .co-rating-val {{ font-size: 13px; font-weight: 700; color: #123047; display: block; }}
@@ -1340,7 +1342,7 @@ def build_quote_comparison_html(
     /* ── Living benefits ── */
     .lb-intro {{ font-size: 12px; color: #2c4a63; margin-bottom: 6px; }}
     .lb-subhead {{
-        font-size: 11px; font-weight: 600; color: #0e7fa6;
+        font-size: 11px; font-weight: 600; color: #5a6b7a;
         margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em;
     }}
     .lb-cards {{
@@ -1348,7 +1350,7 @@ def build_quote_comparison_html(
     }}
     .lb-card {{
         border: 1px solid #dde9f0; border-radius: 8px; padding: 14px 16px;
-        background: #f9fcfe;
+        background: #fafbfc;
     }}
     .lb-icon {{ font-size: 20px; margin-bottom: 6px; }}
     .lb-card-title {{ font-size: 13px; font-weight: 700; color: #123047; margin-bottom: 6px; }}
@@ -1360,7 +1362,7 @@ def build_quote_comparison_html(
     }}
     .lb-summary-item {{
         flex: 1; padding: 14px 16px; text-align: center;
-        border-right: 1px solid #dde9f0; background: #eef6fb;
+        border-right: 1px solid #dde9f0; background: #f0f2f5;
         font-size: 11px; color: #123047; line-height: 1.5;
     }}
     .lb-summary-item:last-child {{ border-right: none; }}
@@ -1371,10 +1373,10 @@ def build_quote_comparison_html(
     }}
     /* ── Next steps ── */
     .next-steps {{
-        background: #eef6fb; border-radius: 8px;
-        padding: 14px 18px; border: 1px solid #c8dfe9; margin-top: 20px;
+        background: #f4f5f7; border-radius: 8px;
+        padding: 14px 18px; border: 1px solid #dde9f0; margin-top: 20px;
     }}
-    .next-steps h3 {{ font-size: 13px; font-weight: 600; color: #0e7fa6; margin-bottom: 8px; }}
+    .next-steps h3 {{ font-size: 13px; font-weight: 600; color: #123047; margin-bottom: 8px; }}
     .next-steps p {{ font-size: 11px; color: #2c4a63; margin: 3px 0; }}
     .disclaimer {{
         margin-top: 20px; font-size: 9.5px; color: #6b7f8f; line-height: 1.55;
