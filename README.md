@@ -133,8 +133,9 @@ An AI coaching suite built into the Agent Toolkit (Tools → AI Coach, at `/illu
 
 - **Presentation Review** — paste a call transcript; get a 0–100 score, a category breakdown, and 10 ranked, transcript-specific fixes. Results are saved so agents can track their score over time.
 - **Training Partner** — practice a live pitch against an AI prospect (8 personalities × 4 difficulty tiers), then hit "End & Coach me" for a scored debrief. Reps are saved to track improvement.
+- **Objection Coach** — type the objection you just heard (or tap a common one) and get 2–3 on-brand, speakable word-tracks that re-tie to the client's why, with copy-to-clipboard.
 - **Operating Principles** — the single source of truth ("how we operate"), editable in the UI.
-- More tools (health/finance extractor, objection word-tracks, KPI analyzer, post-call notes, recruiting screen) are specced in [PROMPTS.md](PROMPTS.md) and built on the same shared config + client.
+- More tools (health/finance extractor, KPI analyzer, post-call notes, recruiting screen) are specced in [PROMPTS.md](PROMPTS.md) and built on the same shared config + client.
 
 > Training & coaching tools for licensed agents only — never client-facing advice, and never used to decide eligibility or underwriting. The toolkit stores structured review results, not raw transcripts.
 

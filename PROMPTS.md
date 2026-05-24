@@ -278,7 +278,7 @@ Call `submit_intake` exactly once.
 }
 ```
 
-## 5. Bonus — Objection-Handling / Word-Track Generator
+## 5. Bonus — Objection-Handling / Word-Track Generator  ✅ (built)
 
 What it does: agent types the exact objection they got ("$80 is too much, I'm on a fixed income"); returns 2–3 on-brand responses that re-tie to the why and protect the client.
 
@@ -414,7 +414,8 @@ Note: scores are 0–10. Keep this strictly trait-based; never infer protected a
 * **Anthropic client** — `agent_toolkit/ai/client.py` (server-side, forced tool use for structured output, per-tool model selection).
 * **Tool 1 — Presentation Review Bot** — ✅ live at `/illuminate/review`, results saved to `ai_coach.db` and tracked at `/illuminate/review/history`.
 * **Tool 2 — AI Training Partner** — ✅ live at `/illuminate/roleplay`: multi-turn roleplay vs. an AI prospect (8 personalities × 4 difficulties), then an "End & Coach me" debrief saved to `ai_coach.db` and tracked at `/illuminate/roleplay/history`.
-* Tools 3–7 — schemas and prompts captured above; to be built next, each as a route under the `illuminate` blueprint reusing the shared config + client.
+* **Tool 5 — Objection Word-Track Generator** — ✅ live at `/illuminate/objections`: type an objection (or tap a common one), get 2–3 on-brand, speakable word-tracks tied to the why, with copy-to-clipboard.
+* Tools 4, 6, 7, 8 — schemas and prompts captured above; to be built next, each as a route under the `illuminate` blueprint reusing the shared config + client.
 
 ## 10. Extra build tips
 

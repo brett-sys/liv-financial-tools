@@ -17,6 +17,7 @@ from ai.prompts import (
     PERSONALITIES, DIFFICULTIES, PRODUCTS,
     roleplay_system_prompt, debrief_system_prompt, DEBRIEF_TOOL,
     personality_label, difficulty_label,
+    OBJECTION_TOOL, COMMON_OBJECTIONS, objection_system_prompt,
 )
 from models.ai_coach import (
     get_operating_principles, save_operating_principles, is_using_default_principles,
@@ -237,3 +238,41 @@ def debrief_detail(debrief_id):
     if not data:
         abort(404)
     return render_template("ai_debrief_detail.html", d=data)
+
+
+# ---------------------------------------------------------------------------
+# Tool 5 — Objection-Handling / Word-Track Generator
+# ---------------------------------------------------------------------------
+@illuminate_bp.route("/objections")
+def objections():
+    return render_template(
+        "ai_objections.html",
+        common=COMMON_OBJECTIONS, models=MODEL_CHOICES,
+        default_model=DEFAULT_MODEL, configured=is_configured(),
+    )
+
+
+@illuminate_bp.route("/objections/generate", methods=["POST"])
+def objections_generate():
+    if not is_configured():
+        return jsonify({"error": "AI is not configured. Add ANTHROPIC_API_KEY to your .env."}), 400
+
+    data = request.get_json(silent=True) or {}
+    objection = (data.get("objection") or "").strip()
+    if len(objection) < 3:
+        return jsonify({"error": "Type the objection you heard."}), 400
+
+    system = objection_system_prompt(get_operating_principles())
+    try:
+        result = structured_call(
+            system=system,
+            user_content="OBJECTION FROM THE CLIENT:\n\n" + objection,
+            tool_name=OBJECTION_TOOL["name"],
+            tool_description=OBJECTION_TOOL["description"],
+            input_schema=OBJECTION_TOOL["input_schema"],
+            model=data.get("model", DEFAULT_MODEL),
+            max_tokens=1500,
+        )
+    except AIError as exc:
+        return jsonify({"error": str(exc)}), 502
+    return jsonify({"result": result})

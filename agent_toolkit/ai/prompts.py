@@ -199,3 +199,55 @@ DEBRIEF_TOOL = {
 
 def debrief_system_prompt(operating_principles: str) -> str:
     return _DEBRIEF_SYSTEM_PROMPT.replace("{operating_principles}", operating_principles)
+
+
+# ---------------------------------------------------------------------------
+# Tool 5 — Objection-Handling / Word-Track Generator
+# ---------------------------------------------------------------------------
+_OBJECTION_SYSTEM_PROMPT = """You are a master closer and trainer for life-insurance phone sales. An agent gives you a real objection from a live call. Return on-brand responses consistent with the agency's process — empathetic, direct, client-first. Re-tie every response to the client's WHY. Never teach high-pressure, deceptive, or "sell the biggest policy" tactics. Keep responses speakable (spoken word-tracks, not essays).
+
+{operating_principles}
+
+Call `submit_tracks` once."""
+
+OBJECTION_TOOL = {
+    "name": "submit_tracks",
+    "description": "Submit on-brand spoken word-tracks for handling the objection.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "objection_type": {"type": "string", "description": "e.g. price, spouse, think-about-it, distrust, already-covered"},
+            "why_they_say_it": {"type": "string", "description": "the real concern underneath, one sentence"},
+            "responses": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 3,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "approach": {"type": "string", "description": "short label, e.g. 'Acknowledge + right-size'"},
+                        "word_track": {"type": "string", "description": "exact words the agent can say"},
+                    },
+                    "required": ["approach", "word_track"],
+                },
+            },
+            "avoid": {"type": "string", "description": "what NOT to do with this objection"},
+        },
+        "required": ["objection_type", "responses"],
+    },
+}
+
+COMMON_OBJECTIONS = [
+    "It's too expensive",
+    "I need to talk to my spouse",
+    "Let me think about it",
+    "I already have coverage",
+    "Is this a scam?",
+    "I can't afford it right now",
+    "Just send me some information",
+    "I'm not interested",
+]
+
+
+def objection_system_prompt(operating_principles: str) -> str:
+    return _OBJECTION_SYSTEM_PROMPT.replace("{operating_principles}", operating_principles)

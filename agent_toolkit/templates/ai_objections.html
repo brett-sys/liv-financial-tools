@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Objection Coach - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Objection Coach</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        Type the objection you just heard. Get 2–3 on-brand, speakable word-tracks that
+        re-tie to the client's why — never high-pressure.
+    </p>
+
+    {% if not configured %}
+    <div class="flash flash-error" style="margin-bottom: 1rem;">
+        AI is not configured. Add <code>ANTHROPIC_API_KEY</code> to your <code>.env</code> to use this tool.
+    </div>
+    {% endif %}
+
+    <div class="call-form">
+        <div class="form-group">
+            <label for="objection">Objection</label>
+            <textarea id="objection" rows="2" placeholder="e.g. $80 is too much, I'm on a fixed income"></textarea>
+        </div>
+
+        <div class="obj-chips">
+            {% for o in common %}<button type="button" class="obj-chip" data-text="{{ o }}">{{ o }}</button>{% endfor %}
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="model">Model</label>
+                <select id="model">
+                    {% for value, text in models %}<option value="{{ value }}" {% if value == default_model %}selected{% endif %}>{{ text }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-primary btn-lg" id="genBtn" {% if not configured %}disabled{% endif %}>Get Word-Tracks</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="out" style="margin-top: 1.25rem;"></div>
+</div>
+
+<style>
+.obj-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.obj-chip {
+    padding: 0.4rem 0.7rem; border-radius: 999px; background: var(--surface);
+    border: 1px solid var(--border); color: var(--text-muted);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.obj-chip:hover { border-color: var(--primary); color: var(--text); }
+
+.obj-meta { margin-bottom: 0.9rem; }
+.obj-type { display: inline-block; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem 0.55rem; border-radius: 6px; background: var(--primary-glow); color: var(--primary); }
+.obj-why { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.45; }
+.obj-why strong { color: var(--text); }
+
+.obj-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 0.8rem; margin-bottom: 0.55rem; }
+.obj-card-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.obj-approach { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: var(--success); }
+.obj-copy { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.2rem 0.5rem; cursor: pointer; }
+.obj-copy:hover { border-color: var(--primary); color: var(--primary); }
+.obj-track { font-size: 0.92rem; line-height: 1.5; }
+.obj-avoid { margin-top: 0.6rem; font-size: 0.8rem; line-height: 1.45; padding: 0.6rem 0.7rem; border-left: 3px solid var(--danger); background: rgba(255, 69, 58, 0.08); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.obj-avoid-lab { font-weight: 800; color: var(--danger); text-transform: uppercase; font-size: 0.62rem; letter-spacing: 0.04em; margin-right: 0.4rem; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var GEN_URL = "{{ url_for('illuminate.objections_generate') }}";
+    var box = document.getElementById('objection');
+    var btn = document.getElementById('genBtn');
+    var out = document.getElementById('out');
+
+    function el(cls, text) {
+        var d = document.createElement('div');
+        d.className = cls;
+        if (text !== undefined) d.textContent = text;
+        return d;
+    }
+
+    function render(res) {
+        out.innerHTML = '';
+        var meta = el('obj-meta');
+        if (res.objection_type) meta.appendChild(el('obj-type', res.objection_type));
+        if (res.why_they_say_it) {
+            var why = el('obj-why');
+            var lab = document.createElement('strong'); lab.textContent = 'Why they say it: ';
+            why.appendChild(lab);
+            why.appendChild(document.createTextNode(res.why_they_say_it));
+            meta.appendChild(why);
+        }
+        out.appendChild(meta);
+
+        (res.responses || []).forEach(function (r) {
+            var card = el('obj-card');
+            var head = el('obj-card-head');
+            head.appendChild(el('obj-approach', r.approach || 'Response'));
+            var copy = document.createElement('button');
+            copy.type = 'button'; copy.className = 'obj-copy'; copy.textContent = 'Copy';
+            copy.addEventListener('click', function () {
+                var done = function () { copy.textContent = 'Copied'; setTimeout(function () { copy.textContent = 'Copy'; }, 1500); };
+                if (navigator.clipboard) { navigator.clipboard.writeText(r.word_track).then(done, done); }
+                else { done(); }
+            });
+            head.appendChild(copy);
+            card.appendChild(head);
+            card.appendChild(el('obj-track', r.word_track || ''));
+            out.appendChild(card);
+        });
+
+        if (res.avoid) {
+            var av = el('obj-avoid');
+            var l = document.createElement('span'); l.className = 'obj-avoid-lab'; l.textContent = 'Avoid';
+            av.appendChild(l);
+            av.appendChild(document.createTextNode(res.avoid));
+            out.appendChild(av);
+        }
+    }
+
+    function generate() {
+        var objection = box.value.trim();
+        if (!objection) { box.focus(); return; }
+        btn.disabled = true; btn.textContent = 'Thinking…';
+        out.innerHTML = '';
+        fetch(GEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ objection: objection, model: document.getElementById('model').value }),
+        })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+            btn.disabled = false; btn.textContent = 'Get Word-Tracks';
+            if (!res.ok || res.j.error) {
+                out.innerHTML = '<div class="flash flash-error">' + (res.j.error || 'Something went wrong.') + '</div>';
+                return;
+            }
+            render(res.j.result || {});
+        })
+        .catch(function () {
+            btn.disabled = false; btn.textContent = 'Get Word-Tracks';
+            out.innerHTML = '<div class="flash flash-error">Network error. Try again.</div>';
+        });
+    }
+
+    btn.addEventListener('click', generate);
+    box.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); generate(); }
+    });
+    document.querySelectorAll('.obj-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            box.value = chip.getAttribute('data-text');
+            generate();
+        });
+    });
+})();
+</script>
+{% endblock %}
