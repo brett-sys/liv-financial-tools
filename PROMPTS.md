@@ -122,7 +122,7 @@ RULES:
 }
 ```
 
-## 3. Tool — AI Training Partner (roleplay prospect + debrief)
+## 3. Tool — AI Training Partner (roleplay prospect + debrief)  ✅ (built)
 
 What it does: the agent practices a live pitch against an AI that stays in character as a prospect, with selectable personality and difficulty. After the rep, a second call grades it.
 
@@ -413,7 +413,8 @@ Note: scores are 0–10. Keep this strictly trait-based; never infer protected a
 * **Shared Operating Principles config** — `agent_toolkit/ai/prompts.py` (default) + editable at `/illuminate/settings`, stored in `ai_coach.db`. Every tool injects it.
 * **Anthropic client** — `agent_toolkit/ai/client.py` (server-side, forced tool use for structured output, per-tool model selection).
 * **Tool 1 — Presentation Review Bot** — ✅ live at `/illuminate/review`, results saved to `ai_coach.db` and tracked at `/illuminate/review/history`.
-* Tools 2–7 — schemas and prompts captured above; to be built next, each as a route under the `illuminate` blueprint reusing the shared config + client.
+* **Tool 2 — AI Training Partner** — ✅ live at `/illuminate/roleplay`: multi-turn roleplay vs. an AI prospect (8 personalities × 4 difficulties), then an "End & Coach me" debrief saved to `ai_coach.db` and tracked at `/illuminate/roleplay/history`.
+* Tools 3–7 — schemas and prompts captured above; to be built next, each as a route under the `illuminate` blueprint reusing the shared config + client.
 
 ## 10. Extra build tips
 

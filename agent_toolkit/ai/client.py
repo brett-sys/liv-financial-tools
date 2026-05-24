@@ -94,3 +94,35 @@ def structured_call(
             return block.input
 
     raise AIError("Claude did not return the expected structured output. Try again.")
+
+
+def chat(*, system: str, messages: list, model: str = DEFAULT_MODEL,
+         max_tokens: int = 400) -> str:
+    """Free-form conversational turn (no tool use). Returns the assistant text.
+
+    Used by the roleplay prospect, who must reply in natural spoken dialogue.
+    `messages` must alternate user/assistant and end on a user turn.
+    """
+    if model not in VALID_MODELS:
+        model = DEFAULT_MODEL
+
+    client = _client()
+    try:
+        resp = client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=messages,
+        )
+    except AIError:
+        raise
+    except Exception as exc:
+        raise AIError(f"Claude API error: {exc}") from exc
+
+    text = "".join(
+        getattr(b, "text", "") for b in resp.content
+        if getattr(b, "type", None) == "text"
+    ).strip()
+    if not text:
+        raise AIError("The prospect didn't say anything. Try again.")
+    return text

@@ -49,6 +49,25 @@ def init_db():
                 created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS ai_debriefs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_name TEXT NOT NULL DEFAULT '',
+                personality TEXT NOT NULL DEFAULT '',
+                difficulty TEXT NOT NULL DEFAULT '',
+                product TEXT NOT NULL DEFAULT '',
+                outcome TEXT NOT NULL DEFAULT '',
+                score INTEGER NOT NULL DEFAULT 0,
+                headline TEXT NOT NULL DEFAULT '',
+                did_well_json TEXT NOT NULL DEFAULT '[]',
+                missed_json TEXT NOT NULL DEFAULT '[]',
+                one_thing TEXT NOT NULL DEFAULT '',
+                best_line TEXT NOT NULL DEFAULT '',
+                turns INTEGER NOT NULL DEFAULT 0,
+                model TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+            )
+        """)
         conn.commit()
 
 
@@ -138,4 +157,63 @@ def get_review(review_id: int) -> dict | None:
     data = dict(row)
     data["categories"] = json.loads(data.pop("categories_json") or "[]")
     data["fixes"] = json.loads(data.pop("fixes_json") or "[]")
+    return data
+
+
+# ---------------------------------------------------------------------------
+# Roleplay Debriefs (Tool 2)
+# ---------------------------------------------------------------------------
+
+def save_debrief(agent_name: str, personality: str, difficulty: str, product: str,
+                 result: dict, turns: int, model: str) -> int:
+    with get_db() as conn:
+        cur = conn.execute(
+            """INSERT INTO ai_debriefs
+               (agent_name, personality, difficulty, product, outcome, score,
+                headline, did_well_json, missed_json, one_thing, best_line, turns, model)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                agent_name, personality, difficulty, product,
+                result.get("outcome", ""),
+                int(result.get("score", 0)),
+                result.get("headline", ""),
+                json.dumps(result.get("did_well", [])),
+                json.dumps(result.get("missed", [])),
+                result.get("one_thing", ""),
+                result.get("best_line", ""),
+                int(turns),
+                model,
+            ),
+        )
+        conn.commit()
+        return cur.lastrowid
+
+
+def get_debriefs(agent_name: str | None = None, limit: int = 100) -> list:
+    clauses, params = [], []
+    if agent_name:
+        clauses.append("agent_name = ?")
+        params.append(agent_name)
+    where = "WHERE " + " AND ".join(clauses) if clauses else ""
+    params.append(limit)
+    with get_db() as conn:
+        rows = conn.execute(
+            f"SELECT id, agent_name, personality, difficulty, product, outcome, "
+            f"score, headline, turns, model, created_at "
+            f"FROM ai_debriefs {where} ORDER BY id DESC LIMIT ?",
+            params,
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_debrief(debrief_id: int) -> dict | None:
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT * FROM ai_debriefs WHERE id = ?", (debrief_id,)
+        ).fetchone()
+    if not row:
+        return None
+    data = dict(row)
+    data["did_well"] = json.loads(data.pop("did_well_json") or "[]")
+    data["missed"] = json.loads(data.pop("missed_json") or "[]")
     return data

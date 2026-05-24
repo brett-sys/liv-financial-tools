@@ -132,8 +132,9 @@ Web-based call logging with multi-agent support.
 An AI coaching suite built into the Agent Toolkit (Tools → AI Coach, at `/illuminate/`). Powered by Claude via the Anthropic API; every tool reads from one editable **Operating Principles** config so refining your process re-tunes the whole suite. Set `ANTHROPIC_API_KEY` in `.env` to enable it — tools degrade gracefully (show a setup banner) when it's unset.
 
 - **Presentation Review** — paste a call transcript; get a 0–100 score, a category breakdown, and 10 ranked, transcript-specific fixes. Results are saved so agents can track their score over time.
+- **Training Partner** — practice a live pitch against an AI prospect (8 personalities × 4 difficulty tiers), then hit "End & Coach me" for a scored debrief. Reps are saved to track improvement.
 - **Operating Principles** — the single source of truth ("how we operate"), editable in the UI.
-- More tools (roleplay training partner, health/finance extractor, objection word-tracks, KPI analyzer, post-call notes, recruiting screen) are specced in [PROMPTS.md](PROMPTS.md) and built on the same shared config + client.
+- More tools (health/finance extractor, objection word-tracks, KPI analyzer, post-call notes, recruiting screen) are specced in [PROMPTS.md](PROMPTS.md) and built on the same shared config + client.
 
 > Training & coaching tools for licensed agents only — never client-facing advice, and never used to decide eligibility or underwriting. The toolkit stores structured review results, not raw transcripts.
 

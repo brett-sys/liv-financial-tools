@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Training Partner - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Training Partner</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        Practice a live pitch against an AI prospect. Pick a personality and difficulty,
+        run the call, then hit <strong>End &amp; Coach me</strong> for a debrief.
+    </p>
+
+    {% if not configured %}
+    <div class="flash flash-error" style="margin-bottom: 1rem;">
+        AI is not configured. Add <code>ANTHROPIC_API_KEY</code> to your <code>.env</code> to start practicing.
+    </div>
+    {% endif %}
+
+    <!-- Setup -->
+    <div id="setup" class="call-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="personality">Personality</label>
+                <select id="personality">
+                    {% for p in personalities %}<option value="{{ p.key }}">{{ p.label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="difficulty">Difficulty</label>
+                <select id="difficulty">
+                    {% for d in difficulties %}<option value="{{ d.key }}" {% if d.key == 'medium' %}selected{% endif %}>{{ d.label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="product">Product</label>
+                <select id="product">
+                    {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="model">Model</label>
+                <select id="model">
+                    {% for value, text in models %}<option value="{{ value }}" {% if value == default_model %}selected{% endif %}>{{ text }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="scenario">Scenario (optional)</label>
+            <input type="text" id="scenario" maxlength="200" placeholder="e.g. Just got off work, kids in the background">
+        </div>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="startBtn" {% if not configured %}disabled{% endif %}>
+            Start Call
+        </button>
+    </div>
+
+    <!-- Chat -->
+    <div id="chat" hidden>
+        <div class="rp-bar" id="rpBar"></div>
+        <div class="chat-log" id="log"></div>
+        <div class="chat-input">
+            <textarea id="msg" rows="2" placeholder="Type what you'd say on the call…"></textarea>
+            <button type="button" class="btn btn-primary" id="sendBtn">Send</button>
+        </div>
+        <div class="rp-actions">
+            <button type="button" class="btn btn-success btn-sm" id="endBtn">End &amp; Coach me</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="newBtn">New call</button>
+            <a href="{{ url_for('illuminate.roleplay_history') }}" class="btn btn-ghost btn-sm">Past reps</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-log { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.6rem 0; min-height: 220px; max-height: 52vh; overflow-y: auto; }
+.msg { max-width: 82%; padding: 0.55rem 0.75rem; border-radius: 14px; font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg-agent { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.msg-prospect { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg-sys { align-self: center; font-size: 0.72rem; color: var(--text-muted); text-align: center; }
+.msg-typing { align-self: flex-start; color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+.msg-err { align-self: center; color: var(--danger); font-size: 0.8rem; text-align: center; }
+.chat-input { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 0.4rem; }
+.chat-input textarea { flex: 1; resize: none; }
+.rp-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+.rp-chip { font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.55rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); }
+.rp-actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.75rem; flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var TURN_URL = "{{ url_for('illuminate.roleplay_turn') }}";
+    var DEBRIEF_URL = "{{ url_for('illuminate.roleplay_debrief') }}";
+
+    var setup = document.getElementById('setup');
+    var chat = document.getElementById('chat');
+    var log = document.getElementById('log');
+    var msgInput = document.getElementById('msg');
+    var sendBtn = document.getElementById('sendBtn');
+    var endBtn = document.getElementById('endBtn');
+
+    var messages = [];
+    var cfg = {};
+    var busy = false;
+
+    function el(cls, text) {
+        var d = document.createElement('div');
+        d.className = cls;
+        if (text !== undefined) d.textContent = text;  // textContent avoids XSS
+        return d;
+    }
+    function scrollDown() { log.scrollTop = log.scrollHeight; }
+
+    function addBubble(role, text) {
+        log.appendChild(el(role === 'user' ? 'msg msg-agent' : 'msg msg-prospect', text));
+        scrollDown();
+    }
+
+    document.getElementById('startBtn').addEventListener('click', function () {
+        cfg = {
+            personality: document.getElementById('personality').value,
+            difficulty: document.getElementById('difficulty').value,
+            product: document.getElementById('product').value,
+            scenario: document.getElementById('scenario').value,
+            model: document.getElementById('model').value,
+        };
+        var pers = document.getElementById('personality');
+        var diff = document.getElementById('difficulty');
+        var bar = document.getElementById('rpBar');
+        bar.appendChild(el('rp-chip', pers.options[pers.selectedIndex].text));
+        bar.appendChild(el('rp-chip', diff.options[diff.selectedIndex].text));
+        bar.appendChild(el('rp-chip', cfg.product));
+        setup.hidden = true;
+        chat.hidden = false;
+        log.appendChild(el('msg msg-sys', '📞 They pick up. You\'re calling about ' + cfg.product + '. Open the call.'));
+        msgInput.focus();
+    });
+
+    function setBusy(state) {
+        busy = state;
+        sendBtn.disabled = state;
+        endBtn.disabled = state;
+    }
+
+    function send() {
+        if (busy) return;
+        var text = msgInput.value.trim();
+        if (!text) return;
+        messages.push({ role: 'user', content: text });
+        addBubble('user', text);
+        msgInput.value = '';
+        setBusy(true);
+
+        var typing = el('msg msg-typing', 'Prospect is typing…');
+        log.appendChild(typing); scrollDown();
+
+        fetch(TURN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                personality: cfg.personality, difficulty: cfg.difficulty,
+                product: cfg.product, scenario: cfg.scenario,
+                model: cfg.model, messages: messages,
+            }),
+        })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+            log.removeChild(typing);
+            setBusy(false);
+            if (!res.ok || res.j.error) {
+                // revert the unanswered turn so roles stay alternating
+                messages.pop();
+                if (log.lastChild) log.removeChild(log.lastChild);
+                msgInput.value = text;
+                log.appendChild(el('msg msg-err', res.j.error || 'Something went wrong.'));
+                scrollDown();
+                return;
+            }
+            messages.push({ role: 'assistant', content: res.j.reply });
+            addBubble('assistant', res.j.reply);
+            msgInput.focus();
+        })
+        .catch(function () {
+            log.removeChild(typing);
+            setBusy(false);
+            messages.pop();
+            if (log.lastChild) log.removeChild(log.lastChild);
+            msgInput.value = text;
+            log.appendChild(el('msg msg-err', 'Network error. Try again.'));
+            scrollDown();
+        });
+    }
+
+    sendBtn.addEventListener('click', send);
+    msgInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+
+    endBtn.addEventListener('click', function () {
+        if (busy) return;
+        var agentTurns = messages.filter(function (m) { return m.role === 'user'; }).length;
+        if (agentTurns < 2) {
+            log.appendChild(el('msg msg-err', 'Practice a bit more before ending — at least a couple of exchanges.'));
+            scrollDown();
+            return;
+        }
+        if (!confirm('End the call and get your debrief?')) return;
+        setBusy(true);
+        endBtn.textContent = 'Scoring…';
+        fetch(DEBRIEF_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                personality: cfg.personality, difficulty: cfg.difficulty,
+                product: cfg.product, model: cfg.model, messages: messages,
+            }),
+        })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+            if (!res.ok || res.j.error) {
+                setBusy(false);
+                endBtn.textContent = 'End & Coach me';
+                log.appendChild(el('msg msg-err', res.j.error || 'Could not generate a debrief.'));
+                scrollDown();
+                return;
+            }
+            window.location = res.j.redirect;
+        })
+        .catch(function () {
+            setBusy(false);
+            endBtn.textContent = 'End & Coach me';
+            log.appendChild(el('msg msg-err', 'Network error. Try again.'));
+            scrollDown();
+        });
+    });
+
+    document.getElementById('newBtn').addEventListener('click', function () {
+        window.location.reload();
+    });
+})();
+</script>
+{% endblock %}

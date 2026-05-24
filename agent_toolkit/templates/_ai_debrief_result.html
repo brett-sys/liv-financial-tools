@@ -1,0 +1,84 @@
+{# Shared render of a roleplay debrief. Expects `d` with keys:
+   outcome, score, headline, did_well[], missed[], one_thing, best_line. #}
+<div class="db-result">
+    <div class="db-top">
+        <div class="db-score db-score-{{ 'good' if d.score >= 80 else ('mid' if d.score >= 60 else 'low') }}">
+            <span class="db-score-num">{{ d.score }}</span><span class="db-score-max">/100</span>
+        </div>
+        <div class="db-top-body">
+            <span class="db-outcome db-outcome-{{ d.outcome }}">
+                {{ {'closed': 'Closed', 'callback_earned': 'Callback earned', 'lost': 'Lost'}.get(d.outcome, d.outcome) }}
+            </span>
+            <div class="db-headline">{{ d.headline }}</div>
+        </div>
+    </div>
+
+    {% if d.did_well %}
+    <div class="db-block">
+        <h2 class="db-h">What you did well</h2>
+        <ul class="db-list db-list-good">
+            {% for item in d.did_well %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if d.missed %}
+    <div class="db-block">
+        <h2 class="db-h">What you missed</h2>
+        <ul class="db-list db-list-miss">
+            {% for item in d.missed %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if d.one_thing %}
+    <div class="db-onething">
+        <span class="db-onething-lab">Do this next rep</span>
+        {{ d.one_thing }}
+    </div>
+    {% endif %}
+
+    {% if d.best_line %}
+    <div class="db-block">
+        <h2 class="db-h">Better word-track</h2>
+        <blockquote class="db-quote">{{ d.best_line }}</blockquote>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.db-result { margin-top: 1rem; }
+.db-top { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.1rem; }
+.db-score {
+    flex-shrink: 0; width: 84px; height: 84px; border-radius: 50%;
+    display: flex; align-items: baseline; justify-content: center;
+    border: 3px solid var(--border); font-weight: 800;
+}
+.db-score-num { font-size: 1.9rem; }
+.db-score-max { font-size: 0.8rem; color: var(--text-muted); }
+.db-score-good { border-color: var(--success); color: var(--success); }
+.db-score-mid  { border-color: var(--warning); color: var(--warning); }
+.db-score-low  { border-color: var(--danger);  color: var(--danger); }
+.db-top-body { display: flex; flex-direction: column; gap: 0.35rem; }
+.db-outcome { align-self: flex-start; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem 0.55rem; border-radius: 6px; }
+.db-outcome-closed { background: rgba(52, 199, 89, 0.18); color: var(--success); }
+.db-outcome-callback_earned { background: rgba(79, 140, 255, 0.18); color: var(--primary); }
+.db-outcome-lost { background: rgba(255, 69, 58, 0.18); color: var(--danger); }
+.db-headline { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
+
+.db-block { margin-bottom: 1rem; }
+.db-h { font-size: 0.95rem; margin: 0 0 0.45rem; }
+.db-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.db-list li { font-size: 0.85rem; line-height: 1.45; padding-left: 1.4rem; position: relative; }
+.db-list li::before { position: absolute; left: 0; top: 0; font-weight: 800; }
+.db-list-good li::before { content: "✓"; color: var(--success); }
+.db-list-miss li::before { content: "•"; color: var(--warning); }
+
+.db-onething {
+    background: var(--primary-glow); border: 1px solid var(--primary);
+    border-radius: var(--radius-sm); padding: 0.8rem; margin-bottom: 1rem;
+    font-size: 0.9rem; font-weight: 600; line-height: 1.45;
+}
+.db-onething-lab { display: block; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--primary); margin-bottom: 0.3rem; }
+.db-quote { margin: 0; padding: 0.7rem 0.85rem; border-left: 3px solid var(--primary); background: var(--surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.88rem; font-style: italic; line-height: 1.5; }
+</style>
