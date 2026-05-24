@@ -15,6 +15,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 # ---------------------------------------------------------------------------
 CALLS_DB_PATH = BASE_DIR / "calls.db"
 REFERRALS_DB_PATH = BASE_DIR / "referrals.db"
+AI_COACH_DB_PATH = BASE_DIR / "ai_coach.db"
 
 # ---------------------------------------------------------------------------
 # Flask
@@ -160,6 +161,12 @@ AGENT_PHONE = "(714) 335-1412"
 AGENT_EMAIL_DISPLAY = "brett@fflliv.com"
 AGENT_LICENSE = "License #21114292"
 AGENT_WEBSITE = "www.livfinancialgroup.com"
+
+# ---------------------------------------------------------------------------
+# Illuminate AI Coach (Anthropic)
+# ---------------------------------------------------------------------------
+# API key stays server-side. Tools degrade gracefully when it is unset.
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
 # ---------------------------------------------------------------------------
 # Integrity Connect (Quoter)

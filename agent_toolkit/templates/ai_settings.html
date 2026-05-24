@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Operating Principles - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Operating Principles</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        This is the single source of truth — "how we operate." Every AI tool injects it into
+        its prompt, so editing it here re-tunes the whole suite. Edit it to match your real
+        script and word tracks.
+        {% if using_default %}<br><strong style="color: var(--warning);">Currently using the built-in default.</strong>{% endif %}
+    </p>
+
+    <form method="POST" action="{{ url_for('illuminate.settings') }}" class="call-form">
+        <div class="form-group">
+            <textarea id="principles" name="operating_principles" rows="22"
+                      style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.5;"
+                      required>{{ principles }}</textarea>
+        </div>
+        <div class="form-actions" style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">Save Principles</button>
+            <button type="button" class="btn btn-secondary" id="restoreBtn">Restore default</button>
+        </div>
+    </form>
+
+    <textarea id="defaultPrinciples" hidden>{{ default_text }}</textarea>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('restoreBtn').addEventListener('click', function () {
+    if (!confirm('Replace the text with the built-in default? You still need to Save.')) return;
+    document.getElementById('principles').value = document.getElementById('defaultPrinciples').value;
+});
+</script>
+{% endblock %}

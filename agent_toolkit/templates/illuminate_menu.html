@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}AI Coach - LIFI{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+    <h1>AI Coach</h1>
+</div>
+
+{% if not configured %}
+<div class="flash flash-error" style="margin-bottom: 1rem;">
+    AI is not configured yet. Add <code>ANTHROPIC_API_KEY</code> to your <code>.env</code> to enable these tools.
+</div>
+{% endif %}
+
+<div class="tools-grid">
+    <a href="{{ url_for('illuminate.review') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <path d="M9 15l2 2 4-4"/>
+        </svg>
+        <span class="tool-card-title">Presentation Review</span>
+        <span class="tool-card-desc">Grade a call transcript</span>
+    </a>
+
+    <a href="{{ url_for('illuminate.review_history') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span class="tool-card-title">Review History</span>
+        <span class="tool-card-desc">Track scores over time</span>
+    </a>
+
+    <a href="{{ url_for('illuminate.settings') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+        <span class="tool-card-title">Operating Principles</span>
+        <span class="tool-card-desc">The shared config</span>
+    </a>
+</div>
+
+<p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 1.5rem; line-height: 1.5;">
+    Training &amp; coaching tools for licensed agents only — never client-facing advice,
+    and never used to decide eligibility, underwriting, or recommend a policy to a consumer.
+    Every tool reads from your <a href="{{ url_for('illuminate.settings') }}" style="color: var(--primary);">Operating Principles</a>,
+    so refining your process re-tunes the whole suite.
+</p>
+{% endblock %}
