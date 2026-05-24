@@ -35,9 +35,15 @@ app.register_blueprint(scoreboard_bp)
 # Theme: set via /<agent_slug>, detected by hostname, stored in cookie
 # ---------------------------------------------------------------------------
 THEME_ROUTES = {}
+# Primary slug: full agent name, lowercased, no spaces (e.g. "Kevin Nelson" -> kevinnelson).
 for agent in config.AGENTS:
     slug = agent["name"].lower().replace(" ", "")
     THEME_ROUTES[slug] = agent
+# Alias: theme key for short links (e.g. /kevin) when it does not collide with another name slug.
+for agent in config.AGENTS:
+    theme_slug = (agent.get("theme") or "").strip().lower()
+    if theme_slug and theme_slug not in THEME_ROUTES:
+        THEME_ROUTES[theme_slug] = agent
 
 
 @app.route("/<slug>")
@@ -58,16 +64,19 @@ def inject_globals():
         theme = cookie_theme
         agent_pref = request.cookies.get("agent_pref", "Brett")
     else:
-        host = request.host.split(":")[0]
-        is_local = host in ("localhost", "127.0.0.1") or host.startswith("192.168.")
-        theme = "brett" if is_local else "kevin"
-        agent_pref = "Brett" if is_local else "Kevin Nelson"
+        # First visit (no cookies): use first agent in config — not a hardcoded production default.
+        first = config.AGENTS[0] if config.AGENTS else {"name": "Brett", "theme": "brett"}
+        theme = first["theme"]
+        agent_pref = first["name"]
     return {
         "theme": theme,
         "agent_pref": agent_pref,
         "agents": config.AGENT_CHOICES,
         "app_name": "LIFI",
         "vapid_public_key": config.VAPID_PUBLIC_KEY,
+        "social_links": config.SOCIAL_LINKS,
+        "app_store_url": config.APP_STORE_URL,
+        "play_store_url": config.PLAY_STORE_URL,
     }
 
 

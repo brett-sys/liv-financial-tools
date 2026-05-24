@@ -7,6 +7,7 @@ from flask import (
 from datetime import datetime
 
 import config
+from uppa_report import load_uppa_export
 from models.scoreboard import (
     log_activity, get_ranked, get_leaderboard, get_recent_activity,
     check_milestone, ACTIVITY_TYPES, ACTIVITY_LABELS, ACTIVITY_EMOJIS,
@@ -40,6 +41,7 @@ METRICS = {
 def scoreboard():
     period = request.args.get("period", "week")
     metric = request.args.get("metric", "policies")
+    agent_pref = request.cookies.get("agent_pref", config.AGENT_CHOICES[0])
 
     if period not in PERIODS:
         period = "week"
@@ -50,8 +52,22 @@ def scoreboard():
     leaderboard = get_leaderboard(period)
     recent = get_recent_activity(15)
 
+    month_lb = get_leaderboard("month")
+    my_month_ap = month_lb.get(agent_pref, {}).get("ap", 0.0)
+    my_month_commission = my_month_ap * config.COMMISSION_FIRST_YEAR_PCT / 100
+    commission_goal = config.COMMISSION_MONTHLY_GOAL
+    goal_pct = min(100, (my_month_commission / commission_goal * 100) if commission_goal else 0)
+
     # Build recognition badges
     recognition = _build_recognition(leaderboard)
+
+    uppa_columns: list[str] = []
+    uppa_rows: list[dict] = []
+    uppa_export_error: str | None = None
+    export_url = getattr(config, "UPPA_IP_EXPORT_URL", "") or ""
+    if export_url:
+        bust = request.args.get("refresh_uppa") == "1"
+        uppa_columns, uppa_rows, uppa_export_error = load_uppa_export(export_url, bust_cache=bust)
 
     # Format recent feed
     feed = []
@@ -79,6 +95,15 @@ def scoreboard():
         metrics=METRICS,
         agents=config.AGENT_CHOICES,
         commission_rate=config.COMMISSION_FIRST_YEAR_PCT,
+        commission_renewal_rate=config.COMMISSION_RENEWAL_PCT,
+        my_month_commission=my_month_commission,
+        commission_goal=commission_goal,
+        goal_pct=goal_pct,
+        uppa_ip_report_url=config.UPPA_IP_REPORT_URL or None,
+        uppa_columns=uppa_columns,
+        uppa_rows=uppa_rows,
+        uppa_export_error=uppa_export_error,
+        uppa_export_configured=bool(export_url),
     )
 
 

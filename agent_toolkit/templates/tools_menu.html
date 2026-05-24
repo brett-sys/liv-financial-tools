@@ -33,7 +33,17 @@
             <polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
         <span class="tool-card-title">Policy Submitted</span>
-        <span class="tool-card-desc">Confirmation PDF</span>
+        <span class="tool-card-desc">IUL confirmation PDF</span>
+    </a>
+
+    <a href="{{ url_for('tools.policy_submitted_veterans') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 11v0"/>
+            <path d="M8 11h8"/>
+        </svg>
+        <span class="tool-card-title">Veterans Policy Submitted</span>
+        <span class="tool-card-desc">Veteran confirmation PDF</span>
     </a>
 
     <a href="{{ url_for('tools.term_comparison') }}" class="tool-card">
@@ -54,6 +64,17 @@
         <span class="tool-card-desc">Compare final expense quotes</span>
     </a>
 
+    <a href="{{ url_for('tools.quote_comparison') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18" rx="1"/>
+            <rect x="14" y="3" width="7" height="18" rx="1"/>
+            <line x1="6" y1="8" x2="7" y2="8"/><line x1="17" y1="8" x2="18" y2="8"/>
+            <line x1="6" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="18" y2="12"/>
+        </svg>
+        <span class="tool-card-title">Quote Comparison</span>
+        <span class="tool-card-desc">Compare quote options PDF</span>
+    </a>
+
     <a href="{{ url_for('tools.quick_quote') }}" class="tool-card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="4" y="2" width="16" height="20" rx="2"/>
@@ -65,6 +86,18 @@
         </svg>
         <span class="tool-card-title">Quick Quote</span>
         <span class="tool-card-desc">Estimate IUL values fast</span>
+    </a>
+
+    <a href="{{ url_for('tools.pipeline') }}" class="tool-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="5" height="16" rx="1"/>
+            <rect x="10" y="4" width="5" height="16" rx="1"/>
+            <rect x="17" y="4" width="4" height="16" rx="1"/>
+            <line x1="8" y1="9" x2="10" y2="9"/>
+            <line x1="15" y1="14" x2="17" y2="14"/>
+        </svg>
+        <span class="tool-card-title">Pipeline</span>
+        <span class="tool-card-desc">Kanban call pipeline board</span>
     </a>
 
     <a href="{{ url_for('tools.teleprompter') }}" class="tool-card">

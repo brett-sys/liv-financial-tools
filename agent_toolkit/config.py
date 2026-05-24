@@ -95,6 +95,127 @@ AGENTS = [
         "calendar": "google",
         "calendar_id": "",
     },
+    {
+        "name": "Blake",
+        "full_name": "Blake",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "blake",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Alberto",
+        "full_name": "Alberto",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "alberto",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "JL",
+        "full_name": "JL",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "jl",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Carmello",
+        "full_name": "Carmello",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "carmello",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Noah",
+        "full_name": "Noah",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "noah",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Mahan",
+        "full_name": "Mahan",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "mahan",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Alex",
+        "full_name": "Alex",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "alex",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Kaiden",
+        "full_name": "Kaiden",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "kaiden",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Devon",
+        "full_name": "Devon",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "devon",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Nico",
+        "full_name": "Nico",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "nico",
+        "calendar": "google",
+        "calendar_id": "",
+    },
+    {
+        "name": "Harlie",
+        "full_name": "Harlie",
+        "title": "Agent",
+        "phone": "",
+        "license": "",
+        "email": "",
+        "theme": "harlie",
+        "calendar": "google",
+        "calendar_id": "",
+    },
 ]
 
 AGENT_CHOICES = [a["name"] for a in AGENTS]
@@ -151,6 +272,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 PDF_ENGINE_DIR = BASE_DIR / "pdf_engine"
 LOGO_FILENAME = "assets/234.png"
 NLG_LOGO_FILENAME = "assets/nlg_logo.png"
+VETERANS_LOGO_FILENAME = "assets/veterans_logo.png"
 AGENT_PHOTO_FILENAME = "assets/agent_headshot.png"
 BUSINESS_CARD_FILENAME = "assets/business_card.png"
 
@@ -176,6 +298,19 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 # ---------------------------------------------------------------------------
 SCOREBOARD_DB_PATH = BASE_DIR / "scoreboard.db"
 
+# UppaTop company IP report — opened in the user's browser from the scoreboard.
+# stats.uppatop.com is behind Cloudflare; server-side HTTP fetch is blocked, so
+# we do not scrape this URL. Set UPPA_IP_REPORT_URL in .env when the path/date changes.
+UPPA_IP_REPORT_URL = os.getenv(
+    "UPPA_IP_REPORT_URL",
+    "https://stats.uppatop.com/ipreport_ytd/9ba64f11-57ad-4def-9609-d3ce8256b8eb/2026-04-30",
+).strip()
+
+# Direct export URL (CSV or JSON) — set in .env when UppaTop gives you a download link.
+# Server fetches this; optional bearer token if the link requires auth.
+UPPA_IP_EXPORT_URL = os.getenv("UPPA_IP_EXPORT_URL", "").strip()
+UPPA_IP_EXPORT_TOKEN = os.getenv("UPPA_IP_EXPORT_TOKEN", "").strip()
+
 # ---------------------------------------------------------------------------
 # Web Push (VAPID)
 # ---------------------------------------------------------------------------
@@ -188,6 +323,7 @@ VAPID_CLAIMS_EMAIL = os.getenv("VAPID_CLAIMS_EMAIL", "brett@fflliv.com")
 # ---------------------------------------------------------------------------
 COMMISSION_FIRST_YEAR_PCT = float(os.getenv("COMMISSION_FIRST_YEAR_PCT", "100"))
 COMMISSION_RENEWAL_PCT = float(os.getenv("COMMISSION_RENEWAL_PCT", "5"))
+COMMISSION_MONTHLY_GOAL = float(os.getenv("COMMISSION_MONTHLY_GOAL", "10000"))
 
 # ---------------------------------------------------------------------------
 # Daily Reminders
