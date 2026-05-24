@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Review History - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Review History</h1>
+
+    <div class="btn-group" style="margin-bottom: 1rem;">
+        <a href="{{ url_for('illuminate.review_history') }}"
+           class="btn-toggle {% if mine_only %}active{% endif %}">My reviews</a>
+        <a href="{{ url_for('illuminate.review_history', scope='team') }}"
+           class="btn-toggle {% if not mine_only %}active{% endif %}">Whole team</a>
+    </div>
+
+    {% if reviews %}
+    <div class="rev-list">
+        {% for r in reviews %}
+        <a class="rev-row" href="{{ url_for('illuminate.review_detail', review_id=r.id) }}">
+            <span class="rev-chip rev-chip-{{ 'good' if r.score >= 80 else ('mid' if r.score >= 60 else 'low') }}">{{ r.score }}</span>
+            <span class="rev-row-body">
+                <span class="rev-row-title">{{ r.label or r.verdict or "Untitled review" }}</span>
+                <span class="rev-row-meta">
+                    {% if not mine_only %}{{ r.agent_name or "—" }} · {% endif %}{{ r.created_at }}
+                </span>
+            </span>
+            <svg class="rev-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        No reviews yet.
+        <a href="{{ url_for('illuminate.review') }}" style="color: var(--primary);">Run your first review →</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.rev-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.rev-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.7rem 0.8rem; text-decoration: none; color: inherit;
+}
+.rev-row:hover { border-color: var(--primary); }
+.rev-chip {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.95rem; border: 2px solid var(--border);
+}
+.rev-chip-good { border-color: var(--success); color: var(--success); }
+.rev-chip-mid  { border-color: var(--warning); color: var(--warning); }
+.rev-chip-low  { border-color: var(--danger);  color: var(--danger); }
+.rev-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.rev-row-title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rev-row-meta { font-size: 0.72rem; color: var(--text-muted); }
+.rev-row-arrow { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+</style>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Presentation Review - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Presentation Review</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        Paste a call transcript. Claude grades the agent against your Operating Principles
+        and returns a score plus 10 ranked fixes for the next call.
+    </p>
+
+    {% if not configured %}
+    <div class="flash flash-error" style="margin-bottom: 1rem;">
+        AI is not configured. Add <code>ANTHROPIC_API_KEY</code> to your <code>.env</code> to enable reviews.
+    </div>
+    {% endif %}
+
+    {% set sel = model or default_model %}
+    <form method="POST" action="{{ url_for('illuminate.review') }}" class="call-form" autocomplete="off"
+          onsubmit="var b=document.getElementById('revBtn'); b.disabled=true; b.textContent='Reviewing… (10–30s)';">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="label">Label (optional)</label>
+                <input type="text" id="label" name="label" maxlength="80"
+                       placeholder="Client first name or call ID" value="{{ label or '' }}">
+            </div>
+            <div class="form-group">
+                <label for="model">Model</label>
+                <select id="model" name="model">
+                    {% for value, text in models %}
+                    <option value="{{ value }}" {% if value == sel %}selected{% endif %}>{{ text }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="transcript">Call transcript</label>
+            <textarea id="transcript" name="transcript" rows="9" required
+                      placeholder="Agent: Hi, this is Brett with LIV Financial…&#10;Client: Oh, hi…&#10;Agent: …"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="revBtn">Review Call</button>
+    </form>
+
+    <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.75rem;">
+        <a href="{{ url_for('illuminate.review_history') }}" class="btn btn-ghost btn-sm">Past reviews</a>
+        <a href="{{ url_for('illuminate.settings') }}" class="btn btn-ghost btn-sm">Operating Principles</a>
+    </div>
+
+    {% if result %}
+    {% set res = result %}
+    {% include "_ai_review_result.html" %}
+    <div style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('illuminate.review') }}" class="btn btn-secondary btn-sm">Review another call</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -12,3 +12,6 @@ google-api-python-client>=2.0
 pywebpush>=2.0.0
 gunicorn>=21.2
 cryptography>=41.0
+
+# Illuminate AI Coach (agent_toolkit)
+anthropic>=0.40.0

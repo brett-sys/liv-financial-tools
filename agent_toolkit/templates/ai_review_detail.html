@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Review - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <a href="{{ url_for('illuminate.review_history') }}" class="btn btn-ghost btn-sm" style="margin-bottom: 0.5rem;">← History</a>
+    <h1>{{ r.label or "Presentation Review" }}</h1>
+    <p style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.5rem;">
+        {{ r.agent_name or "—" }} · {{ r.created_at }} · {{ r.model }}
+    </p>
+
+    {% set res = r %}
+    {% include "_ai_review_result.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Debrief - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <a href="{{ url_for('illuminate.roleplay_history') }}" class="btn btn-ghost btn-sm" style="margin-bottom: 0.5rem;">← History</a>
+    <h1>Practice Debrief</h1>
+    <p style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.5rem;">
+        {{ d.personality or "—" }} · {{ d.difficulty or "—" }} · {{ d.product or "—" }}
+        · {{ d.turns }} turns · {{ d.created_at }}
+    </p>
+
+    {% include "_ai_debrief_result.html" %}
+
+    <div style="text-align: center; margin-top: 1.25rem;">
+        <a href="{{ url_for('illuminate.roleplay') }}" class="btn btn-primary btn-sm">Practice again</a>
+    </div>
+</div>
+{% endblock %}

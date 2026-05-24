@@ -1,0 +1,84 @@
+{# Shared render of a Presentation Review result. Expects `res` with
+   keys: score, verdict, categories[], fixes[]. #}
+<div class="rev-result">
+    <div class="rev-score-row">
+        <div class="rev-score rev-score-{{ 'good' if res.score >= 80 else ('mid' if res.score >= 60 else 'low') }}">
+            <span class="rev-score-num">{{ res.score }}</span><span class="rev-score-max">/100</span>
+        </div>
+        <div class="rev-verdict">{{ res.verdict }}</div>
+    </div>
+
+    {% if res.categories %}
+    <div class="rev-cats">
+        {% for c in res.categories %}
+        <div class="rev-cat">
+            <div class="rev-cat-head">
+                <span class="rev-cat-name">{{ c.name }}</span>
+                <span class="rev-cat-score">{{ c.score }}/10</span>
+            </div>
+            <div class="rev-cat-bar">
+                <div class="rev-cat-fill rev-fill-{{ 'good' if c.score >= 8 else ('mid' if c.score >= 5 else 'low') }}"
+                     style="width: {{ c.score * 10 }}%;"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="rev-fixes-title">Top fixes — most impactful first</h2>
+    <ol class="rev-fixes">
+        {% for f in res.fixes %}
+        <li class="rev-fix">
+            <div class="rev-fix-head">
+                <span class="rev-pri rev-pri-{{ f.priority }}">{{ f.priority }}</span>
+                <span class="rev-fix-title">{{ f.title }}</span>
+            </div>
+            {% if f.observed %}<div class="rev-fix-line"><span class="rev-lab">Observed</span>{{ f.observed }}</div>{% endif %}
+            <div class="rev-fix-line"><span class="rev-lab rev-lab-fix">Fix</span>{{ f.fix }}</div>
+        </li>
+        {% endfor %}
+    </ol>
+</div>
+
+<style>
+.rev-result { margin-top: 1.25rem; }
+.rev-score-row { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; }
+.rev-score {
+    flex-shrink: 0; width: 84px; height: 84px; border-radius: 50%;
+    display: flex; align-items: baseline; justify-content: center;
+    border: 3px solid var(--border); font-weight: 800;
+}
+.rev-score-num { font-size: 1.9rem; }
+.rev-score-max { font-size: 0.8rem; color: var(--text-muted); }
+.rev-score-good { border-color: var(--success); color: var(--success); }
+.rev-score-mid  { border-color: var(--warning); color: var(--warning); }
+.rev-score-low  { border-color: var(--danger);  color: var(--danger); }
+.rev-verdict { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
+
+.rev-cats { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 1.25rem; }
+.rev-cat-head { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem; }
+.rev-cat-name { font-weight: 600; }
+.rev-cat-score { color: var(--text-muted); font-weight: 700; }
+.rev-cat-bar { height: 7px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+.rev-cat-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+.rev-fill-good { background: var(--success); }
+.rev-fill-mid  { background: var(--warning); }
+.rev-fill-low  { background: var(--danger); }
+
+.rev-fixes-title { font-size: 1rem; margin: 0 0 0.6rem; }
+.rev-fixes { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.55rem; counter-reset: fix; }
+.rev-fix {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.7rem 0.8rem;
+}
+.rev-fix-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
+.rev-fix-title { font-weight: 700; font-size: 0.9rem; }
+.rev-pri { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.18rem 0.45rem; border-radius: 5px; }
+.rev-pri-high   { background: rgba(255, 69, 58, 0.18);  color: var(--danger); }
+.rev-pri-medium { background: rgba(255, 159, 10, 0.18); color: var(--warning); }
+.rev-pri-low    { background: rgba(139, 143, 163, 0.18); color: var(--text-muted); }
+.rev-fix-line { font-size: 0.82rem; line-height: 1.45; color: var(--text); margin-top: 0.2rem; }
+.rev-lab { display: inline-block; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-right: 0.4rem; }
+.rev-lab-fix { color: var(--primary); }
+</style>
