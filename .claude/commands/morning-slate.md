@@ -60,6 +60,7 @@ NBA · NCAAB · NFL · Soccer · MLB · NHL · PGA.
 - **Parlays:** 2-leg **cross-game only**, both legs 55%+, $25–$50.
 - **Volume:** 5–10 bets/week. **Weekday cap 3.** **Never chase.** Down session =
   fewer bets, not bigger ones.
+- **No live (in-game) betting on weekends.** Sat/Sun = pre-game number value only.
 - **Cap 5 bets in week one. Default LEAN** until 10 bets logged with real CLV.
 
 ## 4-Filter Gate (all four must pass — else PASS)

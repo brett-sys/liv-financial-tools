@@ -114,6 +114,9 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
   bankroll does.
 - **Volume & chase rules:** 5–10 bets/week · **weekday cap 3** · **never chase** ·
   down sessions = fewer bets, not bigger ones.
+- **No live (in-game) betting on weekends.** The edge is pre-game number value;
+  weekend live markets are fast, heavily juiced, and a chase magnet. Sat/Sun =
+  pre-game bets only.
 
 ---
 

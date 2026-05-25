@@ -23,7 +23,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-1? | — | SEED ROW 3 — replace with real week-1 gap from findings.md | F5 | — | — | — | Diamond ?er | n | — |
 | 2026-05-24 | NBA | OKC @ SAS WCF G4 | side | OKC +2.5 (FD) | OKC +3 (-110) | 0.5 | Diamond higher (OKC +pts) | n | PASS — gap only, JW unresolved, steam vs OKC |
 | 2026-05-24 | NBA | OKC @ SAS WCF G4 | total | 218.5 (FD) | 219 (-110) | 0.5 | Diamond higher | n | PASS — hardest market, no pace read |
-| 2026-05-24 | NHL | COL @ VEG WCF G3 | total | 5.5 (DK) | 6 u-114 | 0.5 | Diamond higher | hold | CONDITIONAL Lean under — wait on COL goalie at warmup |
+| 2026-05-24 | NHL | COL @ VEG WCF G3 | total | 5.5 (DK) | 6 u-114 | 0.5 | Diamond higher | n | NO FIRE — not placed (had +0.5 CLV vs 5.5 close) |
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | side(ML) | VEG +124 | VEG +130 | ~1% | Diamond better dog price | n | PASS — <3% ML threshold |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
@@ -35,5 +35,5 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 - Logged real: **4** (2026-05-24) + **3** week-1 placeholders pending confirmation
 - Remaining to threshold (real): **~13**
-- Gaps fired so far: **0** (1 conditional hold: NHL COL@VEG under 6)
+- Gaps fired so far: **0** (NHL COL@VEG under 6 identified +0.5 CLV but not placed)
 - CLV on bet gaps so far: **TBD** (need closing lines via Pikkit)
