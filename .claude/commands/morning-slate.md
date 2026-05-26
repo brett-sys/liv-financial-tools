@@ -142,6 +142,13 @@ When Brett pastes Diamond lines:
 - **EV at multiple sizes** (Lean $295 / Standard $510 / Max $900). Show the math.
 - **Run the 4-filter gate + decision framework.** Need **5+** framework signals
   to fire. Default **LEAN**.
+- **Two play types, never blended** (see SYSTEMS.md):
+  - *Projection play* — must clear Filter 2 (**1.5+ pts / 3% ML**); tiered.
+  - *Line-gap (CLV) play* — cross-book gap ≥0.5; **Lean-only, confirmed-lineup
+    only, 5+ signals**, graded on CLV. A 0.5 gap does NOT borrow the projection
+    tier. Never fire a line-gap play on a conditional/unconfirmed goalie.
+- **Number-only:** justify every bet **and every pass** with a number
+  (gap / price / CLV). If the only case is who-wins narrative → automatic PASS.
 - **Assign a tier or an explicit PASS** for every game — passes are results too.
 - **Log EVERY gap in `research/line-gap-edge/gap-log.md`, bet or not** (the
   selection-bias guard). The line-gap edge is **n=3, UNPROVEN** — do not size up

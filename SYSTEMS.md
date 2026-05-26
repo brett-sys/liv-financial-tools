@@ -86,6 +86,11 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 
 - **Market maker, not a fan.** Bet mispriced numbers, not winners. The question is
   never *"who wins"* — it is always *"is this the right number."*
+- **Number-only, never narrative.** Every bet **and every pass** is justified by a
+  number — a gap, a price, a CLV figure. Situational stories (revenge, closeout,
+  "desperate home dog," "they're due") are **not** reasons to act. If the only
+  case for a play is who-wins narrative, it is an **automatic PASS** — say so in
+  those words.
 - **Juice ceiling.** Standard markets only, **−110 to −115**. Anything heavier
   than **−120**, or any parlay/prop/teaser juiced on both sides, gets **killed**.
   Vig compounds losses.
@@ -136,13 +141,35 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 
 ---
 
-## Line-Gap Edge (UNPROVEN — n=3)
+## Two Play Types — never blend them
 
-- The DK-vs-Diamond line-gap edge is **n=3 and unproven.** Treat it as a
-  hypothesis, not an edge, until **n=20 + positive CLV**.
-- **Log every gap I spot, bet or not**, in
-  `research/line-gap-edge/gap-log.md`. This is the **selection-bias guard** —
-  recording only the gaps I bet would make a losing pattern look like a winner.
+**1. Projection play (primary).** Must clear the full 4-filter, **including
+Filter 2**: a **1.5+ pt** edge on the number (spread/total) or **3%+ ML** edge,
+from my own projection. Tiered Lean / Standard / Max by conviction.
+
+**2. Line-gap (CLV) play.** A cross-book number gap (Diamond vs the sharp/DK
+reference). Its edge is **CLV, not a projection — so it does NOT use Filter 2's
+1.5-pt threshold.** It has its own hard gate, all required:
+
+- Gap **≥ 0.5** where the half-point actually buys value (e.g., under 6 vs a 5.5
+  close — the 6 pushes), OR a materially better ML price than the sharp number.
+- Juice **≤ −115** (prefer +money).
+- Lineup / goalie **CONFIRMED** — **no conditional fires** on a line-gap play.
+- **5+** decision-framework signals.
+- **Lean ($295) ONLY** — never Standard or Max on a line-gap play.
+- Graded on **CLV, not W/L.**
+
+> A 0.5 gap is a *line-gap* play, not a projection play. Do not let it borrow the
+> projection tier. If a spot has neither a 1.5-pt projection nor a clean line-gap,
+> it is a **PASS**.
+
+### Line-gap is UNPROVEN (n=3) — on probation
+
+- Stays **Lean-only** until **n=20 logged + positive average CLV**. If CLV is
+  negative at n=20, **kill the track**.
+- **Log every gap, bet or not**, in `research/line-gap-edge/gap-log.md` — the
+  **selection-bias guard**. Recording only the gaps I bet would make a losing
+  pattern look like a winner.
 
 ---
 

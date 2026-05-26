@@ -26,7 +26,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | total | 5.5 (DK) | 6 u-114 | 0.5 | Diamond higher | n | NO FIRE — not placed (had +0.5 CLV vs 5.5 close) |
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | side(ML) | VEG +124 | VEG +130 | ~1% | Diamond better dog price | n | PASS — <3% ML threshold |
 | 2026-05-25 | NBA | NYK @ CLE ECF G4 | side+total | DK open -1.5 / 216.5 | -2.5 / 217.5 | ~1.0 | Diamond = consensus; DK open stale | n | PASS — no Diamond edge (DK is soft side, unbettable) |
-| 2026-05-25 | NHL | CAR @ MTL ECF G3 | total | 5.5 (sharp/consensus) | 6 u-115 | 0.5 | Diamond higher | hold | CONDITIONAL Lean under — MTL goalie unconfirmed (Dobeš proj.), warmup |
+| 2026-05-25 | NHL | CAR @ MTL ECF G3 | total | 5.5 (sharp/consensus) | 6 u-115 | 0.5 | Diamond higher | ??? | GREEN-LIT (Dobeš confirmed) Lean $295 under 6 @ -115 — FILL + RESULT PENDING from Brett |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
