@@ -61,10 +61,12 @@
 
 ### Where Brett Bets
 
-- **Diamond** — primary offshore book. **NOT scrapeable** — Brett supplies these
-  lines manually from screenshots.
-- **Secondary offshore** — ~$333 balance.
-- **DraftKings** — **view-only** reference. CA betting illegal; no wagers placed there.
+- **Diamond** — primary offshore book. **NOT scrapeable** — Brett supplies lines
+  via screenshots.
+- **WagerBoard** — secondary offshore book. Also screenshot-supplied.
+- **Line-shop both books** — on every play, take the better number/price between
+  Diamond and WagerBoard. Must have funds on whichever book holds the number.
+- **DraftKings** — **view-only** US sharp reference. CA betting illegal; no wagers placed there.
 
 ### Roles & Data Flow
 
@@ -94,12 +96,13 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 - **Juice ceiling.** Standard markets only, **−110 to −115**. Anything heavier
   than **−120**, or any parlay/prop/teaser juiced on both sides, gets **killed**.
   Vig compounds losses.
+- **Segments: 1st half and full game ONLY — NO second-half bets.** (Brett pref,
+  set 2026-05-26.) Skip every 2H market regardless of price.
 - **Market-softness ranking** (where edge lives — softest first):
   1. **1H totals** ← softest, most edge
-  2. **2H totals**
-  3. **Full-game spreads on key numbers**
-  4. **Small-dog MLs** (+100 to +180)
-  5. **Full-game totals** ← hardest; books model heavily. Only bet with a
+  2. **Full-game spreads on key numbers**
+  3. **Small-dog MLs** (+100 to +180)
+  4. **Full-game totals** ← hardest; books model heavily. Only bet with a
      specific pace/efficiency read.
 - **CLV is the only metric that matters week to week.** Bet better numbers than
   the close and you win long-term. **+0.3 average CLV = profitable even in red

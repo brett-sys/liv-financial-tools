@@ -47,10 +47,11 @@ NBA · NCAAB · NFL · Soccer · MLB · NHL · PGA.
 - **MLB:** F5 sides > F5 totals > full-game ML. **Avoid run lines. Avoid Coors
   Field totals** (model noise too high).
 - **NHL:** totals, especially **+money unders** > puck lines. (See goalie protocol.)
-- **NBA:** 1H totals > 2H totals > full-game spreads on **key numbers** >
-  small-dog MLs (+100 to +180).
-- **General market-softness (softest first):** 1H totals > 2H totals > full-game
-  spreads on key numbers > small dogs (+100..+180) > full-game totals (hardest).
+- **NBA:** 1H totals > full-game spreads on **key numbers** > small-dog MLs
+  (+100 to +180). **No 2H.**
+- **Segments: 1st half and full game ONLY — no second-half bets, any sport.**
+- **General market-softness (softest first):** 1H totals > full-game spreads on
+  key numbers > small dogs (+100..+180) > full-game totals (hardest).
 
 ## Hard Rules
 
@@ -76,7 +77,7 @@ NBA · NCAAB · NFL · Soccer · MLB · NHL · PGA.
 ## Decision Framework (need 5+ to fire)
 
 Count the signals before betting; **need 5+** of: edge ≥1.5 pts / 3% · line moved
-my way · soft market tier (1H/2H total, key-number spread, small dog) · juice
+my way · soft market tier (1H total, key-number spread, small dog) · juice
 ≤ −115 · confirmed starter/lineup · pace/efficiency read supports it · injury/news
 creates unpriced value · Diamond number beats US reference · no correlated
 exposure already on the slate · not chasing a loss.
@@ -138,7 +139,8 @@ no narrative. **PASS is a valid, frequent answer.**
 
 When Brett pastes Diamond lines:
 
-- **Compute the gap** for each: Diamond number vs the US reference (DK).
+- **Compute the gap** for each: **line-shop the offshore books** (Diamond vs
+  WagerBoard — take the better side) vs the US reference (DK).
 - **EV at multiple sizes** (Lean $295 / Standard $510 / Max $900). Show the math.
 - **Run the 4-filter gate + decision framework.** Need **5+** framework signals
   to fire. Default **LEAN**.
