@@ -26,9 +26,9 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | total | 5.5 (DK) | 6 u-114 | 0.5 | Diamond higher | n | NO FIRE — not placed (had +0.5 CLV vs 5.5 close) |
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | side(ML) | VEG +124 | VEG +130 | ~1% | Diamond better dog price | n | PASS — <3% ML threshold |
 | 2026-05-25 | NBA | NYK @ CLE ECF G4 | side+total | DK open -1.5 / 216.5 | -2.5 / 217.5 | ~1.0 | Diamond = consensus; DK open stale | n | PASS — no Diamond edge (DK is soft side, unbettable) |
-| 2026-05-25 | NHL | CAR @ MTL ECF G3 | total | 5.5 (sharp/consensus) | 6 u-115 | 0.5 | Diamond higher | ??? | GREEN-LIT (Dobeš confirmed) Lean $295 under 6 @ -115 — FILL + RESULT PENDING from Brett |
+| 2026-05-25 | NHL | CAR @ MTL ECF G3 | total | 5.5 (sharp/consensus) | 6 u-115 | 0.5 | Diamond higher | ??? | GREEN-LIT (Dobeš confirmed) Lean $295 under 6. GAME: CAR 3-2 OT = 5 total → UNDER 6 WON (+0.5 CLV vs 5.5). Placement still unconfirmed by Brett (placed? odds?) |
 | 2026-05-26 | NBA | OKC @ SAS WCF G5 | side | DK -4.5 | OKC -4 (-105) | 0.5 | Diamond lower (better for OKC) | n | PASS — 0.5 at non-key NBA # (4), FG spread, no number edge |
-| 2026-05-26 | NHL | COL @ VGK WCF G4 | total | 6.5 (DK) | 6 o-114 | 0.5 | Diamond lower (better for OVER) | hold | line-gap OVER candidate — pending goalie confirm. Pattern FLIPPED vs prior 2 nights (Diamond low, not high) |
+| 2026-05-26 | NHL | COL @ VGK WCF G4 | total | 6.5 (DK) | 6 o-114 | 0.5 | Diamond lower | n | PASS — COL upgraded G (Blackwood in for yanked Wedgewood) + Hart = two quality goalies → total heading DOWN. Over 6 = negative CLV; DK 6.5 is the soft/high #, not Diamond's 6 |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
@@ -39,6 +39,6 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 - Logged real: **8** (4 on 5/24, 2 on 5/25, 2 on 5/26) + **3** week-1 placeholders pending confirmation
 - Remaining to threshold (real): **~12**
-- Gaps fired so far: **0 confirmed** (CAR@MTL 5/25 green-lit but fill/result still pending from Brett)
+- Gaps fired so far: **0 confirmed.** CAR@MTL 5/25 under 6 WON the game (CAR 3-2 OT = 5) and had +0.5 CLV — but Brett has NOT confirmed he placed it, so it can't count as a real bet yet. Confirm placement to log bet #1.
 - **Pattern watch — WEAKENING:** Diamond ran NHL totals 0.5 *high* vs sharp on 5/24 (COL@VEG) and 5/25 (CAR@MTL), favoring unders. But 5/26 (COL@VGK) Diamond was 0.5 *low* (6 vs DK 6.5), favoring the over. Direction is NOT consistent — do not treat "Diamond hangs hockey totals high" as a rule. Keep logging.
 - CLV on bet gaps so far: **TBD** (need closing lines via Pikkit)
