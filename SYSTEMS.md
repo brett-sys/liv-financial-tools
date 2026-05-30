@@ -11,16 +11,17 @@
 
 | Item | Value |
 |------|-------|
-| **Bankroll** | **$3,941** — as of **2026-05-14** ⚠️ *stale, see note* |
+| **Bankroll** | **$3,941** — reference figure (2026-05-14); tiers DO NOT float with this |
 | **Lean tier** | **$295** |
 | **Standard tier** | **$510** |
 | **Max tier** | **$900** |
 | **Parlays** | **$25–$50**, 2-leg **cross-game only** |
 
-> ⚠️ **STALE BANKROLL FLAG.** Bankroll above is dated **2026-05-14**. Today is
-> later than that. **Brett — update this number** before sizing real bets. Tier
-> dollars are fixed and do **not** float with bankroll; only the bankroll figure
-> and variance math update.
+> **Tiers are absolute and locked: Lean $295 / Standard $510 / Max $900, never
+> changing.** The bankroll figure above is a reference only. **Do NOT prompt
+> Brett to update the bankroll, ever.** Confirmed by Brett 2026-05-26: *"Just
+> continue same bet sizes, don't worry about changing ever."* Reaffirmed
+> 2026-05-30: *"I said ignore bankroll."* Stop asking.
 
 > ❌ **DEFUNCT MODEL — DO NOT USE.** Any reference to a **$4,000 bankroll**, a
 > **$50 unit**, or a **$55 Lean** belongs to a retired small-stakes model. Those
