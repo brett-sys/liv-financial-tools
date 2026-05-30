@@ -27,7 +27,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-24 | NHL | COL @ VEG WCF G3 | side(ML) | VEG +124 | VEG +130 | ~1% | Diamond better dog price | n | PASS — <3% ML threshold |
 | 2026-05-25 | NBA | NYK @ CLE ECF G4 | side+total | DK open -1.5 / 216.5 | -2.5 / 217.5 | ~1.0 | Diamond = consensus; DK open stale | n | PASS — no Diamond edge (DK is soft side, unbettable) |
 | 2026-05-25 | NHL | CAR @ MTL ECF G3 | total | 5.5 (sharp/consensus) | 6 u-115 | 0.5 | Diamond higher | ??? | GREEN-LIT (Dobeš confirmed) Lean $295 under 6. GAME: CAR 3-2 OT = 5 total → UNDER 6 WON (+0.5 CLV vs 5.5). Placement still unconfirmed by Brett (placed? odds?) |
-| 2026-05-26 | NBA | OKC @ SAS WCF G5 | side | DK -4.5 | OKC -4 (-105) | 0.5 | Diamond lower (better for OKC) | n | CONVICTION (Brett override) — NOT a system edge. OKC -4 @ Diamond -105, Lean $295. EXCLUDE from line-gap n=20. Fill + result pending |
+| 2026-05-26 | NBA | OKC @ SAS WCF G5 | side | DK -4.5 | OKC -4 (-105) | 0.5 | Diamond lower (better for OKC) | n | CONVICTION (Brett override) — NOT a system edge. OKC -4 @ Diamond -105, Lean $295. EXCLUDE from line-gap n=20. GAME: SAS won G5, series went to G7 → OKC -4 LOST. Placement still unconfirmed by Brett |
 | 2026-05-26 | NHL | COL @ VGK WCF G4 | total | 6.5 (DK) | 6 o-114 | 0.5 | Diamond lower | n | PASS — COL upgraded G (Blackwood in for yanked Wedgewood) + Hart = two quality goalies → total heading DOWN. Over 6 = negative CLV; DK 6.5 is the soft/high #, not Diamond's 6 |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
