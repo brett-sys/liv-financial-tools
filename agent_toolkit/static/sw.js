@@ -45,13 +45,13 @@ self.addEventListener('push', event => {
         icon: '/static/icons/icon-192.png',
         badge: '/static/icons/icon-192.png',
         tag: data.tag || 'follow-up',
-        data: { url: data.url || '/quoter/' }
+        data: { url: data.url || '/dashboard' }
     };
     event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    const url = event.notification.data.url || '/quoter/';
+    const url = event.notification.data.url || '/dashboard';
     event.waitUntil(clients.openWindow(url));
 });

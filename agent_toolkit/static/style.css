@@ -144,10 +144,6 @@ body {
     justify-content: space-around;
     z-index: 100;
 }
-.bottom-nav--two .nav-tab {
-    flex: 1;
-    max-width: none;
-}
 .nav-tab {
     display: flex;
     flex-direction: column;
