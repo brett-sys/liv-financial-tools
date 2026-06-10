@@ -84,6 +84,62 @@ def parse_policy_submitted_email(text: str) -> dict | None:
     }
 
 
+def parse_policy_submitted_veterans_email(text: str) -> dict | None:
+    """Parse veterans policy confirmation (same core fields + service branch / plan hints)."""
+    payload = parse_policy_submitted_email(text)
+    if payload is None:
+        text = text.strip()
+        if not text:
+            return None
+        payload = {
+            "client_name": "—",
+            "policy_number": "—",
+            "policy_type": "Veterans Life Insurance",
+            "carrier": "—",
+            "effective_date": "—",
+            "death_benefit": "—",
+            "beneficiary": "—",
+            "annual_premium": "—",
+            "monthly_premium": "—",
+        }
+
+    def _re(group: int = 1):
+        def _inner(pattern: str, flags=0):
+            m = re.search(pattern, text, re.IGNORECASE | re.DOTALL | flags)
+            return m.group(group).strip() if m else ""
+        return _inner
+
+    r = _re()
+    branch = (
+        r(r"(?:Branch|Service Branch|Branch of Service):\s*(.+?)(?:\n|$)")
+        or r(r"Military Branch:\s*(.+?)(?:\n|$)")
+    )
+    veteran_status = r(r"Veteran(?:\s*Status)?:\s*(.+?)(?:\n|$)")
+    plan_type = (
+        r(r"(?:Plan|Product)\s*Type:\s*(.+?)(?:\n|$)")
+        or r(r"Coverage\s*Type:\s*(.+?)(?:\n|$)")
+    )
+
+    product = payload.get("policy_type", "") or ""
+    combined = f"{product} {plan_type}".lower()
+    if "final expense" in combined or "burial" in combined:
+        plan_category = "Final Expense"
+    elif "whole life" in combined:
+        plan_category = "Whole Life"
+    elif "term" in combined:
+        plan_category = "Term Life"
+    else:
+        plan_category = plan_type or "Veterans Life Insurance"
+
+    payload["service_branch"] = branch or "—"
+    payload["veteran_status"] = veteran_status or "U.S. Veteran"
+    payload["plan_category"] = plan_category
+    if payload.get("policy_type") in ("—", "IUL", ""):
+        payload["policy_type"] = plan_category
+
+    return payload
+
+
 def parse_graph_points(data_text: str) -> list[dict]:
     """Extract summary points for 'Cash Value vs Premiums Paid' style graph.
 
@@ -434,6 +490,23 @@ def parse_data_to_html(data_text):
                     except Exception:
                         return 0.0
 
+                def currency_tokens(val: str) -> list[str]:
+                    return re.findall(r"\$[\d,]+(?:\.\d{1,2})?", val or "")
+
+                # PDF text extraction can collapse columns so "Modal Premium" may
+                # accidentally receive "Monthly (EFT)" from the Premium Mode column.
+                row1_money = currency_tokens(block_lines[1] if len(block_lines) > 1 else "")
+                if row1_money:
+                    current_face = raw_pairs.get("Initial Face Amount", "")
+                    if "Initial Face Amount" in raw_pairs and "$" not in current_face:
+                        raw_pairs["Initial Face Amount"] = row1_money[0]
+                    elif "Initial Face Amount" in raw_pairs:
+                        raw_pairs["Initial Face Amount"] = currency_tokens(current_face)[0] if currency_tokens(current_face) else current_face
+
+                    current_modal = raw_pairs.get("Modal Premium", "")
+                    if "Modal Premium" in raw_pairs and ("$" not in current_modal or "Monthly" in current_modal):
+                        raw_pairs["Modal Premium"] = row1_money[1] if len(row1_money) > 1 else current_modal
+
                 pairs: list[tuple[str, str]] = []
 
                 if "Initial Face Amount" in raw_pairs:
@@ -509,6 +582,12 @@ def parse_data_to_html(data_text):
 
         # Skip standalone "Values" heading (already handled by table parser)
         if stripped_line == "Values" or stripped_line.startswith("Values"):
+            i += 1
+            continue
+
+        # Policy numbers sometimes appear as a standalone line in the export.
+        # The PDF header renders this separately, so avoid a loose body line.
+        if re.fullmatch(r"[A-Z]{1,6}\d[A-Z0-9\-]{5,}", stripped_line, re.IGNORECASE):
             i += 1
             continue
 

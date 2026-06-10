@@ -102,8 +102,7 @@ def get_leaderboard(period: str = "week") -> dict:
     for row in rows:
         agent = row["agent_name"]
         if agent not in data:
-            data[agent] = {"policies": 0, "ap": 0.0, "calls": 0,
-                           "appointments": 0, "presentations": 0, "applications": 0}
+            continue
         atype = row["activity_type"]
         if atype == "policy":
             data[agent]["policies"] += row["total_count"]

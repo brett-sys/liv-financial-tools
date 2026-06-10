@@ -7,6 +7,12 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config as _cfg
 
+from .pdf_agent_snippets import (
+    pdf_agent_header_html,
+    pdf_footer_contact_bullets,
+    pdf_next_steps_contact_line,
+)
+
 AGENT_NAME = _cfg.AGENT_NAME
 AGENT_TITLE = _cfg.AGENT_TITLE
 AGENT_PHONE = _cfg.AGENT_PHONE
@@ -41,8 +47,8 @@ def generate_pdf_html(
     graph_points: list[dict] | None = None,
     summary_data: dict | None = None,
     nlg_logo_data_uri: str | None = None,
-    agent_photo_data_uri: str | None = None,
     client_name: str = "",
+    policy_number: str = "",
     agent_info: dict | None = None,
 ):
     """Create complete HTML document styled to match livfinancialgroup.com vibe."""
@@ -91,24 +97,7 @@ def generate_pdf_html(
         else ""
     )
 
-    # Build agent info HTML
-    agent_photo_html = (
-        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
-        if agent_photo_data_uri
-        else ""
-    )
-    agent_info_html = f"""
-        <div class="agent-info">
-            {agent_photo_html}
-            <div class="agent-details">
-                <div class="agent-name">{ai['name']}</div>
-                <div class="agent-detail">{ai['title']}</div>
-                <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
-                <div class="agent-detail">{ai['license']}</div>
-                <div class="agent-detail">{ai['website']}</div>
-            </div>
-        </div>
-    """
+    agent_info_html = pdf_agent_header_html(ai)
 
     # Build graph HTML if we have points
     graph_section_html = ""
@@ -260,11 +249,21 @@ def generate_pdf_html(
             summary_html=summary_html,
         )
 
+    graphs_page_html = ""
+    if graph_section_html.strip():
+        graphs_page_html = f"""
+    <div class="page page-graphs">
+        {graph_section_html}
+    </div>"""
+
     # Prepared-for line and date stamp
     today_str = date.today().strftime("%B %d, %Y")
     prepared_for_html = ""
     if client_name.strip():
         prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}</strong></div>'
+    policy_number_html = ""
+    if policy_number.strip():
+        policy_number_html = f'<div class="policy-number">Policy Number <strong>{policy_number.strip()}</strong></div>'
     date_html = f'<div class="date-stamp">{today_str}</div>'
 
     return f"""<!DOCTYPE html>
@@ -275,7 +274,7 @@ def generate_pdf_html(
         @page {{
             margin-bottom: 40px;
             @bottom-center {{
-                content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
+                content: "Prepared by LIV Financial Group  |  Page " counter(page) " of " counter(pages);
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 font-size: 8px;
                 color: #6b7f8f;
@@ -332,15 +331,6 @@ def generate_pdf_html(
             gap: 12px;
             text-align: left;
         }}
-        .agent-photo {{
-            width: 80px;
-            height: 80px;
-            border-radius: 6px;
-            border: 2px solid #ffffff;
-            object-fit: cover;
-            object-position: top center;
-            flex-shrink: 0;
-        }}
         .agent-details {{
             line-height: 1.3;
         }}
@@ -380,6 +370,25 @@ def generate_pdf_html(
         .prepared-for strong {{
             font-weight: 700;
         }}
+        .policy-number {{
+            display: inline-block;
+            margin-top: 8px;
+            padding: 5px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }}
+        .policy-number strong {{
+            color: #ffffff;
+            font-size: 11px;
+            letter-spacing: 0;
+            text-transform: none;
+        }}
         .date-stamp {{
             font-size: 10px;
             color: rgba(255, 255, 255, 0.75);
@@ -398,7 +407,7 @@ def generate_pdf_html(
         }}
         .section {{
             margin: 24px 0;
-            page-break-before: always;
+            page-break-before: auto;
         }}
         .section.section-no-break {{
             page-break-before: avoid;
@@ -771,6 +780,7 @@ def generate_pdf_html(
                         Plan today, protect what matters most for a lifetime.
                     </div>
                     {prepared_for_html}
+                    {policy_number_html}
                     {date_html}
                 </div>
                 <span class="hero-nlg-right">{nlg_logo_html}</span>
@@ -834,9 +844,7 @@ def generate_pdf_html(
             and benefit amounts are determined by the specific policy contract.
         </p>
     </div>
-    <div class="page page-graphs">
-        {graph_section_html}
-    </div>
+    {graphs_page_html}
 </body>
 </html>"""
 
@@ -1039,19 +1047,114 @@ POLICY_SUBMITTED_HTML = """<!DOCTYPE html>
 </html>"""
 
 
+def _build_iul_quote_growth_chart(carriers: list[dict]) -> str:
+    """Build SVG line chart for parsed IUL illustration cash value growth."""
+    series = []
+    all_years: set[int] = set()
+    max_value = 0.0
+    colors = ["#0e7fa6", "#123047", "#1a9fc4", "#74c0d8"]
+
+    for idx, carrier in enumerate(carriers):
+        points = []
+        for point in carrier.get("graph", []) or []:
+            year = point.get("year")
+            value = point.get("cash_value")
+            if year is None or value is None:
+                continue
+            try:
+                year_i = int(year)
+                value_f = float(value)
+            except (TypeError, ValueError):
+                continue
+            all_years.add(year_i)
+            max_value = max(max_value, value_f)
+            points.append((year_i, value_f))
+        if points:
+            series.append({
+                "label": carrier.get("carrier") or carrier.get("product") or f"Option {idx + 1}",
+                "points": sorted(points),
+                "color": colors[idx % len(colors)],
+            })
+
+    if not series or not all_years or max_value <= 0:
+        return '<p class="chart-empty">Paste illustration data to include a cash value growth chart.</p>'
+
+    years = sorted(all_years)
+    min_year = min(years)
+    max_year = max(years)
+    width = 640
+    height = 260
+    left = 62
+    right = 24
+    top = 34
+    bottom = 42
+    chart_w = width - left - right
+    chart_h = height - top - bottom
+
+    def x_for(year: int) -> float:
+        if max_year == min_year:
+            return left + chart_w / 2
+        return left + ((year - min_year) / (max_year - min_year)) * chart_w
+
+    def y_for(value: float) -> float:
+        return top + chart_h - (value / max_value) * chart_h
+
+    y_guides = ""
+    for i in range(5):
+        value = max_value * i / 4
+        y = top + chart_h - chart_h * i / 4
+        y_guides += (
+            f'<line x1="{left}" y1="{y:.1f}" x2="{width - right}" y2="{y:.1f}" stroke="#dde9f0" stroke-width="1"/>'
+            f'<text x="{left - 8}" y="{y + 3:.1f}" text-anchor="end" fill="#6b7f8f" font-size="9">${value:,.0f}</text>'
+        )
+
+    x_labels = ""
+    label_years = [y for y in (10, 20, 30) if y in all_years]
+    if not label_years:
+        label_years = years
+    for year in label_years:
+        x = x_for(year)
+        x_labels += (
+            f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + chart_h}" stroke="#eef3f6" stroke-width="1"/>'
+            f'<text x="{x:.1f}" y="{height - 14}" text-anchor="middle" fill="#476072" font-size="10">Yr {year}</text>'
+        )
+
+    lines = ""
+    legend = ""
+    for idx, item in enumerate(series):
+        point_pairs = " ".join(f"{x_for(y):.1f},{y_for(v):.1f}" for y, v in item["points"])
+        color = item["color"]
+        lines += f'<polyline points="{point_pairs}" fill="none" stroke="{color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+        for year, value in item["points"]:
+            lines += f'<circle cx="{x_for(year):.1f}" cy="{y_for(value):.1f}" r="3.5" fill="{color}" stroke="#fff" stroke-width="1"/>'
+        lx = left + idx * 145
+        legend += f'<rect x="{lx}" y="4" width="12" height="12" rx="3" fill="{color}"/>'
+        legend += f'<text x="{lx + 17}" y="14" fill="#123047" font-size="10" font-weight="600">{item["label"][:22]}</text>'
+
+    return f"""
+    <svg class="growth-svg" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">
+        <g>{legend}</g>
+        <g>{y_guides}{x_labels}</g>
+        <line x1="{left}" y1="{top + chart_h}" x2="{width - right}" y2="{top + chart_h}" stroke="#b9c9d4" stroke-width="1.2"/>
+        <line x1="{left}" y1="{top}" x2="{left}" y2="{top + chart_h}" stroke="#b9c9d4" stroke-width="1.2"/>
+        <g>{lines}</g>
+    </svg>
+    """
+
+
 def build_quote_comparison_html(
     client_name: str,
     client_age: str,
     carriers: list[dict],
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
-    agent_photo_data_uri: str | None = None,
     agent_info: dict | None = None,
 ) -> str:
     """Build a professional quote comparison PDF styled like the LIV Policy Illustration.
 
     Each carrier dict has keys: carrier, product, monthly_premium, death_benefit,
-    cash_value_10yr, cash_value_20yr, am_best, sp, moodys, about.
+    cash_value_10yr, cash_value_20yr, cash_value_30yr, graph, am_best, sp,
+    moodys, about.
     """
     ai = _resolve_agent(agent_info)
     today_str = date.today().strftime("%B %d, %Y")
@@ -1061,12 +1164,6 @@ def build_quote_comparison_html(
         if logo_data_uri
         else ""
     )
-    agent_photo_html = (
-        f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
-        if agent_photo_data_uri
-        else ""
-    )
-
     # ── Summary stat boxes ──────────────────────────────────────────────────
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
@@ -1093,6 +1190,10 @@ def build_quote_comparison_html(
                     <div class="stat-label">20-YR&nbsp;CASH&nbsp;VALUE</div>
                     <div class="stat-value">{c.get('cash_value_20yr', '—')}</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-label">30-YR&nbsp;CASH&nbsp;VALUE</div>
+                    <div class="stat-value">{c.get('cash_value_30yr', '—')}</div>
+                </div>
             </div>
         </div>"""
 
@@ -1110,8 +1211,11 @@ def build_quote_comparison_html(
             <td class="num">{c.get('monthly_premium', '—')}</td>
             <td class="num">{c.get('cash_value_10yr', '—')}</td>
             <td class="num">{c.get('cash_value_20yr', '—')}</td>
+            <td class="num">{c.get('cash_value_30yr', '—')}</td>
             <td class="center">{am}</td>
         </tr>"""
+
+    growth_chart_html = _build_iul_quote_growth_chart(carriers)
 
     # ── Company info sections ───────────────────────────────────────────────
     company_sections_html = ""
@@ -1200,6 +1304,8 @@ def build_quote_comparison_html(
         age_part = f", Age {client_age}" if client_age.strip() else ""
         prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}{age_part}</strong></div>'
 
+    next_steps_contact = pdf_next_steps_contact_line(ai)
+
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -1208,7 +1314,7 @@ def build_quote_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1245,11 +1351,6 @@ def build_quote_comparison_html(
     }}
     .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
-    .agent-photo {{
-        width: 72px; height: 72px; border-radius: 6px;
-        border: 2px solid rgba(255,255,255,0.6);
-        object-fit: cover; object-position: top center; flex-shrink: 0;
-    }}
     .agent-details {{ line-height: 1.35; }}
     .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
     .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
@@ -1339,6 +1440,15 @@ def build_quote_comparison_html(
         border-radius: 3px; margin-left: 6px; vertical-align: middle;
         letter-spacing: 0.05em;
     }}
+    .chart-container {{
+        background: #f7fafc;
+        border: 1px solid #dde9f0;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin: 0 0 22px 0;
+    }}
+    .growth-svg {{ display: block; width: 100%; height: auto; }}
+    .chart-empty {{ font-size: 11px; color: #6b7f8f; }}
     /* ── Company sections ── */
     .company-section {{ margin-bottom: 22px; }}
     .co-body {{ display: flex; gap: 20px; margin-bottom: 10px; }}
@@ -1408,16 +1518,7 @@ def build_quote_comparison_html(
     <header class="hero">
         <div class="hero-top">
             <span class="hero-logo-wrap">{logo_html}</span>
-            <div class="agent-info">
-                {agent_photo_html}
-                <div class="agent-details">
-                    <div class="agent-name">{ai['name']}</div>
-                    <div class="agent-detail">{ai['title']}</div>
-                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
-                    <div class="agent-detail">{ai['license']}</div>
-                    <div class="agent-detail">{ai['website']}</div>
-                </div>
-            </div>
+            {pdf_agent_header_html(ai)}
         </div>
         <div class="hero-bottom">
             <div>
@@ -1448,6 +1549,7 @@ def build_quote_comparison_html(
                     <th>Monthly Premium</th>
                     <th>10-Yr Cash Value</th>
                     <th>20-Yr Cash Value</th>
+                    <th>30-Yr Cash Value</th>
                     <th>AM Best</th>
                 </tr>
             </thead>
@@ -1455,6 +1557,11 @@ def build_quote_comparison_html(
                 {rows_html}
             </tbody>
         </table>
+
+        <h2 class="section-title">Cash Value Growth</h2>
+        <div class="chart-container">
+            {growth_chart_html}
+        </div>
 
         {company_sections_html}
 
@@ -1465,7 +1572,7 @@ def build_quote_comparison_html(
             <p>1. Review the options above and consider which best fits your goals and budget.</p>
             <p>2. Ask me any questions about the differences between carriers or products.</p>
             <p>3. Once you decide, I will submit the application and guide you through every step.</p>
-            <p>Contact me anytime: <strong>{ai['phone']}</strong> or <strong>{ai['email']}</strong></p>
+            {next_steps_contact}
         </div>
 
         <div class="disclaimer">
@@ -1518,7 +1625,6 @@ def build_term_comparison_html(
     carriers: list[dict],
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
-    agent_photo_data_uri: str | None = None,
     agent_info: dict | None = None,
 ) -> str:
     """Build a Term Life comparison PDF matching the IUL Comparison layout.
@@ -1533,14 +1639,12 @@ def build_term_comparison_html(
     if logo_data_uri:
         logo_html = f'<img class="logo" src="{logo_data_uri}" alt="LIV Financial Logo" />'
 
-    agent_photo_html = ""
-    if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
-
     prepared_for_html = ""
     if client_name and client_name.strip():
         age_part = f", Age {client_age}" if client_age and client_age.strip() else ""
         prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}{age_part}</strong></div>'
+
+    footer_contact = pdf_footer_contact_bullets(ai)
 
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
@@ -1582,7 +1686,7 @@ def build_term_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1618,11 +1722,6 @@ def build_term_comparison_html(
     }}
     .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
-    .agent-photo {{
-        width: 72px; height: 72px; border-radius: 6px;
-        border: 2px solid rgba(255,255,255,0.6);
-        object-fit: cover; object-position: top center; flex-shrink: 0;
-    }}
     .agent-details {{ line-height: 1.35; }}
     .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
     .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
@@ -1693,16 +1792,7 @@ def build_term_comparison_html(
     <header class="hero">
         <div class="hero-top">
             <span class="hero-logo-wrap">{logo_html}</span>
-            <div class="agent-info">
-                {agent_photo_html}
-                <div class="agent-details">
-                    <div class="agent-name">{ai['name']}</div>
-                    <div class="agent-detail">{ai['title']}</div>
-                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
-                    <div class="agent-detail">{ai['license']}</div>
-                    <div class="agent-detail">{ai['website']}</div>
-                </div>
-            </div>
+            {pdf_agent_header_html(ai)}
         </div>
         <div class="hero-bottom">
             <div>
@@ -1727,7 +1817,7 @@ def build_term_comparison_html(
             This comparison is for illustrative purposes only and is not an offer or contract.
             Premiums shown are estimates based on the information provided and may change based on
             underwriting. Please review each carrier&rsquo;s full policy details before making a decision.<br/>
-            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
+            {footer_contact}
         </div>
     </div>
 </body>
@@ -1740,7 +1830,6 @@ def build_final_expense_comparison_html(
     carriers: list[dict],
     recommended_idx: int | None = None,
     logo_data_uri: str | None = None,
-    agent_photo_data_uri: str | None = None,
     agent_info: dict | None = None,
 ) -> str:
     """Build a Final Expense (Whole Life) comparison PDF matching the IUL Comparison layout.
@@ -1755,14 +1844,12 @@ def build_final_expense_comparison_html(
     if logo_data_uri:
         logo_html = f'<img class="logo" src="{logo_data_uri}" alt="LIV Financial Logo" />'
 
-    agent_photo_html = ""
-    if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
-
     prepared_for_html = ""
     if client_name and client_name.strip():
         age_part = f", Age {client_age}" if client_age and client_age.strip() else ""
         prepared_for_html = f'<div class="prepared-for">Prepared for <strong>{client_name.strip()}{age_part}</strong></div>'
+
+    footer_contact = pdf_footer_contact_bullets(ai)
 
     stat_boxes_html = ""
     for i, c in enumerate(carriers):
@@ -1799,7 +1886,7 @@ def build_final_expense_comparison_html(
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -1835,11 +1922,6 @@ def build_final_expense_comparison_html(
     }}
     .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
-    .agent-photo {{
-        width: 72px; height: 72px; border-radius: 6px;
-        border: 2px solid rgba(255,255,255,0.6);
-        object-fit: cover; object-position: top center; flex-shrink: 0;
-    }}
     .agent-details {{ line-height: 1.35; }}
     .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
     .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
@@ -1910,16 +1992,7 @@ def build_final_expense_comparison_html(
     <header class="hero">
         <div class="hero-top">
             <span class="hero-logo-wrap">{logo_html}</span>
-            <div class="agent-info">
-                {agent_photo_html}
-                <div class="agent-details">
-                    <div class="agent-name">{ai['name']}</div>
-                    <div class="agent-detail">{ai['title']}</div>
-                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
-                    <div class="agent-detail">{ai['license']}</div>
-                    <div class="agent-detail">{ai['website']}</div>
-                </div>
-            </div>
+            {pdf_agent_header_html(ai)}
         </div>
         <div class="hero-bottom">
             <div>
@@ -1944,7 +2017,7 @@ def build_final_expense_comparison_html(
             This comparison is for illustrative purposes only and is not an offer or contract.
             Premiums shown are estimates based on the information provided and may change based on
             underwriting. Please review each carrier&rsquo;s full policy details before making a decision.<br/>
-            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
+            {footer_contact}
         </div>
     </div>
 </body>
@@ -1953,9 +2026,213 @@ def build_final_expense_comparison_html(
 
 def build_policy_submitted_html(payload: dict, logo_data_uri: str | None = None) -> str:
     """Build Policy Submitted HTML from parsed payload."""
+    return _build_policy_submitted_from_template(POLICY_SUBMITTED_HTML, payload, logo_data_uri)
+
+
+POLICY_SUBMITTED_VETERANS_HTML = """<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Veterans Policy Submitted Packet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      color: #123047;
+      line-height: 1.6;
+    }
+    .page { width: 100%; background: #ffffff; overflow: hidden; }
+    .hero {
+      background: linear-gradient(135deg, #1a2a44 0%, #123047 55%, #0d2238 100%);
+      color: #ffffff;
+      padding: 18px 32px 20px 32px;
+      border-bottom: 4px solid #c9a227;
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .hero-logo { height: 60px; width: auto; }
+    .hero-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201, 162, 39, 0.25);
+      color: #f0d78c;
+      border: 1px solid rgba(201, 162, 39, 0.5);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .hero-title { font-size: 24px; font-weight: 600; }
+    .hero-subtitle { font-size: 13px; opacity: 0.92; max-width: 520px; }
+    .content { padding: 24px 32px 32px 32px; }
+    h2.section-title {
+      font-size: 18px;
+      color: #1a2a44;
+      border-bottom: 2px solid #c9a227;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .card {
+      border: 1px solid #dde9f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+    .card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #1a2a44;
+      font-weight: 700;
+      margin-bottom: 4px;
+      border-bottom: 1px solid #dde9f0;
+      padding-bottom: 4px;
+    }
+    .card-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #123047;
+      margin-top: 4px;
+      word-wrap: break-word;
+    }
+    .summary { margin-top: 10px; font-size: 12px; color: #2c4a63; }
+    .summary h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a2a44;
+      margin: 12px 0 4px 0;
+    }
+    .summary p { margin: 4px 0; }
+    .summary ul { margin: 6px 0 6px 18px; }
+    .summary li { margin: 3px 0; }
+    .disclaimer {
+      margin-top: 16px;
+      font-size: 10px;
+      color: #6b7f8f;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="hero-top">
+        {{logo_html}}
+        <div>
+          <div class="hero-badge">Veterans</div>
+          <div class="hero-title">Policy Submitted</div>
+        </div>
+      </div>
+      <div class="hero-subtitle">
+        Thank you for your service. This packet confirms coverage details for {{client_name}}.
+      </div>
+    </div>
+    <div class="content">
+      <h2 class="section-title">Policy Snapshot</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-label">Client Name</div>
+          <div class="card-value">{{client_name}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Veteran Status</div>
+          <div class="card-value">{{veteran_status}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Service Branch</div>
+          <div class="card-value">{{service_branch}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Policy Number</div>
+          <div class="card-value">{{policy_number}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Plan Type</div>
+          <div class="card-value">{{plan_category}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Product</div>
+          <div class="card-value">{{policy_type}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Carrier</div>
+          <div class="card-value">{{carrier}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Effective / Draft Date</div>
+          <div class="card-value">{{effective_date}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Death Benefit</div>
+          <div class="card-value">{{death_benefit}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Beneficiary</div>
+          <div class="card-value">{{beneficiary}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Annual Premium</div>
+          <div class="card-value">{{annual_premium}}</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Monthly Premium</div>
+          <div class="card-value">{{monthly_premium}}</div>
+        </div>
+      </div>
+      <div class="summary">
+        <h3>Your Coverage at a Glance</h3>
+        <p>
+          This confirms that {{client_name}} has submitted an application for {{plan_category}}
+          coverage with {{carrier}}, with a death benefit of {{death_benefit}} and a monthly
+          premium of {{monthly_premium}}.
+        </p>
+        <h3>Why Veterans Choose This Protection</h3>
+        <ul>
+          <li><strong>Honor your family:</strong> A death benefit helps loved ones cover final expenses, debts, and other needs.</li>
+          <li><strong>Peace of mind:</strong> Knowing burial and funeral costs are planned for can relieve stress on your family.</li>
+          <li><strong>Works alongside VA benefits:</strong> Private life insurance can complement VA burial allowances and other veteran benefits&mdash;amounts and eligibility vary.</li>
+          <li><strong>Fixed, predictable coverage:</strong> Many veteran-focused plans are whole life or final expense designs with level premiums and guaranteed death benefits (per policy contract).</li>
+        </ul>
+        <h3>Next Steps</h3>
+        <p>
+          Your application is in process with the carrier. You may receive additional forms or
+          underwriting requests. Keep this summary for your records and contact your agent with
+          any questions about your policy status or beneficiary designations.
+        </p>
+      </div>
+      <div class="disclaimer">
+        This veterans policy submitted packet is for informational purposes only and is not a
+        contract or guarantee of coverage. Approval is subject to carrier underwriting. VA
+        benefits, military pay, and other government programs have separate rules and limits.
+        Please review your carrier&rsquo;s full policy, application, and outline of coverage for
+        complete terms, exclusions, and guaranteed values.
+      </div>
+    </div>
+  </div>
+</body>
+</html>"""
+
+
+def _build_policy_submitted_from_template(
+    template: str, payload: dict, logo_data_uri: str | None = None, logo_alt: str = "Logo"
+) -> str:
     logo_html = ""
     if logo_data_uri:
-        logo_html = f'<img class="hero-logo" src="{logo_data_uri}" alt="Logo" />'
+        logo_html = f'<img class="hero-logo" src="{logo_data_uri}" alt="{logo_alt}" />'
     subs = {
         "{{logo_html}}": logo_html,
         "{{client_name}}": str(payload.get("client_name", "—")),
@@ -1967,8 +2244,18 @@ def build_policy_submitted_html(payload: dict, logo_data_uri: str | None = None)
         "{{beneficiary}}": str(payload.get("beneficiary", "—")),
         "{{annual_premium}}": str(payload.get("annual_premium", "—")),
         "{{monthly_premium}}": str(payload.get("monthly_premium", "—")),
+        "{{service_branch}}": str(payload.get("service_branch", "—")),
+        "{{veteran_status}}": str(payload.get("veteran_status", "U.S. Veteran")),
+        "{{plan_category}}": str(payload.get("plan_category", "Veterans Life Insurance")),
     }
-    html = POLICY_SUBMITTED_HTML
+    html = template
     for k, v in subs.items():
         html = html.replace(k, v)
     return html
+
+
+def build_policy_submitted_veterans_html(payload: dict, logo_data_uri: str | None = None) -> str:
+    """Build Veterans Policy Submitted HTML from parsed payload."""
+    return _build_policy_submitted_from_template(
+        POLICY_SUBMITTED_VETERANS_HTML, payload, logo_data_uri, logo_alt="Veterans"
+    )

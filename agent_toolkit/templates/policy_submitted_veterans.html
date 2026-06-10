@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% set active_tab = "tools" %}
+{% block title %}Veterans Policy Submitted - LIFI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h1>Veterans Policy Submitted</h1>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+        Paste the carrier confirmation for a veteran client to generate a client-ready PDF
+        (final expense, whole life, or other veteran plans).
+    </p>
+
+    <form method="POST" action="{{ url_for('tools.policy_submitted_veterans') }}" class="call-form">
+        <div class="form-group">
+            <label for="policy_number">Policy Number</label>
+            <input id="policy_number" name="policy_number" type="text"
+                   placeholder="ABC123" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label for="paste_data">Confirmation Data</label>
+            <textarea id="paste_data" name="paste_data" class="paste-area" rows="12"
+                      placeholder="Paste confirmation email or text here...&#10;&#10;Example lines:&#10;Insured: John Smith&#10;Policy #: ABC123&#10;Insurance Product: Final Expense - Veterans Plan&#10;Branch of Service: U.S. Army&#10;Face Amount: $15,000&#10;Monthly Premium: $89.00&#10;Beneficiary: Jane Smith&#10;Monthly Draft: 15th of each month"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Generate Veterans PDF</button>
+    </form>
+
+    <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+        <a href="{{ url_for('tools.policy_submitted') }}">Standard Policy Submitted (IUL)</a>
+    </p>
+</div>
+{% endblock %}

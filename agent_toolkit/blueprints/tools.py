@@ -1,6 +1,7 @@
 """Tools blueprint – Illustration, Comparison, Policy Submitted, Quote Comparison, Pipeline, Quick Quote, Teleprompter."""
 
 import json
+import re
 import tempfile
 from pathlib import Path
 
@@ -21,14 +22,61 @@ def _current_agent_info() -> dict:
     return config.get_agent_info(agent_name)
 
 
+def _extract_policy_number(text: str) -> str:
+    """Best-effort extraction for illustration policy numbers pasted as standalone IDs."""
+    patterns = [
+        r"Policy\s*(?:Number|#)\s*:?\s*([A-Z0-9][A-Z0-9\-]{5,})",
+        r"\b([A-Z]{1,6}\d[A-Z0-9\-]{5,})\b",
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            return m.group(1).strip()
+    return ""
+
+
+def _money(value) -> str:
+    """Format numeric parsed illustration values for comparison PDFs."""
+    if value in (None, "", "—"):
+        return "—"
+    try:
+        return f"${float(value):,.0f}"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def _graph_value(graph: list[dict], year: int) -> str:
+    """Return formatted cash value for a policy year from parsed graph points."""
+    for point in graph or []:
+        if point.get("year") == year:
+            return _money(point.get("cash_value"))
+    return "—"
+
+
+def _illustration_carrier_hint(text: str) -> str:
+    """Best-effort carrier name from pasted illustration text."""
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if "National Life" in stripped or "Life Group" in stripped:
+            return stripped[:80]
+        if "Insurance" in stripped and len(stripped) <= 80:
+            return stripped
+    return ""
+
+
 def _get_pdf_engine():
     """Lazy import the pdf engine modules."""
     from pdf_engine.parsers import (
         parse_data_to_html, parse_graph_points, parse_summary_data,
-        parse_policy_submitted_email, ParseError,
+        parse_policy_submitted_email,
+        parse_policy_submitted_veterans_email,
+        ParseError,
     )
     from pdf_engine.html_builders import (
         generate_pdf_html, build_policy_submitted_html,
+        build_policy_submitted_veterans_html,
         build_quote_comparison_html,
         build_term_comparison_html,
         build_final_expense_comparison_html,
@@ -36,23 +84,25 @@ def _get_pdf_engine():
     from pdf_engine.pdf_gen import generate_pdf_bytes
     from pdf_engine.assets import (
         load_logo_data_uri, load_nlg_logo_data_uri,
-        load_agent_photo_data_uri,
+        load_veterans_logo_data_uri,
     )
     return {
         "parse_data_to_html": parse_data_to_html,
         "parse_graph_points": parse_graph_points,
         "parse_summary_data": parse_summary_data,
         "parse_policy_submitted_email": parse_policy_submitted_email,
+        "parse_policy_submitted_veterans_email": parse_policy_submitted_veterans_email,
         "ParseError": ParseError,
         "generate_pdf_html": generate_pdf_html,
         "build_policy_submitted_html": build_policy_submitted_html,
+        "build_policy_submitted_veterans_html": build_policy_submitted_veterans_html,
         "build_quote_comparison_html": build_quote_comparison_html,
         "build_term_comparison_html": build_term_comparison_html,
         "build_final_expense_comparison_html": build_final_expense_comparison_html,
         "generate_pdf_bytes": generate_pdf_bytes,
         "load_logo_data_uri": load_logo_data_uri,
         "load_nlg_logo_data_uri": load_nlg_logo_data_uri,
-        "load_agent_photo_data_uri": load_agent_photo_data_uri,
+        "load_veterans_logo_data_uri": load_veterans_logo_data_uri,
     }
 
 
@@ -72,6 +122,10 @@ def illustration():
     if request.method == "POST":
         data = request.form.get("paste_data", "").strip()
         client_name = request.form.get("client_name", "").strip()
+        policy_number = (
+            request.form.get("policy_number", "").strip()
+            or _extract_policy_number(data)
+        )
         if not data:
             flash("Please paste illustration data.", "error")
             return redirect(url_for("tools.illustration"))
@@ -83,7 +137,6 @@ def illustration():
             summary_data = eng["parse_summary_data"](data)
             logo = eng["load_logo_data_uri"]()
             nlg_logo = eng["load_nlg_logo_data_uri"]()
-            agent_photo = eng["load_agent_photo_data_uri"]()
 
             html_content = eng["generate_pdf_html"](
                 html_body,
@@ -91,8 +144,8 @@ def illustration():
                 graph_points=graph_points,
                 summary_data=summary_data,
                 nlg_logo_data_uri=nlg_logo,
-                agent_photo_data_uri=agent_photo,
                 client_name=client_name,
+                policy_number=policy_number,
                 agent_info=_current_agent_info(),
             )
 
@@ -148,13 +201,11 @@ def illustration_comparison():
 
             from pdf_engine.comparison_builder import build_comparison_html
             logo = eng["load_logo_data_uri"]()
-            agent_photo = eng["load_agent_photo_data_uri"]()
 
             html_content = build_comparison_html(
                 client_name=client_name,
                 policies=parsed,
                 logo_data_uri=logo,
-                agent_photo_data_uri=agent_photo,
                 agent_info=_current_agent_info(),
             )
 
@@ -183,6 +234,7 @@ def illustration_comparison():
 def policy_submitted():
     if request.method == "POST":
         data = request.form.get("paste_data", "").strip()
+        policy_number = request.form.get("policy_number", "").strip()
         if not data:
             flash("Please paste policy confirmation data.", "error")
             return redirect(url_for("tools.policy_submitted"))
@@ -197,6 +249,9 @@ def policy_submitted():
                 except json.JSONDecodeError:
                     flash("Could not parse policy details. Paste the confirmation email text.", "error")
                     return redirect(url_for("tools.policy_submitted"))
+
+            if policy_number:
+                payload["policy_number"] = policy_number
 
             logo = eng["load_logo_data_uri"]()
             html_content = eng["build_policy_submitted_html"](payload, logo)
@@ -220,6 +275,51 @@ def policy_submitted():
     return render_template("policy_submitted.html")
 
 
+@tools_bp.route("/policy-submitted/veterans", methods=["GET", "POST"])
+def policy_submitted_veterans():
+    if request.method == "POST":
+        data = request.form.get("paste_data", "").strip()
+        policy_number = request.form.get("policy_number", "").strip()
+        if not data:
+            flash("Please paste policy confirmation data.", "error")
+            return redirect(url_for("tools.policy_submitted_veterans"))
+
+        try:
+            eng = _get_pdf_engine()
+
+            payload = eng["parse_policy_submitted_veterans_email"](data)
+            if payload is None:
+                try:
+                    payload = json.loads(data)
+                except json.JSONDecodeError:
+                    flash("Could not parse policy details. Paste the confirmation email text.", "error")
+                    return redirect(url_for("tools.policy_submitted_veterans"))
+
+            if policy_number:
+                payload["policy_number"] = policy_number
+
+            veterans_logo = eng["load_veterans_logo_data_uri"]()
+            html_content = eng["build_policy_submitted_veterans_html"](payload, veterans_logo)
+            pdf_bytes = eng["generate_pdf_bytes"](html_content)
+
+            client_name = payload.get("client_name", "policy")
+            filename = f"{client_name}_veterans_policy_submitted.pdf".replace(" ", "_")
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+            tmp.write(pdf_bytes)
+            tmp.close()
+
+            return send_file(
+                tmp.name, mimetype="application/pdf",
+                as_attachment=True, download_name=filename,
+            )
+        except Exception as e:
+            flash(f"PDF generation failed: {e}", "error")
+            return redirect(url_for("tools.policy_submitted_veterans"))
+
+    return render_template("policy_submitted_veterans.html")
+
+
 # ---------------------------------------------------------------------------
 # Quote Comparison
 # ---------------------------------------------------------------------------
@@ -230,21 +330,33 @@ def quote_comparison():
         client_age = request.form.get("client_age", "").strip()
         recommended = request.form.get("recommended", "1").strip()
 
+        eng = _get_pdf_engine()
         carriers = []
         for i in range(1, 5):
             carrier = request.form.get(f"carrier_{i}", "").strip()
-            if carrier:
+            paste_data = request.form.get(f"paste_{i}", "").strip()
+            summary = None
+            graph = []
+            if paste_data:
+                summary = eng["parse_summary_data"](paste_data)
+                graph = eng["parse_graph_points"](paste_data)
+
+            if carrier or paste_data:
+                annual_premium = summary.get("annual_premium") if summary else None
+                monthly_from_annual = f"${annual_premium / 12:,.2f}" if annual_premium else ""
                 carriers.append({
-                    "carrier": carrier,
-                    "product": request.form.get(f"product_{i}", "").strip() or "—",
-                    "monthly_premium": request.form.get(f"premium_{i}", "").strip() or "—",
-                    "death_benefit": request.form.get(f"death_benefit_{i}", "").strip() or "—",
-                    "cash_value_10yr": request.form.get(f"cash_value_{i}", "").strip() or "—",
-                    "cash_value_20yr": request.form.get(f"cash_value_20yr_{i}", "").strip() or "—",
+                    "carrier": carrier or _illustration_carrier_hint(paste_data) or f"Option {i}",
+                    "product": request.form.get(f"product_{i}", "").strip() or "IUL",
+                    "monthly_premium": request.form.get(f"premium_{i}", "").strip() or monthly_from_annual or "—",
+                    "death_benefit": request.form.get(f"death_benefit_{i}", "").strip() or (summary or {}).get("death_benefit") or "—",
+                    "cash_value_10yr": request.form.get(f"cash_value_{i}", "").strip() or _graph_value(graph, 10),
+                    "cash_value_20yr": request.form.get(f"cash_value_20yr_{i}", "").strip() or _graph_value(graph, 20),
+                    "cash_value_30yr": request.form.get(f"cash_value_30yr_{i}", "").strip() or _graph_value(graph, 30),
                     "am_best": request.form.get(f"am_best_{i}", "").strip() or "",
                     "sp": request.form.get(f"sp_{i}", "").strip() or "",
                     "moodys": request.form.get(f"moodys_{i}", "").strip() or "",
                     "about": request.form.get(f"about_{i}", "").strip() or "",
+                    "graph": graph,
                 })
 
         if not client_name or not carriers:
@@ -260,9 +372,7 @@ def quote_comparison():
             pass
 
         try:
-            eng = _get_pdf_engine()
             logo = eng["load_logo_data_uri"]()
-            agent_photo = eng["load_agent_photo_data_uri"]()
 
             html_content = eng["build_quote_comparison_html"](
                 client_name=client_name,
@@ -270,7 +380,6 @@ def quote_comparison():
                 carriers=carriers,
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
-                agent_photo_data_uri=agent_photo,
                 agent_info=_current_agent_info(),
             )
 
@@ -328,7 +437,6 @@ def api_illustration():
         summary_data = eng["parse_summary_data"](paste_data)
         logo = eng["load_logo_data_uri"]()
         nlg_logo = eng["load_nlg_logo_data_uri"]()
-        agent_photo = eng["load_agent_photo_data_uri"]()
 
         html_content = eng["generate_pdf_html"](
             html_body,
@@ -336,7 +444,6 @@ def api_illustration():
             graph_points=graph_points,
             summary_data=summary_data,
             nlg_logo_data_uri=nlg_logo,
-            agent_photo_data_uri=agent_photo,
             client_name=client_name,
         )
 
@@ -409,7 +516,6 @@ def term_comparison():
         try:
             eng = _get_pdf_engine()
             logo = eng["load_logo_data_uri"]()
-            agent_photo = eng["load_agent_photo_data_uri"]()
 
             html_content = eng["build_term_comparison_html"](
                 client_name=client_name,
@@ -417,7 +523,6 @@ def term_comparison():
                 carriers=carriers,
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
-                agent_photo_data_uri=agent_photo,
                 agent_info=_current_agent_info(),
             )
 
@@ -474,7 +579,6 @@ def final_expense_comparison():
         try:
             eng = _get_pdf_engine()
             logo = eng["load_logo_data_uri"]()
-            agent_photo = eng["load_agent_photo_data_uri"]()
 
             html_content = eng["build_final_expense_comparison_html"](
                 client_name=client_name,
@@ -482,7 +586,6 @@ def final_expense_comparison():
                 carriers=carriers,
                 recommended_idx=recommended_idx,
                 logo_data_uri=logo,
-                agent_photo_data_uri=agent_photo,
                 agent_info=_current_agent_info(),
             )
 

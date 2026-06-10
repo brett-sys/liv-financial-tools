@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 
-from config import CALLS_DB_PATH
+from config import AGENT_CHOICES, CALLS_DB_PATH
 
 
 @contextmanager
@@ -190,14 +190,18 @@ def get_stats(agent_name=None):
                 (today,),
             ).fetchall()
 
-        # Team-wide per-agent stats for leaderboard (no agent filter)
-        agent_stats = conn.execute(
-            """SELECT agent_name, COUNT(*) as cnt FROM calls
-               WHERE call_datetime >= ? AND call_datetime <= ?
-               AND agent_name != ''
-               GROUP BY agent_name ORDER BY cnt DESC""",
-            (mon, fri + " 23:59:59"),
-        ).fetchall()
+        # Team-wide per-agent stats for configured agents only.
+        if AGENT_CHOICES:
+            placeholders = ",".join("?" for _ in AGENT_CHOICES)
+            agent_stats = conn.execute(
+                f"""SELECT agent_name, COUNT(*) as cnt FROM calls
+                   WHERE call_datetime >= ? AND call_datetime <= ?
+                   AND agent_name IN ({placeholders})
+                   GROUP BY agent_name ORDER BY cnt DESC""",
+                (mon, fri + " 23:59:59", *AGENT_CHOICES),
+            ).fetchall()
+        else:
+            agent_stats = []
 
         if agent_name:
             due_today = conn.execute(

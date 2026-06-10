@@ -7,6 +7,8 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config as _cfg
 
+from .pdf_agent_snippets import pdf_agent_header_html, pdf_footer_contact_bullets
+
 AGENT_NAME = _cfg.AGENT_NAME
 AGENT_TITLE = _cfg.AGENT_TITLE
 AGENT_PHONE = _cfg.AGENT_PHONE
@@ -37,7 +39,7 @@ def _resolve_agent(agent_info):
     return merged
 
 
-def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo_data_uri=None, agent_info=None):
+def build_comparison_html(client_name, policies, logo_data_uri=None, agent_info=None):
     """Build a multi-page comparison PDF from parsed policy data.
 
     policies: list of dicts with keys:
@@ -53,9 +55,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     if logo_data_uri:
         logo_html = f'<img class="logo" src="{logo_data_uri}" alt="LIV Financial Logo" />'
 
-    agent_photo_html = ""
-    if agent_photo_data_uri:
-        agent_photo_html = f'<img class="agent-photo" src="{agent_photo_data_uri}" alt="{ai["name"]}" />'
+    footer_contact = pdf_footer_contact_bullets(ai)
 
     prepared_for_html = ""
     if client_name and client_name.strip():
@@ -65,13 +65,13 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     stat_boxes_html = ""
     for i, p in enumerate(policies):
         s = p["summary"] or {}
+        graph = p.get("graph", [])
+        graph_by_year = {pt["year"]: pt for pt in graph}
 
         death_benefit = s.get("death_benefit", "—")
         annual_prem = f"${s['annual_premium']:,.0f}" if s.get("annual_premium") else "—"
-        be_year = s.get("breakeven_year", "—")
-        be_age = s.get("breakeven_age", "—")
-        last_year = s.get("last_year", "—")
-        last_cash = f"${s['last_cash']:,.0f}" if s.get("last_cash") else "—"
+        cv_10 = f"${graph_by_year[10]['cash_value']:,.0f}" if 10 in graph_by_year else "—"
+        cv_20 = f"${graph_by_year[20]['cash_value']:,.0f}" if 20 in graph_by_year else "—"
 
         stat_boxes_html += f"""
         <div class="stat-box">
@@ -86,12 +86,12 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
                     <div class="stat-value">{annual_prem}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">BREAKEVEN</div>
-                    <div class="stat-value">Year {be_year} (Age {be_age})</div>
+                    <div class="stat-label">CASH VALUE (YR 10)</div>
+                    <div class="stat-value">{cv_10}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">CASH VALUE (YR {last_year})</div>
-                    <div class="stat-value">{last_cash}</div>
+                    <div class="stat-label">CASH VALUE (YR 20)</div>
+                    <div class="stat-value">{cv_20}</div>
                 </div>
             </div>
         </div>"""
@@ -110,7 +110,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     @page {{
         margin: 0.6in 0.5in 0.7in 0.5in;
         @bottom-center {{
-            content: "Prepared by LIV Financial Group  |  {ai['license']}  |  Page " counter(page) " of " counter(pages);
+            content: "Prepared by LIV Financial Group  |  Page " counter(page) " of " counter(pages);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 8px;
             color: #6b7f8f;
@@ -146,11 +146,6 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     }}
     .logo {{ height: 96px; width: auto; max-width: 380px; display: block; }}
     .agent-info {{ display: flex; align-items: center; gap: 12px; text-align: left; }}
-    .agent-photo {{
-        width: 72px; height: 72px; border-radius: 6px;
-        border: 2px solid rgba(255,255,255,0.6);
-        object-fit: cover; object-position: top center; flex-shrink: 0;
-    }}
     .agent-details {{ line-height: 1.35; }}
     .agent-name {{ font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }}
     .agent-detail {{ font-size: 10px; color: rgba(255,255,255,0.85); }}
@@ -229,16 +224,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
     <header class="hero">
         <div class="hero-top">
             <span class="hero-logo-wrap">{logo_html}</span>
-            <div class="agent-info">
-                {agent_photo_html}
-                <div class="agent-details">
-                    <div class="agent-name">{ai['name']}</div>
-                    <div class="agent-detail">{ai['title']}</div>
-                    <div class="agent-detail">{ai['phone']} | {ai['email']}</div>
-                    <div class="agent-detail">{ai['license']}</div>
-                    <div class="agent-detail">{ai['website']}</div>
-                </div>
-            </div>
+            {pdf_agent_header_html(ai)}
         </div>
         <div class="hero-bottom">
             <div>
@@ -270,7 +256,7 @@ def build_comparison_html(client_name, policies, logo_data_uri=None, agent_photo
             Non-guaranteed projections are hypothetical and may not apply to an actual policy.
             Actual results may be more or less favorable. Please review each carrier&rsquo;s
             full illustration for guaranteed values and complete policy details.<br/>
-            {ai['name']} &bull; {ai['phone']} &bull; {ai['website']}
+            {footer_contact}
         </div>
     </div>
 </body>

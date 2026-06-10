@@ -2,7 +2,7 @@ const CACHE_NAME = 'lifi-v1';
 const STATIC_ASSETS = [
     '/static/style.css',
     '/static/manifest.json',
-    '/static/lumberjack_logo.png'
+    '/static/liv_logo.png'
 ];
 
 self.addEventListener('install', event => {
@@ -45,13 +45,13 @@ self.addEventListener('push', event => {
         icon: '/static/icons/icon-192.png',
         badge: '/static/icons/icon-192.png',
         tag: data.tag || 'follow-up',
-        data: { url: data.url || '/dashboard' }
+        data: { url: data.url || '/quoter/' }
     };
     event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    const url = event.notification.data.url || '/dashboard';
+    const url = event.notification.data.url || '/quoter/';
     event.waitUntil(clients.openWindow(url));
 });

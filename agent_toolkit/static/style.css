@@ -61,9 +61,10 @@ body {
     font-size: 1.1rem;
 }
 .top-logo {
-    height: 36px;
-    width: auto;
-    border-radius: 6px;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 .top-agent {
     font-size: 0.8rem;
@@ -142,6 +143,10 @@ body {
     align-items: center;
     justify-content: space-around;
     z-index: 100;
+}
+.bottom-nav--two .nav-tab {
+    flex: 1;
+    max-width: none;
 }
 .nav-tab {
     display: flex;

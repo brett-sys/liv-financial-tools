@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="form-page">
-    <h1>Quote Comparison</h1>
+    <h1>IUL Quote Comparison</h1>
     <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
-        Enter up to 4 carrier quotes to generate a comparison PDF.
+        Paste full IUL illustration data for up to 4 options. The PDF will pull cash values at years 10, 20, and 30, then compare growth side by side.
     </p>
 
     <form method="POST" action="{{ url_for('tools.quote_comparison') }}" class="call-form">
@@ -28,35 +28,44 @@
 
         {% for i in range(1, 5) %}
         <div class="card">
-            <h2>Carrier {{ i }}{% if i > 2 %} (optional){% endif %}</h2>
+            <h2>IUL Option {{ i }}{% if i > 2 %} (optional){% endif %}</h2>
+            <div class="form-group">
+                <label>Illustration Data</label>
+                <textarea name="paste_{{ i }}" class="paste-area" rows="8"
+                          placeholder="Paste the full IUL illustration export for option {{ i }}...{% if i > 2 %}&#10;(Leave empty to skip){% endif %}"></textarea>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Carrier</label>
-                    <input type="text" name="carrier_{{ i }}" placeholder="National Life">
+                    <input type="text" name="carrier_{{ i }}" placeholder="Optional override, e.g. National Life">
                 </div>
                 <div class="form-group">
                     <label>Product</label>
-                    <input type="text" name="product_{{ i }}" placeholder="SummitLife IUL">
+                    <input type="text" name="product_{{ i }}" placeholder="Optional, e.g. SummitLife IUL">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Monthly Premium</label>
-                    <input type="text" name="premium_{{ i }}" placeholder="$150">
+                    <input type="text" name="premium_{{ i }}" placeholder="Auto from illustration, or override">
                 </div>
                 <div class="form-group">
                     <label>Death Benefit</label>
-                    <input type="text" name="death_benefit_{{ i }}" placeholder="$250,000">
+                    <input type="text" name="death_benefit_{{ i }}" placeholder="Auto from illustration, or override">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>10-Yr Cash Value</label>
-                    <input type="text" name="cash_value_{{ i }}" placeholder="$12,000">
+                    <input type="text" name="cash_value_{{ i }}" placeholder="Auto from illustration, or override">
                 </div>
                 <div class="form-group">
                     <label>20-Yr Cash Value</label>
-                    <input type="text" name="cash_value_20yr_{{ i }}" placeholder="$38,000">
+                    <input type="text" name="cash_value_20yr_{{ i }}" placeholder="Auto from illustration, or override">
+                </div>
+                <div class="form-group">
+                    <label>30-Yr Cash Value</label>
+                    <input type="text" name="cash_value_30yr_{{ i }}" placeholder="Auto from illustration, or override">
                 </div>
             </div>
             <div class="form-row">

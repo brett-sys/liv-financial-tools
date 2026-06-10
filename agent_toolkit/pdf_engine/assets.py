@@ -37,6 +37,10 @@ def load_nlg_logo_data_uri():
     return _load_image(config.NLG_LOGO_FILENAME)
 
 
+def load_veterans_logo_data_uri():
+    return _load_image(config.VETERANS_LOGO_FILENAME)
+
+
 def load_agent_photo_data_uri():
     return _load_image(config.AGENT_PHOTO_FILENAME)
 
