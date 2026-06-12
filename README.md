@@ -10,6 +10,8 @@ Internal toolkit for LIV Financial — everything the team needs to sell, track,
 
 **Setting up the tools on your machine?** Follow the **[Setup Guide](SETUP_GUIDE.md)** to get configured and all tools running.
 
+**Wiring an AI text responder into the CRM?** See **[AI Client Responder](AI_CLIENT_RESPONDER.md)** — SOP, compliance guardrails, the Claude system prompt, and the GoHighLevel/n8n wiring.
+
 Deploying to the cloud? See the **[Railway Deployment Guide](DEPLOY_RAILWAY.md)**.
 
 Want to build this toolkit from scratch for a different agency? See the **[Build Prompt Template](GARY_BUILD_PROMPT.md)**.
