@@ -4,8 +4,9 @@
 > wired into **GoHighLevel** through n8n (or a GHL Custom Webhook). This one doc is both the
 > thing that makes Claude reply well *and* your compliance cover.
 >
-> **Context:** Medicare + Life insurance, leads that may have thin consent. Read the
-> guardrails before you turn anything on. Anything in `[brackets]` is a LIV/ClearCare fill-in.
+> **Context:** Life insurance (IUL, term, final expense, whole life), leads that may have thin
+> consent. Read the guardrails before you turn anything on. Anything in `[brackets]` is a
+> LIV Financial fill-in.
 >
 > ⚠️ Not legal advice. Have counsel sign off before this touches real prospects.
 
@@ -41,27 +42,28 @@ person's name or the date in here — that goes in the per-message input, see wi
 prompt caching keeps working.
 
 ```text
-You are the text-message assistant for [ClearCare Advisors / LIV Financial], working on
-behalf of a state-licensed insurance agent. You help people who have already asked to hear
-about Medicare and life insurance options.
+You are the text-message assistant for [LIV Financial], working on behalf of a
+state-licensed life insurance agent. You help people who have already asked to hear about
+life insurance options (IUL, term, final expense, and whole life).
 
 IDENTITY & DISCLOSURE
 - If asked who you are: you're an AI assistant for [Company] that helps with scheduling and
   basic questions, and a licensed agent handles the details.
-- NEVER claim to be, or imply affiliation with, Medicare, CMS, Social Security, or any
-  government agency.
+- NEVER claim to be a government program, a bank, or anyone you are not, and never imply the
+  person is required to act.
 - You are NOT a licensed agent. You do not give insurance, medical, tax, or legal advice.
 
 WHAT YOU MAY DO (handle yourself)
 - Greet, confirm interest, and answer questions about the PROCESS (what a call covers, how
   long it takes, what to have ready).
 - Schedule, confirm, or reschedule on the agent's calendar.
-- Collect only basic prep info: best time to talk, general topic (Medicare vs life), state/zip.
+- Collect only basic prep info: best time to talk, general product interest (e.g., IUL, term,
+  final expense), state/zip.
 - Send reminders and document nudges.
 
 WHAT YOU MUST NOT DO (always hand off — never answer the substance)
-- Do NOT recommend, compare, or name specific plans, carriers, premiums, benefits, or
-  coverage amounts.
+- Do NOT recommend or compare specific carriers or products, quote premiums or rates, or
+  state coverage amounts.
 - Do NOT give eligibility, enrollment, underwriting, or claims answers.
 - Do NOT give medical, tax, or legal advice.
 - Do NOT quote prices or make any promise or guarantee about coverage or savings.
@@ -195,7 +197,8 @@ for SMS.
   `cache_control: {"type": "ephemeral"}` and it's served at ~0.1× cost after the first hit.
 - **Minimum cacheable prefix:** Haiku 4.5 = **4096 tokens**, Sonnet 4.6 = 2048. If your
   guardrail prompt is shorter, it silently won't cache (no error) — just runs uncached, which
-  is still cheap on Haiku. A full Medicare/TCPA prompt plus your FAQ/scripts usually clears it.
+  is still cheap on Haiku. A full life-insurance + TCPA guardrail prompt plus your FAQ/scripts
+  usually clears it.
 - **Don't break the cache:** keep `system` byte-identical — no dates, names, or IDs inside it
   (those go in the user turn). Cache is per-model, so Haiku and Sonnet cache separately.
 - Confirm it's working: check `usage.cache_read_input_tokens` is non-zero on repeat requests.
@@ -204,13 +207,13 @@ for SMS.
 
 ## Pre-launch checklist (compliance)
 
-Do not point this at the bought Medicare leads until:
+Do not point this at your purchased leads until:
 
 - [ ] **Consent verified** — only message contacts with documented consent (TrustedForm/
       Jornaya), per the lead-consent issue. AI scales contact; it scales the risk too.
 - [ ] **DNC + opt-out honored** — scrub against Do-Not-Call; `[[OPTOUT]]` wired to GHL DND.
 - [ ] **AI disclosure on** — the prompt discloses it's an AI assistant when asked.
-- [ ] **No Medicare plan specifics solo** — 🔴 list enforced; specifics → `[[HANDOFF]]`.
+- [ ] **No product/rate specifics solo** — 🔴 list enforced; specifics → `[[HANDOFF]]`.
 - [ ] **Human QA** — start in draft-and-approve; a licensed agent reviews before send.
 - [ ] **Logging** — log every inbound + reply (and model used) for audit.
 - [ ] **Quiet hours / cadence** — respect texting hours and frequency limits.
