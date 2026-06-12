@@ -6,7 +6,11 @@ Internal toolkit for LIV Financial — everything the team needs to sell, track,
 
 ## New to the Team?
 
-Follow the **[Setup Guide](SETUP_GUIDE.md)** to get your machine configured and all tools running.
+**New recruit (agent)?** Start with the **[Onboarding Video Series](ONBOARDING.md)** and the **[Client Pipeline Cheat Sheet](CLIENT_PIPELINE.md)** — that's the day-one path for selling and working clients in the CRM.
+
+**Setting up the tools on your machine?** Follow the **[Setup Guide](SETUP_GUIDE.md)** to get configured and all tools running.
+
+**Wiring an AI text responder into the CRM?** See **[AI Client Responder](AI_CLIENT_RESPONDER.md)** — SOP, compliance guardrails, the Claude system prompt, and the GoHighLevel/n8n wiring.
 
 Deploying to the cloud? See the **[Railway Deployment Guide](DEPLOY_RAILWAY.md)**.
 
