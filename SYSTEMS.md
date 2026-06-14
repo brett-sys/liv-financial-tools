@@ -145,11 +145,14 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 
 ---
 
-## Two Play Types — never blend them
+## Three Play Types — never blend them
 
-**1. Projection play (primary).** Must clear the full 4-filter, **including
-Filter 2**: a **1.5+ pt** edge on the number (spread/total) or **3%+ ML** edge,
-from my own projection. Tiered Lean / Standard / Max by conviction.
+**1. Projection play (model-driven).** Must clear the full 4-filter, **including
+Filter 2**: a **1.5+ run/pt** edge on the number (spread/total) or **3%+ ML** edge,
+from a real projection. For MLB F5 totals the model lives at
+`projection_model/f5_model.py` (UNPROVEN, n=30 calibration goal). Other sports
+and markets need their own model or a supplied projection. Tiered Lean only
+until calibrated.
 
 **2. Line-gap (CLV) play.** A cross-book number gap (Diamond vs the sharp/DK
 reference). Its edge is **CLV, not a projection — so it does NOT use Filter 2's
@@ -174,6 +177,21 @@ reference). Its edge is **CLV, not a projection — so it does NOT use Filter 2'
 - **Log every gap, bet or not**, in `research/line-gap-edge/gap-log.md` — the
   **selection-bias guard**. Recording only the gaps I bet would make a losing
   pattern look like a winner.
+
+**3. Pattern (situational) play.** A bet driven by a codified situational
+signal — not a projection model, not a cross-book gap. Each recognized pattern
+must be named, defined, and tracked separately. Currently recognized:
+
+- **Public-fade total** — 80%+ public handle on one side of a total, where the
+  cross-game average disagrees with the line by ≥1.5 pts.
+- **F5 ROI fade list** — fade these teams' F5 ML when they're favored: bottom
+  4 by season F5 ROI (e.g. BAL, BOS, PHI, TOR — refresh weekly).
+- **F5 ROI back list** — back these teams' F5 ML when they're dogs: top 4 by
+  season F5 ROI (e.g. WSN, CLE, STL, LAD — refresh weekly).
+
+All Pattern plays are **Lean-only** until **n=20 logged + positive CLV** for
+that specific pattern. Each pattern has its own n-count. A losing pattern at
+n=20 gets killed.
 
 ---
 
