@@ -149,10 +149,12 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 
 **1. Projection play (model-driven).** Must clear the full 4-filter, **including
 Filter 2**: a **1.5+ run/pt** edge on the number (spread/total) or **3%+ ML** edge,
-from a real projection. For MLB F5 totals the model lives at
-`projection_model/f5_model.py` (UNPROVEN, n=30 calibration goal). Other sports
-and markets need their own model or a supplied projection. Tiered Lean only
-until calibrated.
+from a real projection. The MLB F5 totals model (`projection_model/f5_model.py`)
+was **KILLED at v0.1 calibration on 2026-06-15** — does not beat a constant 4.30
+baseline on 547 games (RMSE 3.38 vs 3.27). **Do not size off the v0.1 model.**
+v0.2 needs to predict probabilities (not point estimates) + use xFIP/Stuff+/
+lineup quality. Until a v0.2 model passes calibration, **the Projection play
+type is blocked for MLB F5 totals.**
 
 **2. Line-gap (CLV) play.** A cross-book number gap (Diamond vs the sharp/DK
 reference). Its edge is **CLV, not a projection — so it does NOT use Filter 2's

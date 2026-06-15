@@ -1,5 +1,21 @@
 """F5 Totals Projector — MLB First-5-Innings projection model (v0.1).
 
+⚠️  KILLED at v0.1 calibration (2026-06-15) — DO NOT BET OFF THIS MODEL.
+
+Calibration on 547 historical MLB games (May 1 – June 13, 2026) showed
+the model's RMSE (3.38 runs) is WORSE than a constant 4.30 baseline
+(RMSE 3.27). Variance from blowout games crushes any point-estimate
+projector. See projection_model/README.md for full results.
+
+The code below is kept as the v0.2 starting point. v0.2 needs to:
+  1. Predict P(F5 > X) probabilities, not point estimates
+  2. Swap ERA for xFIP / Stuff+
+  3. Add lineup quality
+  4. Add recency weighting + bullpen exposure
+  5. Refresh park factors against 2026 data
+
+Original v0.1 design (unchanged below)
+--------------------------------------
 Purpose
 -------
 Generate a *projected* F5 total runs for an MLB game, so the system has a

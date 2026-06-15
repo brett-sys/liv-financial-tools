@@ -1,86 +1,100 @@
-# F5 Projection Model — v0.1
+# F5 Projection Model — v0.1 (KILLED)
 
-A simple, transparent model that projects MLB First-5-Innings total runs from
-pitcher ERA, park, and weather. Built so the system has an actual Filter-2
-input instead of passing every night.
+## Status: ❌ KILLED at v0.1 calibration (2026-06-15)
 
-## Quick start
+The v0.1 ERA × park model **did not beat a constant 4.30 baseline** on 547
+historical MLB games (May 1 – June 13, 2026). Verdict: do **not** bet F5
+totals off this model. Escalate to v0.2 before re-attempting.
 
-```bash
-python3 projection_model/f5_model.py
-```
+### Empirical results (n = 547 games)
 
-Runs the example projections at the bottom of `f5_model.py`. Edit `main()`
-or import the functions into your own script.
+| Metric | Model | Baseline (always 4.30) |
+|--------|-------|------------------------|
+| RMSE | **3.38 runs** | 3.27 runs |
+| Mean bias | −0.98 runs (under-projects) | — |
+| Within ±1.0 | 25.0% | — |
+| Within ±1.5 | 35.5% | — |
+| Within ±2.0 | 47.3% | — |
+| Beats baseline | **NO ❌** | — |
 
-```python
-from projection_model.f5_model import project_f5_with_market
+Train/test split (70/30): test set RMSE is **3.57** (worse than train at 3.30),
+confirming the model isn't picking up real signal — the under-projection
+*widens* on held-out data.
 
-project_f5_with_market(
-    away_era=2.40,        # Skenes
-    home_era=4.50,        # Meyer
-    home_park="PIT",
-    market_line=4.0,
-)
-# → {'projection': 3.47, 'market': 4.0, 'edge_runs': 0.53,
-#    'call': 'sub-threshold lean under (log, do not fire)'}
-```
+### Why it failed: variance, not bias
 
-## Formula
+The **median** projection is roughly right (mean bias only −1 run), but F5
+totals have a fat right tail of blowouts the pitcher-only model can't see.
+Worst 5 misses:
 
-```
-projection = LEAGUE_F5_BASELINE × park_factor × pitcher_skill × weather_factor
+| Date | Matchup | Park | Projected | Actual F5 |
+|------|---------|------|-----------|-----------|
+| 2026-05-02 | CIN @ PIT | PIT | 3.64 | **19** |
+| 2026-05-18 | BAL @ TB | TB | 3.94 | 16 |
+| 2026-05-30 | MIN @ PIT | PIT | 3.74 | 15 |
+| 2026-05-31 | NYY @ ATH | ATH | 4.96 | 16 |
+| 2026-05-19 | NYM @ WSH | WAS | 3.39 | 14 |
 
-pitcher_skill        = (away_skill + home_skill) / 2
-each pitcher_skill   = 1 + W × (ERA / LEAGUE_AVG_ERA − 1)        W = 0.85 default
-park_factor          = table lookup (1.00 = neutral; Coors = 1.20; T-Mobile = 0.92)
-weather_factor       = 1.00 unless outdoor + extreme temp/wind
-```
+A "starter implodes for 8 ER in 3 IP" game can't be foreseen from his ERA going
+in. The constant 4.30 baseline gets *equally* destroyed by these — but its RMSE
+benefits from being equidistant to extremes in both directions, whereas the
+model picks a low side and gets murdered.
 
-All constants live at the top of `f5_model.py`. Update annually.
+### Per-park bias
 
-## Verdict thresholds
+| Park | n | Bias | Note |
+|------|---|------|------|
+| PIT | 19 | −2.76 | Model way under at PNC — likely stale park factor or blowout cluster |
+| NYM | 16 | −2.46 | Citi Field scored higher than the 0.98 factor implies |
+| ATH | 17 | −2.41 | Sutter Health (Sacramento) — even hotter than the 1.08 factor |
+| SF | 16 | −2.06 | Even Oracle Park scored above the 0.92 factor |
+| CWS | 19 | −1.67 | |
 
-From `SYSTEMS.md` Filter 2:
+All parks miss in the same direction (under-projecting) — that's a baseline
+problem, not park factors.
 
-| Edge vs market | System call |
-|----------------|-------------|
-| ≥ 1.5 runs | **Lean (fire candidate)** — clears Filter 2 |
-| 0.5 – 1.5 runs | sub-threshold lean — log, do not fire |
-| < 0.5 runs | PASS — no edge |
+### Per-ERA-bucket bias
 
-## Status: UNPROVEN
+| Bucket | n | Bias |
+|--------|---|------|
+| Elite (<2.50) | 50 | −2.08 |
+| Good (2.50–3.50) | 152 | −1.28 |
+| Avg (3.50–4.50) | 203 | −0.98 |
+| Bad (>4.50) | 142 | −0.29 |
 
-This model has not been calibrated against historical outcomes. Until
-**n ≥ 30 logged bets** sourced from its picks show **positive CLV**, treat
-its calls as hypotheses, not edges. Max size off model output = **Lean ($295)**.
+Bias is *worst* on elite arms (under-projecting by 2 runs) — but the bad-arm
+bucket is the closest to right. This means the damping factor W = 0.85 is too
+aggressive: when an elite arm pitches, the bullpen behind him + opposing lineup
+still produces real runs, and the model gives the elite arm too much credit.
 
-Calibration roadmap (next phase):
-1. Pull last 30 days of F5 results from Baseball Savant.
-2. Run model on each historical game; compare projection vs actual F5.
-3. Compute RMSE and bias. Adjust constants if RMSE > 1.5 or bias > 0.3.
-4. Track model vs closing line: when model differs by ≥ 0.5 runs, what's the
-   W-L vs the close? Need ≥ 53% to claim CLV edge.
+### What v0.2 needs to fix
 
-## Known limitations (v0.1)
+1. **Stop predicting point estimates of a fat-tailed distribution.** Predict
+   probabilities: P(F5 > 4), P(F5 > 5), etc. Compare to market implied probs.
+   That's the framework that survives variance.
+2. **Better pitcher inputs.** ERA is noisy. Use xFIP (luck-stripped) or
+   Stuff+ (skill signal) via FanGraphs.
+3. **Lineup quality.** Currently absent. Dodgers offense ≠ White Sox offense.
+4. **Recency weighting.** Last 5 starts > season-to-date for in-season form.
+5. **Bullpen exposure.** F5 sometimes sees relief on short outings.
+6. **Park factor refresh.** Current factors are 3-yr averages; 2026 may differ.
 
-- ERA is the only pitcher input. xFIP / Stuff+ / K-BB% would be more
-  predictive; ERA is luck-prone. Upgrade in v0.2.
-- No bullpen / opener handling. F5 sometimes sees the bullpen if a starter
-  pulls early — not modeled.
-- Lineup quality not factored. A great lineup hits avg pitching harder.
-- Weather is rough. No humidity, no altitude beyond park factor.
-- Park factors are static 3-yr averages, not month-to-date.
+### Don't bet F5 totals off this until v0.2
 
-## Where it fits in the system
-
-`SYSTEMS.md` recognizes three play types:
-
-1. **Line-gap (CLV)** — cross-book number gaps (Diamond vs DK), Lean-only, unproven (n=20 goal).
-2. **Projection (model-driven)** — *new* — model-vs-market edges of 1.5+ runs (F5 totals only for v0.1), Lean-only, unproven (n=30 goal).
-3. **Pattern (situational)** — public-fade / season-ROI / sharp-splits angles, Lean-only, codify per pattern.
+The model's median is informative as a sanity check but its RMSE is worse
+than guessing 4.30 every game. **Until v0.2 is calibrated and beats baseline,
+no F5 total bets sized off model output.**
 
 ## Files
 
-- `f5_model.py` — model + park factors + CLI demo
-- `README.md` — this file
+- `f5_model.py` — the model code (kept for reference / v0.2 starting point)
+- `calibrate.py` — calibration pipeline (works; reusable for v0.2)
+- `calibration_results/` — CSV outputs (gitignored)
+
+## Reproducing
+
+```bash
+pip install pybaseball pandas
+python3 projection_model/calibrate.py                 # full window
+python3 projection_model/calibrate.py --limit 10      # smoke test
+```
