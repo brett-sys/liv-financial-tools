@@ -4,8 +4,11 @@
 > the US sharp market (Pinnacle). If true, taking the offshore line and grading
 > against Pinnacle close should produce **systematically positive CLV**.
 >
-> **Sample goal**: n=20 graded bets. Until n=20 with positive avg CLV, this is
-> Lean-tier only ($175). Promote only after empirical proof.
+> **Sample goal**: n=20 graded bets with positive avg CLV before any
+> systematic promotion of Diamond/Wagerboard plays. Tier sizing follows
+> locked production tiers (Lean $295 / Standard $510 / Max $900) per
+> SYSTEMS.md — Brett's directive 2026-06-16, overriding workflow's smaller
+> test-stakes.
 >
 > **Hard rule**: Pinnacle numbers come ONLY from OpenClaw pulls in
 > `tracker/pinnacle-pulls/YYYY-MM-DD.md`. Never fetch or guess.
@@ -36,9 +39,8 @@ Status: **0 of 20 toward threshold.**
 
 ## Notes
 
-- Sizing for this sample: **Lean $175 / Standard $300 / Max $550** — smaller
-  than SYSTEMS.md production tiers because thesis is unproven. Promote
-  sizing only after n=20 with positive avg CLV.
+- Sizing: **Lean $295 / Standard $510 / Max $900** per SYSTEMS.md locked
+  tiers (Brett directive 2026-06-16). Same tiers as production play.
 - Entry CLV is the stronger signal for the book-mispricing thesis (isolates
   mispricing from market drift over the day).
 - A bet is INVALID if the OpenClaw pull's MARKET doesn't match exactly
