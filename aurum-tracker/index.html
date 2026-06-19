@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurum Financial Group — Client Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">A</div>
+      <div>
+        <div class="brand-name">Aurum Financial</div>
+        <div class="brand-sub">Client Tracker</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-user-block">
+    <div class="user-avatar">CA</div>
+    <div>
+      <div class="user-name">Cye Arroyo</div>
+      <div class="user-loc">Huntington Beach, CA</div>
+    </div>
+  </div>
+
+  <div class="sidebar-search" id="sidebar-search-wrap">
+    <span style="font-size:14px">🔍</span>
+    <input type="text" placeholder="Search clients..." id="sidebar-search-input" oninput="document.getElementById('search').value=this.value;render()">
+    <span style="font-size:11px;color:var(--text3);background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace">⌘K</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="switchTab('clients',this)" data-tab="clients">
+      <span class="nav-icon">👥</span><span>Clients</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('goals',this)" data-tab="goals">
+      <span class="nav-icon">🎯</span><span>Goals</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('leads',this)" data-tab="leads">
+      <span class="nav-icon">💸</span><span>Lead Spend</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('carriers',this)" data-tab="carriers">
+      <span class="nav-icon">📊</span><span>Carriers %</span>
+    </div>
+    <div class="nav-label" style="margin-top:8px">Actions</div>
+    <div class="nav-item" onclick="exportCSV()">
+      <span class="nav-icon">⬇</span><span>Export CSV</span>
+    </div>
+    <div class="nav-item" onclick="downloadHTML()">
+      <span class="nav-icon">💾</span><span>Save File</span>
+    </div>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Clients</div>
+    <div class="topbar-right">
+      <div class="save-status" id="save-status"><span class="save-dot"></span> Auto-saved</div>
+      <button class="btn btn-teal" onclick="openModal()" id="add-btn">+ Add Client</button>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="tab-page active" id="tab-clients">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="Search clients..." oninput="render()">
+      </div>
+      <select class="filter" id="filter-status" onchange="render()">
+        <option value="">All clients</option>
+        <option value="active">Advancement active</option>
+        <option value="clear">Advancement clear</option>
+      </select>
+      <select class="filter" id="filter-sort" onchange="render()">
+        <option value="date-desc">Newest first</option>
+        <option value="date-asc">Oldest first</option>
+        <option value="name">Name A–Z</option>
+        <option value="takehome">Take home ↓</option>
+      </select>
+    </div>
+    <div class="client-list">
+      <div class="client-list-header">
+        <div>Client</div>
+        <div>Policy Sold</div>
+        <div class="adv-col">Advancement</div>
+      </div>
+      <div id="client-list-body"></div>
+      <div class="empty" id="empty" style="display:none">
+        <div class="empty-icon">📋</div>
+        <p>No clients yet.<br>Add your first closed deal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="tab-page" id="tab-goals">
+    <div class="goals-wrap">
+      <div class="goals-header">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)">My Goals</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">Track anything you're working toward</div>
+        </div>
+        <button class="btn btn-teal" onclick="openGoalModal()">+ Add Goal</button>
+      </div>
+      <div id="goals-list"></div>
+      <div class="goals-empty" id="goals-empty" style="display:none">
+        <div style="font-size:36px;margin-bottom:12px;opacity:0.2">🎯</div>
+        <p style="font-size:14px;color:var(--text3);line-height:1.7">No goals yet.<br>Add your first goal to start tracking.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAD SPEND -->
+  <div class="tab-page" id="tab-leads">
+    <div class="leads-wrap">
+      <div class="leads-header">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)">Lead Spend</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">Track spend by company and see your ROI per source</div>
+        </div>
+        <button class="btn btn-teal" onclick="openLeadModal()">+ Add Lead Company</button>
+      </div>
+
+      <!-- ROI summary row -->
+      <div class="leads-roi-row" id="leads-roi-row"></div>
+
+      <!-- company cards -->
+      <div id="lead-companies-list"></div>
+
+      <div class="leads-empty" id="leads-empty" style="display:none">
+        <div style="font-size:36px;margin-bottom:12px;opacity:0.2">💸</div>
+        <p style="font-size:14px;color:var(--text3);line-height:1.7">No lead companies yet.<br>Add your first company to start tracking ROI.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARRIERS -->
+  <div class="tab-page" id="tab-carriers">
+    <div class="carriers-wrap">
+      <div class="carriers-top">
+        <div class="contract-selector">
+          <label>FFL contract level:</label>
+          <select id="contract-level" onchange="saveContractLevel();renderCarriers()">
+            <option value="65">65</option><option value="70">70</option><option value="75">75</option>
+            <option value="80">80</option><option value="85">85</option><option value="90">90</option>
+            <option value="95">95</option><option value="100">100</option><option value="105">105</option>
+            <option value="110">110</option><option value="115">115</option><option value="120">120</option>
+            <option value="125">125</option><option value="130">130</option><option value="135">135</option>
+            <option value="140">140</option><option value="145">145</option>
+          </select>
+        </div>
+        <div class="carriers-note">Commission rates from Family First Life comp guides.</div>
+      </div>
+      <div id="carriers-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">Add client</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>First name</label><input type="text" id="f-first" placeholder="John"></div>
+      <div class="field"><label>Last name</label><input type="text" id="f-last" placeholder="Smith"></div>
+      <div class="field"><label>Cell number</label><input type="tel" id="f-phone" placeholder="(714) 000-0000"></div>
+      <div class="field"><label>Email</label><input type="email" id="f-email" placeholder="john@email.com"></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Carrier</label>
+        <select id="f-carrier-sel" onchange="updateProductDropdown()">
+          <option value="">Select carrier...</option>
+          <option>Mutual of Omaha</option><option>North American</option>
+          <option>National Life Group (NLG)</option><option>Transamerica</option>
+          <option>Americo</option><option>Columbus Life</option><option>Allianz</option>
+          <option>American National</option><option>F&amp;G</option>
+          <option>American Amicable</option><option>Ethos</option><option>Athene</option>
+          <option>Royal Neighbors</option><option>Corebridge</option><option>Aetna / Aflac</option><option>Foresters</option><option>InstaBrain</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Product</label>
+        <select id="f-product-sel" onchange="autoFillCommission()">
+          <option value="">Select product...</option>
+        </select>
+      </div>
+      <div class="field"><label>Policy sold date</label><input type="date" id="f-sold"></div>
+      <div class="field"><label>Months until advancement clear</label><input type="number" id="f-months" placeholder="e.g. 9" min="1" max="24"></div>
+      <div class="field"><label>Annual premium ($)</label><input type="number" id="f-premium" placeholder="e.g. 12000" min="0" oninput="calcTakehome()"></div>
+      <div class="field">
+        <label>Target premium ($) <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400">IUL — CTP</span></label>
+        <input type="number" id="f-targetpremium" placeholder="e.g. 8000" min="0" style="color:var(--gold);font-weight:700">
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Commission % <span id="comm-auto-badge" style="display:none;font-size:10px;background:rgba(0,230,118,.12);color:var(--green);padding:2px 8px;border-radius:10px;margin-left:4px;text-transform:none;letter-spacing:0;font-weight:500">✓ auto-filled</span></label>
+        <input type="number" id="f-commissionpct" placeholder="Auto-fills when carrier + product selected" min="0" max="200" step="0.5" oninput="calcTakehome()" style="font-size:16px;font-weight:700;color:var(--green)">
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Lead source <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400">— tag this client to a lead company for ROI tracking</span></label>
+        <select id="f-leadsource" style="color:var(--teal);font-weight:600">
+          <option value="">No lead source</option>
+        </select>
+      </div>
+    </div>
+    <div class="takehome-preview">
+      <div style="flex:1">
+        <div class="takehome-label">Estimated take home</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px" id="f-takehome-breakdown">Enter annual premium and commission % above</div>
+      </div>
+      <div class="takehome-val" id="f-takehome-preview">$0</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="saveClient()">Save client</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD COMPANY MODAL -->
+<div class="overlay" id="lead-overlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="lead-modal-title">Add Lead Company</span>
+      <button class="close-btn" onclick="closeLeadModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field" style="grid-column:1/-1">
+        <label>Company name</label>
+        <input type="text" id="l-name" placeholder="e.g. Lead Heroes, NAAIP, Facebook Ads">
+      </div>
+      <div class="field">
+        <label>Amount spent ($)</label>
+        <input type="number" id="l-spent" placeholder="e.g. 500" min="0" step="0.01" oninput="updateLeadPreview()">
+      </div>
+      <div class="field">
+        <label>Leads purchased</label>
+        <input type="number" id="l-count" placeholder="e.g. 40" min="0" oninput="updateLeadPreview()">
+      </div>
+      <div class="field">
+        <label>Date purchased</label>
+        <input type="date" id="l-date">
+      </div>
+      <div class="field">
+        <label>Notes <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400">optional</span></label>
+        <input type="text" id="l-notes" placeholder="e.g. Final expense, aged leads">
+      </div>
+    </div>
+    <div class="takehome-preview" style="margin-top:16px">
+      <div style="flex:1">
+        <div class="takehome-label">Cost per lead</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px" id="l-preview-sub">Enter amount and lead count above</div>
+      </div>
+      <div class="takehome-val" id="l-preview-cpl" style="color:var(--teal)">—</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeLeadModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="saveLeadCompany()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="overlay" id="goal-overlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="goal-modal-title">Add Goal</span>
+      <button class="close-btn" onclick="closeGoalModal()">✕</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="field" style="margin-bottom:14px">
+        <label>Pick an emoji</label>
+        <div class="goal-emoji-picker" id="emoji-picker">
+          <div class="emoji-opt selected" onclick="selectEmoji(this,'🏎')">🏎</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🏠')">🏠</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'✈️')">✈️</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'💰')">💰</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'📈')">📈</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🎯')">🎯</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'💎')">💎</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🏋️')">🏋️</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'👔')">👔</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🌍')">🌍</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🎓')">🎓</div>
+          <div class="emoji-opt" onclick="selectEmoji(this,'🔥')">🔥</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1"><label>Goal name</label><input type="text" id="g-title" placeholder="e.g. BMW M3 Competition"></div>
+        <div class="field" style="grid-column:1/-1"><label>Target amount ($)</label><input type="number" id="g-target" placeholder="e.g. 100000" min="1" oninput="updateGoalPreview()"></div>
+      </div>
+      <div style="background:rgba(0,201,184,0.05);border:1px solid var(--teal-border);border-radius:10px;padding:14px 16px;margin-top:14px;font-size:12px;color:var(--text3);line-height:1.6">
+        💡 Progress is automatically calculated from your <span style="color:var(--teal);font-weight:600">total take home</span> across all clients. Add clients on the Clients tab to move this bar.
+      </div>
+      <div class="takehome-preview" style="margin-top:16px">
+        <div style="flex:1">
+          <div class="takehome-label">Progress</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px" id="g-preview-sub">Enter target and current amount</div>
+        </div>
+        <div class="takehome-val" id="g-preview-pct" style="color:var(--teal)">0%</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="saveGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p>Delete this client?<br>This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
