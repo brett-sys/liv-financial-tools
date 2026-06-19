@@ -15,7 +15,7 @@ unproven, and zero confirmed system bets have been placed. Reframing accordingly
 **What it IS, today:**
 - **Discipline guard.** Juice ceiling (−120 cap), market-softness hierarchy,
   weekend no-live rule, locked tiers, NHL goalie protocol, Coors/Sacramento
-  total avoid, no-SGP, etc. This part has caught real bad bets every week.
+  total avoid. This part has caught real bad bets every week.
 - **Slate scanner.** Cross-book line shopping (Diamond ↔ WagerBoard), fact-checking
   rosters/goalies/injuries via search, flagging traps (e.g. stale "Rodriguez on
   Orioles" data, killing juice ≥−125 plays). Catches errors that cost money.
@@ -47,7 +47,7 @@ line, until n=30. After that, CLV tells us whether to scale up, hold, or stop.
 | **Lean tier** | **$295** |
 | **Standard tier** | **$510** |
 | **Max tier** | **$900** |
-| **Parlays** | **$25–$50**, 2-leg **cross-game only** |
+| **Parlays** | Up to **Standard tier** ($510), 2-leg only — see Parlay Rules below |
 
 > **Tiers are absolute and locked: Lean $295 / Standard $510 / Max $900, never
 > changing.** The bankroll figure above is a reference only. **Do NOT prompt
@@ -127,8 +127,9 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
   case for a play is who-wins narrative, it is an **automatic PASS** — say so in
   those words.
 - **Juice ceiling.** Standard markets only, **−110 to −115**. Anything heavier
-  than **−120**, or any parlay/prop/teaser juiced on both sides, gets **killed**.
-  Vig compounds losses.
+  than **−120** on a straight bet gets **killed**. Vig compounds losses.
+  (Parlays are evaluated by total parlay price, not by leg juice — see
+  Parlay Rules below.)
 - **Segments: 1st half and full game ONLY — NO second-half bets.** (Brett pref,
   set 2026-05-26.) Skip every 2H market regardless of price.
 - **Market-softness ranking** (where edge lives — softest first):
@@ -158,6 +159,59 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 - **No live (in-game) betting on weekends.** The edge is pre-game number value;
   weekend live markets are fast, heavily juiced, and a chase magnet. Sat/Sun =
   pre-game bets only.
+
+---
+
+## Parlay Rules (rewritten 2026-06-19 — match Brett's actual practice)
+
+Brett's 4-week parlay record (5/18–6/18): roughly 50/50 W-L by count, but
+**net +~$884** because cross-game/cross-sport hits paid bigger than the
+same-game correlation losses. Rules rewritten to keep what works, kill what
+doesn't.
+
+### What's ALLOWED
+
+1. **2-leg parlays only.** Never 3+ legs — juice compounds and edge dies.
+2. **Stake up to Standard tier ($510).** The $25–$50 cap is dead. Brett's
+   actual practice is $150–$925 per parlay and the book is positive.
+3. **Cross-game / cross-sport parlays — preferred.** Lowest correlation,
+   cleanest math. Examples from the record that worked:
+   - VGK ML +169 (NHL) + OKC ML +123 (NBA) → +$1,249
+   - TEX/OR U13.5 (NCAA) + SF/CHC U3.5 (MLB) → +$417
+   - NYK +20.5 (NBA) + CHC/COL U7.5 (MLB) → +$545
+   - LAA/ATH U12.5 + MEX/SK U1 → +$289
+4. **Same-game parlays — only if correlated in your favor:**
+   - Team ML + Team Spread (same direction): both win when team wins big. ✅
+   - 1H Team ML + Game Team ML: correlated up. ✅
+   - Team ML + Team Total Over (same team): the team scoring more makes both hit. ✅
+
+### What's BANNED
+
+5. **Counter-correlated same-game parlays.** When one leg requires the
+   opposite of what the other implies. **These have been your losing pattern.**
+   - 1H Team Spread + 1H Game Total Under → if your team leads, the total
+     climbs. These legs fight each other. **Lost 4 times in week of 6/8.** ❌
+   - 1H Team ML + 1H Game Total Under (same team) → same trap. ❌
+   - 2H Team Spread + 2H Game Total Under → same trap. ❌
+6. **Same-team Side + Total combos that pull opposite directions** — the SAS
+   1H ML + SAS/NYK U111 combo cost $1,810 across multiple tickets in 6/8 week.
+7. **Same-game parlays involving a Total Under when you're betting the
+   favorite's spread.** Favorite covering big = high-scoring game = under loses.
+
+### Tracking
+
+8. **Parlay-specific log entry.** Each parlay row in `bet_log.md` notes:
+   - `cross-game | cross-sport | same-game correlated | same-game counter-corr`
+   - Net P/L by category — review monthly.
+9. **CLV not graded on parlays** (no clean closing-line math for combined
+   legs). Track straight P/L and category over time.
+
+### Review trigger
+
+If parlay book goes net negative over any rolling 4-week window, drop back
+to **straight bets only** until it recovers. Variance on +200 to +900 parlays
+can swing $2k+ in a single week — don't let one cold streak destroy the
+straight-bet edge.
 
 ---
 
