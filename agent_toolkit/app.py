@@ -5,6 +5,7 @@ from flask import Flask, request, make_response, redirect, url_for
 import config
 from models.calls import init_db
 from models.scoreboard import init_db as init_scoreboard_db
+from models.ai_coach import init_db as init_ai_coach_db
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -12,6 +13,7 @@ app.secret_key = config.SECRET_KEY
 with app.app_context():
     init_db()
     init_scoreboard_db()
+    init_ai_coach_db()
 
 # ---------------------------------------------------------------------------
 # Register blueprints
@@ -22,6 +24,7 @@ from blueprints.tools import tools_bp               # noqa: E402
 from blueprints.referrals import referrals_bp       # noqa: E402
 from blueprints.underwriting_api import underwriting_bp  # noqa: E402
 from blueprints.scoreboard import scoreboard_bp     # noqa: E402
+from blueprints.illuminate import illuminate_bp     # noqa: E402
 
 app.register_blueprint(calls_bp)
 app.register_blueprint(quoter_bp, url_prefix="/quoter")
@@ -29,6 +32,7 @@ app.register_blueprint(tools_bp, url_prefix="/tools")
 app.register_blueprint(referrals_bp, url_prefix="/referrals")
 app.register_blueprint(underwriting_bp, url_prefix="/underwriting")
 app.register_blueprint(scoreboard_bp)
+app.register_blueprint(illuminate_bp, url_prefix="/illuminate")
 
 
 # ---------------------------------------------------------------------------
