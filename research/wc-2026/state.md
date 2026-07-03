@@ -114,8 +114,8 @@ before quoting it in a read.**
 - 🔴 USA vs BIH (6 PM ET) — the game where I misapplied group-stage logic
 
 **Thu 2026-07-02:**
-- 🔴 AUT vs ESP (3 PM ET)
-- other 7 PM game per Brett's earlier slate paste
+- 🔴 AUT vs ESP (3 PM ET) — my earlier note; verify against slate
+- 🔴 **ALG vs SUI (8 PM ET)** — confirmed from Brett's Diamond paste 2026-07-01
 
 **Fri 2026-07-03:**
 - Final R32 matches — verify from Brett's Friday slate
