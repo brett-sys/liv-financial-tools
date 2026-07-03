@@ -101,7 +101,7 @@ before quoting it in a read.**
 **Mon 2026-06-29:**
 - 🔴 BRA vs JPN (11 AM ET)
 - 🔴 GER vs PAR (2:30 PM ET)
-- 🔴 MOR vs NED (7 PM ET) ❓ result not confirmed in my log
+- ✅ MOR vs NED (7 PM ET) — **MOR advanced** (inferred: MOR is on Sat 7/4 R16 vs CAN)
 
 **Tue 2026-06-30:**
 - 🔴 CIV vs NOR (11 AM ET) ❓ result not confirmed
@@ -115,7 +115,18 @@ before quoting it in a read.**
 
 **Thu 2026-07-02:**
 - 🔴 AUT vs ESP (3 PM ET) — my earlier note; verify against slate
-- 🔴 **ALG vs SUI (8 PM ET)** — confirmed from Brett's Diamond paste 2026-07-01
+- 🔴 **ALG vs SUI** — Diamond posted 8 PM ET; WB paste shows 11 PM EST.
+  Time discrepancy between books noted; game IS Thursday.
+
+**Fri 2026-07-03 (R32 late games):**
+- 🔴 EGY vs AUS (2 PM ET)
+- 🔴 CV vs ARG (6 PM ET)
+- 🔴 GHA vs COL (9:30 PM ET)
+
+**Sat 2026-07-04 — R16 begins:**
+- 🔴 MOR vs CAN (1 PM ET) — confirmed on WB slate. Implies MOR advanced
+  from R32 (must have beaten NED Mon 6/29) and CAN advanced from earlier
+  R32 game. Update ❓ markers below.
 
 **Fri 2026-07-03:**
 - Final R32 matches — verify from Brett's Friday slate
