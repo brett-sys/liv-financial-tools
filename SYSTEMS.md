@@ -126,6 +126,15 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
   "desperate home dog," "they're due") are **not** reasons to act. If the only
   case for a play is who-wins narrative, it is an **automatic PASS** — say so in
   those words.
+- **Premise check on any cross-book gap ≥ 30¢.** Before recommending the wider
+  book, write out in one sentence: *"For these books to disagree by X¢ on this
+  market, one of them must think Y."* If Y cannot be stated in numbers grounded
+  in this specific game (stage, matchup, weather, starter, lineup news), the
+  gap is data I do not understand — the recommendation is **PASS** or *"verify
+  before firing,"* never *"fire fast."* A 30¢+ gap between two mainstream books
+  on the same market is more likely a context I'm missing than free money.
+  Added 2026-07-01 after USA/BIH 1H Under +135 miss where a 268¢ gap was
+  misread as arbitrage instead of a signal I hadn't understood the game context.
 - **Juice ceiling.** Standard markets only, **−110 to −115**. Anything heavier
   than **−120** on a straight bet gets **killed**. Vig compounds losses.
   (Parlays are evaluated by total parlay price, not by leg juice — see
@@ -159,6 +168,30 @@ OpenClaw (gather)  →  Claude Code (analyze)  →  Brett (decide)
 - **No live (in-game) betting on weekends.** The edge is pre-game number value;
   weekend live markets are fast, heavily juiced, and a chase magnet. Sat/Sun =
   pre-game bets only.
+
+### Pre-fire checklist (every recommendation)
+
+Before writing "fire" or "play of the day" or any recommendation, I must be
+able to answer, in the response itself, each of:
+
+1. **Stage / context.** For WC, what tournament stage (pulled from
+   `research/wc-2026/state.md`)? For MLB, is the total at Coors or Sacramento?
+   For NHL, is the goalie confirmed?
+2. **The "why" is a number.** What specific number justifies this play? — gap
+   size in cents, implied probability edge, park factor, matchup line. Not a
+   story.
+3. **Juice check.** Is the price within the −125 ceiling on a straight bet?
+   For parlays, is total price + leg structure inside Parlay Rules?
+4. **Tier check.** Is the recommended tier appropriate for down/up-week state?
+   In down-week or unproven-lane play, **Lean only** — Standard/Max require an
+   explicit rule authorizing it.
+5. **Narrative check.** Is any part of the "why" a story ("they're due,"
+   "they'll park the bus," "may rotate," "sleepwalking")? If yes, kill the
+   story or kill the fire.
+
+Any answer that requires "I think" or "might" or "probably" without a number
+lowers the recommendation to **"verify"** — not "fire." Added 2026-07-01 after
+today's miss.
 
 ---
 
@@ -216,6 +249,26 @@ straight-bet edge.
 ---
 
 ## Sport-Specific Protocols
+
+### Soccer / World Cup — Stage & regulation-only rules
+
+- **State the stage first.** Every WC read begins with the tournament stage
+  pulled from `research/wc-2026/state.md` (Group MD1/2/3, R32, R16, QF, SF, F).
+  If that file is out-of-date vs the slate Brett sends, update the file BEFORE
+  analyzing odds.
+- **Group vs knockout is not interchangeable.** Tactical reads that depend on
+  "team X only needs a draw" or "team X may rotate" apply ONLY to group MD3
+  and only for teams whose advancement math is already known. In knockouts,
+  every team plays to win — no rotation, no parking, no sleepwalking
+  narratives. Carrying group-stage tactical logic into a knockout is the exact
+  failure that cost recommendations on 2026-07-01 (USA/BIH 1H Under +135).
+- **ML settles at 90'.** Standard soccer rule — regulation time + added time
+  only. Extra time and PKs do NOT change the ML market. In knockouts, a
+  90'-tied game still pays the Draw ML even though the game continues to ET.
+- **1H markets in knockouts skew toward more scoring, not less.** Both teams
+  must chase a result within regulation, so 1H Under lines are softer (harder
+  to hit) in knockouts, not stronger. Group-stage 1H Under reasoning does not
+  port to R32+.
 
 ### NHL — Goalie / GTD protocol
 
