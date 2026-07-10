@@ -38,7 +38,7 @@ or **$55 Lean** — that is a defunct small-stakes model and the numbers are WRO
 
 ## Scope
 
-NBA · NCAAB · NFL · Soccer · MLB · NHL · PGA.
+NBA · NCAAB · NFL · Soccer · MLB · NHL · PGA · UFC.
 **Primary right now: MLB and NHL** (in season). MLB includes **F5 (first-5)** and
 **confirmed starters**.
 

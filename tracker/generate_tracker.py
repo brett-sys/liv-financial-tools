@@ -34,7 +34,7 @@ DATA_ROWS = 200              # pre-formatted bet rows
 FIRST = 2                    # first data row
 LAST = FIRST + DATA_ROWS - 1 # 201
 
-SPORTS = ["NBA", "NCAAB", "NFL", "Soccer", "MLB", "NHL", "PGA"]
+SPORTS = ["NBA", "NCAAB", "NFL", "Soccer", "MLB", "NHL", "PGA", "UFC"]
 BET_TYPES = ["Spread", "Over", "Under", "ML", "Parlay"]
 TIERS = ["Lean", "Standard", "Max", "Parlay"]
 RESULTS = ["W", "L", "P", "Pending"]
