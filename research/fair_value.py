@@ -23,6 +23,13 @@ De-vig methods:
 Juice ceiling per SYSTEMS.md: any straight price heavier than -120
 (-121, -142, -250...) is DEAD regardless of EV. -120 itself is playable.
 
+Spreads & totals: same math — a spread market is two prices at a line.
+RULE: only grade an offer against the sharp price at the SAME line
+(-5.5 vs -5.5, never -5.5 vs -6.5 — pull DK alternate lines to match).
+Soccer quarter-balls (-0.75 etc.) are half-stakes on the adjacent halves;
+grade each half separately. Spreads are the juice-legal way to back a
+favorite whose ML is dead past -120.
+
 Usage:
   python3 fair_value.py --sharp -250 +205 --names Holloway McGregor \
       --offer Diamond:McGregor:+205 --offer WB:McGregor:+186
@@ -209,6 +216,9 @@ DEMO = [
          names=["Holloway", "McGregor"], sharp=[-250, 205],
          offers=[("Diamond", "Holloway", -250), ("Diamond", "McGregor", 205),
                  ("WB", "Holloway", -229), ("WB", "McGregor", 186)]),
+    dict(title="UFC 329 -- fight spread 5.5 (points)",
+         names=["Holloway -5.5", "McGregor +5.5"], sharp=[-205, 150],
+         offers=[]),
     dict(title="UFC 329 -- Holloway/McGregor total rounds 2.5",
          names=["Over 2.5", "Under 2.5"], sharp=[-110, -120],
          offers=[("WB", "Over 2.5", -110), ("WB", "Under 2.5", -120)]),
