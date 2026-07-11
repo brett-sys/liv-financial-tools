@@ -11,15 +11,26 @@
 
 ---
 
-## Current stage (as of 2026-07-01)
+## Current stage (as of 2026-07-11)
 
-**Round of 32 in progress.** Group stage complete.
+**Quarterfinals in progress.** Group stage, R32, R16 complete.
 
-- Group stage ran 2026-06-11 → 2026-06-27
-- R32 began 2026-06-28 with SA vs CAN (last group-stage crossover-adjacent
-  match) and full R32 games starting Mon 2026-06-29
-- R32 continues through the rest of this week
-- R16 begins next week; QF, SF, F follow through 2026-07-19
+- Thu 2026-07-09: QF France vs Morocco — **France advanced** (inferred:
+  FRA listed in SF vs Spain on DK board; score not verified)
+- Fri 2026-07-10: QF Spain vs Belgium — **Spain advanced** (inferred from
+  same SF fixture; Brett's Spain −105 ticket won 1-0, Merino stoppage time)
+- Sat 2026-07-11 (today): QF **Norway vs England** (5 PM ET) and
+  QF **Argentina vs Switzerland** (9 PM ET)
+- SF: **France vs Spain** Tue 2026-07-14 3 PM ET (per DK); other SF =
+  winners of today's QFs, ~Wed 2026-07-15
+- Final: Sun 2026-07-19
+- Note: Norway reached this QF by beating Brazil in the R16 — priced in,
+  not an angle by itself
+
+Market hygiene for KO rounds: DK posts THREE distinct match markets —
+**90-min ML** (settles at regulation), **ML incl extra time** (draw =
+level after 120), and **To Advance** (includes PKs). Never cross-grade
+one against another; fair lines per market in `tracker/dk-pulls/2026-07-11.md`.
 
 **KO stage means:** every game is win-or-go-home. No rotation. No parking
 the bus for a draw. Every team plays first-choice XI, presses for the
@@ -158,3 +169,6 @@ The only KO-stage roster context that matters:
   Group stage state and R32 fixtures populated from slate-paste history;
   many entries marked ❓ pending verification. Brett confirms/corrects
   on next WC slate paste.
+- **2026-07-11** — stage updated to QF from DK board (NOR/ENG + ARG/SUI today;
+  FRA/ESP SF Tue 7/14 implies FRA and ESP advanced). DK entry pulls + de-vigged
+  fair lines written to tracker/dk-pulls/2026-07-11.md.
