@@ -30,6 +30,9 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-26 | NBA | OKC @ SAS WCF G5 | side | DK -4.5 | OKC -4 (-105) | 0.5 | Diamond lower (better for OKC) | n | CONVICTION (Brett override) — NOT a system edge. OKC -4 @ Diamond -105, Lean $295. EXCLUDE from line-gap n=20. GAME: SAS won G5, series went to G7 → OKC -4 LOST. Placement still unconfirmed by Brett |
 | 2026-05-26 | NHL | COL @ VGK WCF G4 | total | 6.5 (DK) | 6 o-114 | 0.5 | Diamond lower | n | PASS — COL upgraded G (Blackwood in for yanked Wedgewood) + Hart = two quality goalies → total heading DOWN. Over 6 = negative CLV; DK 6.5 is the soft/high #, not Diamond's 6 |
 
+| 2026-07-11 | UFC | Holloway vs McGregor (UFC 329) | side(ML) | HOL -310 (DK, steamed from -250 intraday) | Diamond HOL -250 / WB HOL -229 | 60-81c | offshore lagging steam — stale-CHEAP favorite (+1.6% / +4.3% mult EV vs fair -265) | n | PASS — juice ceiling kills both (heavier than -120). First tool-caught steam-lag gap; the ceiling's cost made visible |
+| 2026-07-11 | Soccer | Argentina vs Switzerland (WC QF) | side(ML 90') | SUI +450 (DK, confirmed fresh twice, 91% public on ARG) | Diamond SUI +459 / WB SUI +500 | 9-50c | WB high on the dog vs public-heavy fav | TBD | WB +500 = +3.4% mult / -0.6% shin vs fair +480. Borderline play, Lean cap, Brett to decide |
+
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
 > into this branch). Paste the actual 3 gaps over the placeholder rows so the
@@ -37,8 +40,8 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 ## Progress to n=20
 
-- Logged real: **8** (4 on 5/24, 2 on 5/25, 2 on 5/26) + **3** week-1 placeholders pending confirmation
-- Remaining to threshold (real): **~12**
+- Logged real: **10** (4 on 5/24, 2 on 5/25, 2 on 5/26, 2 on 7/11) + **3** week-1 placeholders pending confirmation
+- Remaining to threshold (real): **~10**
 - Gaps fired so far: **0 confirmed.** CAR@MTL 5/25 under 6 WON the game (CAR 3-2 OT = 5) and had +0.5 CLV — but Brett has NOT confirmed he placed it, so it can't count as a real bet yet. Confirm placement to log bet #1.
 - **Pattern watch — WEAKENING:** Diamond ran NHL totals 0.5 *high* vs sharp on 5/24 (COL@VEG) and 5/25 (CAR@MTL), favoring unders. But 5/26 (COL@VGK) Diamond was 0.5 *low* (6 vs DK 6.5), favoring the over. Direction is NOT consistent — do not treat "Diamond hangs hockey totals high" as a rule. Keep logging.
 - CLV on bet gaps so far: **TBD** (need closing lines via Pikkit)
