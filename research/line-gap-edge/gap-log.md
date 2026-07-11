@@ -31,7 +31,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 | 2026-05-26 | NHL | COL @ VGK WCF G4 | total | 6.5 (DK) | 6 o-114 | 0.5 | Diamond lower | n | PASS — COL upgraded G (Blackwood in for yanked Wedgewood) + Hart = two quality goalies → total heading DOWN. Over 6 = negative CLV; DK 6.5 is the soft/high #, not Diamond's 6 |
 
 | 2026-07-11 | UFC | Holloway vs McGregor (UFC 329) | side(ML) | HOL -310 (DK, steamed from -250 intraday) | Diamond HOL -250 / WB HOL -229 | 60-81c | offshore lagging steam — stale-CHEAP favorite (+1.6% / +4.3% mult EV vs fair -265) | n | PASS — juice ceiling kills both (heavier than -120). First tool-caught steam-lag gap; the ceiling's cost made visible |
-| 2026-07-11 | Soccer | Argentina vs Switzerland (WC QF) | side(ML 90') | SUI +450 (DK, confirmed fresh twice, 91% public on ARG) | Diamond SUI +459 / WB SUI +500 | 9-50c | WB high on the dog vs public-heavy fav | TBD | WB +500 = +3.4% mult / -0.6% shin vs fair +480. Borderline play, Lean cap, Brett to decide |
+| 2026-07-11 | Soccer | Argentina vs Switzerland (WC QF) | side(ML 90') | SUI +450 (DK, confirmed fresh twice, 91% public on ARG) | Diamond SUI +459 / WB SUI +500 | 9-50c | WB high on the dog vs public-heavy fav | **y** | FIRED — WB +500, $295 Lean (bet_log #48). +3.4% mult / -0.6% shin vs fair +480, 91% public on ARG. CLV vs DK close pending |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced

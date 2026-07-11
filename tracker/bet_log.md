@@ -171,3 +171,21 @@ If those Hurricanes bets had gone the other way (perfectly possible at +180/+210
 This log has ~40 bets visible but **0 with CLV data**. For the n=30 with CLV thesis test (Diamond/WB vs DK close), the count restarts. **0 of 30 with CLV.**
 
 Need OpenClaw to start firing DK pulls for every future bet, then count from there.
+
+## July — WC knockouts (first bets with live CLV pipeline)
+
+| # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
+|---|------|-------|------|--------|------|-------|------|--------|-----|
+| 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **pending** | — (win pays +$1,475) |
+
+**Bet 48 notes:**
+- Book: WagerBoard. DK entry anchor **+450** (pulled twice, unchanged over ~6h —
+  see `tracker/dk-pulls/2026-07-11.md`). Fair +480 mult / +503 Shin.
+- Edge case: +3.4% over mult fair, −0.6% vs Shin → borderline by the book,
+  fired as Lean-capped public-fade (DK showed **91% of bets on ARG**).
+- Gap-log entry #10. **First bet in the CLV pipeline: 1 of 30.**
+- ⚠️ CLOSE PULL NEEDED: DK ARG/SUI 90-min ML at kick (9:00 PM ET / 01:00 UTC).
+  Positive CLV if DK closes SUI shorter than +450 (e.g. +425); negative if
+  it drifts past +450 toward +500.
+- Settlement: 90 minutes + stoppage ONLY. ET/PK Argentina win = draw at 90'
+  = this ticket LOSES (it's not the advance market).
