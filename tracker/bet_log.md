@@ -177,6 +177,14 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
 | # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
 |---|------|-------|------|--------|------|-------|------|--------|-----|
 | 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **pending** | — (win pays +$1,475) |
+| 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
+
+**Bet 49 notes (added same day):** Diamond moved SUI +459 → +490 intraday
+(toward/past mult fair +480) while DK held +450. At +490: +1.7% mult / −2.3%
+Shin — below the +2% bar on its own; taken as an add to the same position.
+⚠️ **Combined SUI position: $590 risk** (two Leans, same outcome) — that is a
+Standard-plus-sized position on a ~17% event, pays +$2,920.50 combined.
+Same DK close pull grades both tickets.
 
 **Bet 48 notes:**
 - Book: WagerBoard. DK entry anchor **+450** (pulled twice, unchanged over ~6h —
