@@ -21,6 +21,65 @@ analysis (see `tracker/bet_log.md`, goal n=30).
 The system's *actual* present-day job: discipline guard + slate scanner +
 bet/CLV tracker. **Not** a bet generator.
 
+## 1b. Empirical verdict — first backtest run (2026-07-11)
+
+Ran `research/backtest_v1.py` over the 44 real-money tickets in
+`tracker/bet_log.md`. This is W-L/ROI only — **0 of 44 bets have CLV**, so
+nothing here separates skill from variance. Read it as "what happened," not
+"we have edge."
+
+**Data caveat baked into every number below:** summing individual tickets
+gives **+$6,815.95**, but the log's own balance progression shows the real
+net is **+$3,754.78**. The granular sum is inflated ~1.8x by overlapping
+weekly rollups and loose date bucketing (see the script header). So the
+*relative* story — which buckets win vs lose — is trustworthy; the absolute
+per-bucket dollars are not. Treat dollar figures as directional.
+
+### The one-line answer: it's a heater, not proven edge
+
+- **Top 5 tickets = 83% of the granular profit** (+$5,670 of $6,816).
+- **Two Carolina −1.5 puck-line bets** (+180 / +210 on 6/8) alone = **+$2,775**.
+  Each implies ~33%. Flip them — fully possible at that price — and the
+  spine of the profit is gone.
+- Strip those two and ~$4,041 (granular) remains across 42 bets, which is
+  still inflated and still CLV-blind.
+
+### What the bans got right (rules validated as correct losers)
+
+| Bucket | Record | Net (granular) | Read |
+|--------|--------|----------------|------|
+| **Same-game parlays** | **1–5** | **−$1,435** | Ban #2 is empirically correct — these bled. |
+| **2nd-half bets** | **0–3** | **−$1,410** | The 2H ban held under pressure; the data backs it. |
+| Cross-game parlays (allowed kind) | 3–1 | +$812 | The *permitted* parlay is the *winning* parlay. Supports rule 7. |
+| Futures (longshots) | 1–2 | +$312 | Small, lotto-ish, as expected. |
+
+### The one clean lane
+
+- **MLB: 6–0, and every ticket a total or F5** — mostly **unders (4–2 straight,
+  +more in parlay legs)**. This is the only bucket that looks like a repeatable
+  read rather than a longshot cashing. **But n=6 and zero CLV** — promising, not
+  proven. This is the lane to forward-test with DK pulls first.
+
+### Too small to conclude
+
+- **Juice ≥ −125**: only n=2 (1–1). Can't confirm the −125 ceiling from this
+  sample — the one weekend-live −223 loss (−$259.30) is the poster child, but
+  it's a single bet. Test A in §3 still needs real volume.
+- **Live betting**: 4–3, +$737 — noisy, no signal either way.
+
+### What this changes
+
+1. **Keep the same-game-parlay and 2nd-half bans** — the data earned them.
+2. **Forward-test MLB unders / F5 with DK CLV pulls** before sizing up — it's
+   the only lane with a non-variance shape, and CLV is the only thing that
+   confirms it.
+3. **Do not scale on this record.** 25–18 with 83% of profit in 5 tickets and
+   no CLV is exactly the "hot run" signature §3 warns about. The number that
+   settles it — avg CLV — is still unmeasured (`clv-log.md` = 0/30).
+
+Re-run anytime with `python3 research/backtest_v1.py`. A v2 should parse
+`bet_log.md` directly instead of the hand-encoded rows so it can't drift.
+
 ## 2. The rules (each is back-testable)
 
 ### Hard PASS — these block bets outright
