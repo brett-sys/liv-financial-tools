@@ -177,14 +177,18 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
 | # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
 |---|------|-------|------|--------|------|-------|------|--------|-----|
 | 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **pending** | — (win pays +$1,475) |
-| 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
+| 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | **1st Half ML** | **SUI 1H +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
 
-**Bet 49 notes (added same day):** Diamond moved SUI +459 → +490 intraday
-(toward/past mult fair +480) while DK held +450. At +490: +1.7% mult / −2.3%
-Shin — below the +2% bar on its own; taken as an add to the same position.
-⚠️ **Combined SUI position: $590 risk** (two Leans, same outcome) — that is a
-Standard-plus-sized position on a ~17% event, pays +$2,920.50 combined.
-Same DK close pull grades both tickets.
+**Bet 49 notes (corrected):** SUI **1st Half** ML +490 @ Diamond (their AM board
+showed +480; settles on halftime score — SUI must LEAD at HT).
+- **UNGRADED vs sharp:** no DK 1H pull exists for ARG/SUI (halves tab not
+  captured). Both offshore books' own de-vigged 1H numbers put fair ≈ +540;
+  +490 likely carries normal 1H vig → this is a dart, not a graded edge.
+- **Line-shop miss:** WB posted SUI 1H **+515** on the same market this AM —
+  25¢ better at the other book in hand. Check both books before firing.
+- Correlation: #48 + #49 both lean on early Swiss resistance but settle
+  differently (HT lead vs 90' win). Combined Swiss-day risk **$590**.
+- Close pulls needed at 9 PM ET kick: DK main board AND halves tab.
 
 **Bet 48 notes:**
 - Book: WagerBoard. DK entry anchor **+450** (pulled twice, unchanged over ~6h —
