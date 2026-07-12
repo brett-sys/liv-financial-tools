@@ -178,7 +178,7 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
 |---|------|-------|------|--------|------|-------|------|--------|-----|
 | 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **pending** | — (win pays +$1,475) |
 | 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | **1st Half ML** | **SUI 1H +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
-| 50 | 7/11 | Soccer WC | NOR vs ENG (QF) | To Advance (incl ET/PK) | **NOR advance +211** | $295 (Lean) | +211 @ WB | **pending** | — (win pays +$622.45) |
+| 50 | 7/11 | Soccer WC | NOR vs ENG (QF) | To Advance (incl ET/PK) | **NOR advance +211** | $295 (Lean) | +211 @ WB | **L** | **-$295** |
 
 **Bet 50 notes — cleanest +EV play in the pipeline:**
 - WB Norway to advance +211. DK anchor NOR +180 (Brett confirmed live at fire
@@ -190,6 +190,11 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
   Different market from #48/#49, different game — not stacked Swiss risk.
 - CLV: close pull = DK NOR-advance at 5:00 PM ET kick. Beat close if DK closes
   NOR shorter than +211. **CLV-gradeable bet 2/30** (with #48; #49 1H has no anchor).
+- **RESULT: England won 2-1, Norway eliminated -> bet LOSES (-$295).**
+  Provisional CLV **POSITIVE**: took +211 vs DK last-pull +180 (fair +195) —
+  we got a better number than the sharp close. Process right, result wrong.
+  This is the exact "+EV bet loses n=1" case the CLV log exists to weather:
+  the price was the edge, not the outcome. One Lean, sized for exactly this.
 
 **Bet 49 notes (corrected):** SUI **1st Half** ML +490 @ Diamond (their AM board
 showed +480; settles on halftime score — SUI must LEAD at HT).
