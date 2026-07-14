@@ -176,9 +176,13 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
 
 | # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
 |---|------|-------|------|--------|------|-------|------|--------|-----|
-| 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **L** | **-$295** |
-| 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | **1st Half ML** | **SUI 1H +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
-| 50 | 7/11 | Soccer WC | NOR vs ENG (QF) | To Advance (incl ET/PK) | **NOR advance +211** | $295 (Lean) | +211 @ WB | **L** | **-$295** |
+| 48 | 7/11 | ~~ARG/SUI~~ | ~~90-min ML~~ | ~~SUI +500~~ | ~~$295~~ | — | **VOID — MIS-LOG** (no such bet in book activity) | **$0** |
+| 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | **1st Half ML** | **SUI 1H +515** | ~$255 | +515 (book) | **L** | **-$255** |
+| 50 | 7/11 | Soccer WC | NOR vs ENG (QF) | To Advance (incl ET/PK) | **NOR advance +211** | $295 | +211 @ WB | **L** | **-$295** |
+
+> ⚠️ #48–50 above were hand-logged live from Brett's messages and are
+> **superseded by the BOOK ACTIVITY RECONCILIATION at the bottom of this file**
+> (ground truth). #48 was a mis-log (voided); #49/#50 confirmed losses there.
 
 **Bet 50 notes — cleanest +EV play in the pipeline:**
 - WB Norway to advance +211. DK anchor NOR +180 (Brett confirmed live at fire
@@ -218,3 +222,56 @@ showed +480; settles on halftime score — SUI must LEAD at HT).
   it drifts past +450 toward +500.
 - Settlement: 90 minutes + stoppage ONLY. ET/PK Argentina win = draw at 90'
   = this ticket LOSES (it's not the advance market).
+
+---
+
+## ⭐ BOOK ACTIVITY RECONCILIATION — ground truth (transcribed 2026-07-14)
+
+> Source: the book's own **"Activity for [date]"** screens (screenshots).
+> This SUPERSEDES the hand-logged #48–50 above, which were an incomplete /
+> partly-mislogged subset captured live from Brett's messages during the QFs.
+> **Book activity = system of record.** Where they conflict, this wins.
+
+### Saturday 7/11 — 9 wagers · book result **+$1,103.65** · 5W–4L
+
+| Sport | Bet | Price | Result | P/L |
+|-------|-----|-------|--------|-----|
+| UFC | B Royval ML (vs Kavanagh) | +175 | **W** | +$481 |
+| UFC | T McKinney ML (vs K Green) | −110 | L | −$385 |
+| Soccer | Norway **1H** ML | +335 | L | −$350 |
+| Soccer | Switzerland **1H** ML | +515 | L | −$255 |
+| Soccer | **England/Norway DRAW (90′)** | +290 | **W** | +$800 |
+| Soccer | Norway to Advance | +211 | L | −$295 |
+| Soccer | **Switzerland/Argentina DRAW (90′)** | +246 | **W** | +$1,107 |
+| Soccer | Switzerland to Advance | +289 | L | −$295 |
+| UFC | Holloway/McGregor **U 2½ rounds** | +100 | **W** | +$295 |
+| | | | **NET** | **+$1,103.65** |
+
+**What actually happened (I had this wrong live):** both KO games went to a
+**90-minute draw**, decided in ET. Brett bet both **90′ draws** (Eng/Nor +290 →
++$800, Swi/Arg +246 → +$1,107) — those two carried the whole day and neither was
+ever in my hand-log. The Holloway/McGregor fight **finished inside 2.5 rounds**
+(Under +100 cashed). Saturday was a **winning day**, not the "−$885 three darts"
+I implied off partial info. Hand-log fix: #48 (SUI reg +500) = **VOID mis-log**;
+#49 = SUI 1H +515 (L −$255); #50 = NOR advance +211 (L −$295).
+
+### Sunday 7/12 — GOLF · **Genesis Scottish Open, 4th-Rd matchups** · 5 wagers · book **+$1,190.66** · 4W–1L
+
+| Tour | Matchup (Brett's side) | Price | Risk→Win | Result |
+|------|------------------------|-------|----------|--------|
+| PGA | **Hovland** vs Rahm | +120 | 295→354 | **W** +$354 |
+| DPWT | **Brennan** vs Theegala | −105 | 296→282 | **W** +$281.66 |
+| PGA | **Spaun** vs Thomas | +110 | 455→501 | **W** +$500.50 |
+| DPWT | **Chacarra** vs Scott | −130 | 585→450 | **W** +$450 |
+| DPWT | **Greyserman** vs Hojgaard | −110 | 396→360 | L −$395.50 |
+| | | | **NET** | **+$1,190.66** |
+
+**FIRST GOLF DATA IN THE SYSTEM — and it's the good kind.** Head-to-head
+**round matchups** priced −130 to +120: **juice-legal, repeatable market
+structure** — the opposite of the dog-longshot heater that drove the May/June
+log. 4–1, +$1,190. n=5 is tiny, but this is exactly the lane the backtest was
+hunting for. **Keep logging golf matchups and CLV-grade them vs a sharp golf
+book — most promising new lane we have.** (Sizing note: Chacarra $585 risk was
+above Standard $510 — flag, tiers are locked.)
+
+### Two-day total (7/11 + 7/12): **+$2,294.31**
