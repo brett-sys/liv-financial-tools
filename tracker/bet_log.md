@@ -176,7 +176,7 @@ Need OpenClaw to start firing DK pulls for every future bet, then count from the
 
 | # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
 |---|------|-------|------|--------|------|-------|------|--------|-----|
-| 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **pending** | — (win pays +$1,475) |
+| 48 | 7/11 | Soccer WC | ARG vs SUI (QF) | 90-min ML (regulation) | **SUI +500** | $295 (Lean) | +500 @ WB | **L** | **-$295** |
 | 49 | 7/11 | Soccer WC | ARG vs SUI (QF) | **1st Half ML** | **SUI 1H +490** | $295 (Lean) | +490 @ Diamond | **pending** | — (win pays +$1,445.50) |
 | 50 | 7/11 | Soccer WC | NOR vs ENG (QF) | To Advance (incl ET/PK) | **NOR advance +211** | $295 (Lean) | +211 @ WB | **L** | **-$295** |
 
