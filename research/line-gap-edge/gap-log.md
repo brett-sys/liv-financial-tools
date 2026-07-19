@@ -35,6 +35,8 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 | 2026-07-11 | Soccer | Norway vs England (WC QF) | side(advance) | NOR advance +180 (DK, Brett-confirmed at fire) | WB NOR advance +211 | 31c | WB high on the Norway dog vs England steam | **y** | FIRED — WB +211 $295 (bet_log #50). RESULT: ENG won 2-1, NOR out -> LOST -$295. Provisional +CLV (beat DK close). +EV process, losing result, n=1 |
 
+| 2026-07-19 | Soccer | WC Final ARG vs ESP | side(to-win-cup) | ARG +127 (DK, steamed from +133) | Diamond/WB ARG +135-140 | 8-13c | offshore lagged DK's Spain steam | **y** | FIRED ARG +135 $295 (bet_log #51). Fair +132 -> +1.4% EV, **+8c CLV vs DK**. First +CLV bet in pipeline |
+
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
 > into this branch). Paste the actual 3 gaps over the placeholder rows so the
@@ -42,7 +44,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 ## Progress to n=20
 
-- Logged real: **11** (4 on 5/24, 2 on 5/25, 2 on 5/26, 3 on 7/11) + **3** week-1 placeholders pending confirmation
+- Logged real: **12** (4 on 5/24, 2 on 5/25, 2 on 5/26, 3 on 7/11, 1 on 7/19) + **3** week-1 placeholders pending confirmation
 - Remaining to threshold (real): **~9**
 - Gaps fired so far: **0 confirmed.** CAR@MTL 5/25 under 6 WON the game (CAR 3-2 OT = 5) and had +0.5 CLV — but Brett has NOT confirmed he placed it, so it can't count as a real bet yet. Confirm placement to log bet #1.
 - **Pattern watch — WEAKENING:** Diamond ran NHL totals 0.5 *high* vs sharp on 5/24 (COL@VEG) and 5/25 (CAR@MTL), favoring unders. But 5/26 (COL@VGK) Diamond was 0.5 *low* (6 vs DK 6.5), favoring the over. Direction is NOT consistent — do not treat "Diamond hangs hockey totals high" as a rule. Keep logging.

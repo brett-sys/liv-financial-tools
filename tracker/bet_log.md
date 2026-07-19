@@ -275,3 +275,20 @@ book — most promising new lane we have.** (Sizing note: Chacarra $585 risk was
 above Standard $510 — flag, tiers are locked.)
 
 ### Two-day total (7/11 + 7/12): **+$2,294.31**
+
+---
+
+## July 19 — WC FINAL (Argentina vs Spain)
+
+| # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
+|---|------|-------|------|--------|------|-------|------|--------|-----|
+| 51 | 7/19 | Soccer WC | Final ARG vs ESP | To Win Cup / Lift Trophy (incl ET/PK) | **Argentina +135** | $295 (Lean, assumed) | +135 | **pending** | — (win pays +$398.25) |
+
+**Bet 51 notes — first clean +CLV bet in the pipeline:**
+- Fired at **+135** (Diamond had +140, took +135 — confirm book: Diamond ticked down or WB).
+- **DK entry anchor: Spain −138 / Argentina +127** (32 min pre-kick) → fair Argentina **+132**.
+- Took +135 vs DK +127 = **+8¢ positive CLV**, **+1.4% EV** (mult) — THIN but genuinely +EV, and it BEAT the sharp price. This is exactly the line-gap thesis working: DK steamed Spain, offshore lagged, we took the stale-long Argentina number.
+- The engine flagged Diamond +140 as the only +2% PLAY on the whole final; +135 is the thinner version of the same edge.
+- Doubles as a hedge if Brett holds Spain futures (Argentina winning = this cashes).
+- Settles on **who wins the World Cup** (ET + pens included) — NOT 90-min.
+- ⚠️ Stake assumed Lean $295 — correct if different. CLV-gradeable bet 3/30.
