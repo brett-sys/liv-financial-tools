@@ -282,7 +282,7 @@ above Standard $510 — flag, tiers are locked.)
 
 | # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
 |---|------|-------|------|--------|------|-------|------|--------|-----|
-| 51 | 7/19 | Soccer WC | Final ARG vs ESP | To Win Cup / Lift Trophy (incl ET/PK) | **Argentina +135** | $295 (Lean, assumed) | +135 | **pending** | — (win pays +$398.25) |
+| 51 | 7/19 | Soccer WC | Final ARG vs ESP | To Win Cup / Lift Trophy (incl ET/PK) | **Argentina +135** | $295 (Lean, assumed) | +135 | **L** | **-$295** |
 
 **Bet 51 notes — first clean +CLV bet in the pipeline:**
 - Fired at **+135** (Diamond had +140, took +135 — confirm book: Diamond ticked down or WB).
@@ -292,3 +292,9 @@ above Standard $510 — flag, tiers are locked.)
 - Doubles as a hedge if Brett holds Spain futures (Argentina winning = this cashes).
 - Settles on **who wins the World Cup** (ET + pens included) — NOT 90-min.
 - ⚠️ Stake assumed Lean $295 — correct if different. CLV-gradeable bet 3/30.
+- **RESULT: Spain won the World Cup → Argentina LOST → −$295.** The +8¢ CLV
+  stands: we beat the closing number, the bet just landed on the ~43% side.
+  A +CLV bet losing n=1 is expected — Argentina was <50%. CLV is measured over
+  30, not 1; the process was right even though the ticket lost. If Brett held
+  Spain futures, this was cheap insurance he didn't need — Spain lifting the
+  Cup is the win that matters.

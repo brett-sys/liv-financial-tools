@@ -35,7 +35,7 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 | 2026-07-11 | Soccer | Norway vs England (WC QF) | side(advance) | NOR advance +180 (DK, Brett-confirmed at fire) | WB NOR advance +211 | 31c | WB high on the Norway dog vs England steam | **y** | FIRED — WB +211 $295 (bet_log #50). RESULT: ENG won 2-1, NOR out -> LOST -$295. Provisional +CLV (beat DK close). +EV process, losing result, n=1 |
 
-| 2026-07-19 | Soccer | WC Final ARG vs ESP | side(to-win-cup) | ARG +127 (DK, steamed from +133) | Diamond/WB ARG +135-140 | 8-13c | offshore lagged DK's Spain steam | **y** | FIRED ARG +135 $295 (bet_log #51). Fair +132 -> +1.4% EV, **+8c CLV vs DK**. First +CLV bet in pipeline |
+| 2026-07-19 | Soccer | WC Final ARG vs ESP | side(to-win-cup) | ARG +127 (DK, steamed from +133) | Diamond/WB ARG +135-140 | 8-13c | offshore lagged DK's Spain steam | **y** | FIRED ARG +135 $295 (bet_log #51). Fair +132 -> +1.4% EV, **+8c CLV vs DK**. RESULT: Spain won Cup -> ARG LOST -$295. +CLV stands (beat close, landed on ~43% side). First graded CLV data point: +8c, losing result |
 
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
