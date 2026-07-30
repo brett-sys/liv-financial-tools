@@ -1,0 +1,269 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <!-- Ceiling -->
+    <linearGradient id="ceiling" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4efe6"/>
+      <stop offset="1" stop-color="#e3d9c8"/>
+    </linearGradient>
+    <!-- Navy feature wall -->
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101b31"/>
+      <stop offset="0.5" stop-color="#1c2d51"/>
+      <stop offset="1" stop-color="#0e1830"/>
+    </linearGradient>
+    <!-- Spotlight glow behind logo -->
+    <radialGradient id="spot" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#3c5488" stop-opacity="0.75"/>
+      <stop offset="0.55" stop-color="#243a66" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#101b31" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Floor -->
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#243350"/>
+      <stop offset="0.35" stop-color="#141d31"/>
+      <stop offset="1" stop-color="#090e1a"/>
+    </linearGradient>
+    <!-- Sky -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fc9e8"/>
+      <stop offset="0.45" stop-color="#c6e6f2"/>
+      <stop offset="0.8" stop-color="#fbe9c6"/>
+      <stop offset="1" stop-color="#fdf1d8"/>
+    </linearGradient>
+    <!-- Sea -->
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f9fc0"/>
+      <stop offset="0.5" stop-color="#4fb4cf"/>
+      <stop offset="1" stop-color="#7fcedd"/>
+    </linearGradient>
+    <!-- Sand -->
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1e2ba"/>
+      <stop offset="1" stop-color="#e6d3a4"/>
+    </linearGradient>
+    <!-- Sun glow -->
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fffaf0" stop-opacity="1"/>
+      <stop offset="0.3" stop-color="#fff2d2" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffe9c7" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Gold text gradient -->
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7ecc0"/>
+      <stop offset="0.45" stop-color="#e4c46b"/>
+      <stop offset="0.55" stop-color="#c99a34"/>
+      <stop offset="1" stop-color="#a97c22"/>
+    </linearGradient>
+    <linearGradient id="goldRule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a97c22" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#e4c46b"/>
+      <stop offset="1" stop-color="#a97c22" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Window glass sheen -->
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="reflection" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbe9c6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#fbe9c6" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="softer" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+    <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- ===== ROOM SHELL ===== -->
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#wall)"/>
+
+  <!-- Ceiling -->
+  <rect x="0" y="0" width="1920" height="120" fill="url(#ceiling)"/>
+  <rect x="0" y="118" width="1920" height="6" fill="#c7bda8"/>
+  <!-- Cove shadow under ceiling -->
+  <rect x="0" y="124" width="1920" height="34" fill="#000000" opacity="0.18" filter="url(#soft)"/>
+  <!-- Recessed downlights -->
+  <g fill="#fff7e6">
+    <ellipse cx="260" cy="60" rx="34" ry="10" opacity="0.9"/>
+    <ellipse cx="620" cy="60" rx="34" ry="10" opacity="0.9"/>
+    <ellipse cx="980" cy="60" rx="34" ry="10" opacity="0.9"/>
+  </g>
+  <!-- Light wash from ceiling onto wall -->
+  <rect x="0" y="130" width="1180" height="220" fill="#ffffff" opacity="0.05" filter="url(#softer)"/>
+
+  <!-- Spotlight glow on feature wall (clipped to wall so ceiling stays clean) -->
+  <clipPath id="wallClip"><rect x="0" y="124" width="1150" height="788"/></clipPath>
+  <ellipse cx="600" cy="470" rx="620" ry="440" fill="url(#spot)" clip-path="url(#wallClip)"/>
+
+  <!-- Subtle vertical panel reveal lines on navy wall -->
+  <g stroke="#0b1428" stroke-width="2" opacity="0.55">
+    <line x1="200" y1="130" x2="200" y2="912"/>
+    <line x1="560" y1="130" x2="560" y2="912"/>
+    <line x1="920" y1="130" x2="920" y2="912"/>
+  </g>
+  <g stroke="#33477a" stroke-width="1" opacity="0.35">
+    <line x1="202" y1="130" x2="202" y2="912"/>
+    <line x1="562" y1="130" x2="562" y2="912"/>
+    <line x1="922" y1="130" x2="922" y2="912"/>
+  </g>
+
+  <!-- ===== WINDOW WITH BEACH VIEW (right side) ===== -->
+  <g>
+    <!-- Outer bronze frame -->
+    <rect x="1150" y="120" width="770" height="792" fill="#20252e"/>
+    <rect x="1164" y="134" width="742" height="764" fill="#2c333d"/>
+    <!-- Glass / view area -->
+    <clipPath id="viewClip"><rect x="1178" y="148" width="714" height="736"/></clipPath>
+    <g clip-path="url(#viewClip)">
+      <!-- Sky -->
+      <rect x="1178" y="148" width="714" height="430" fill="url(#sky)"/>
+      <!-- Sun -->
+      <circle cx="1660" cy="300" r="150" fill="url(#sun)"/>
+      <circle cx="1660" cy="300" r="46" fill="#fffaf0"/>
+      <!-- Distant clouds -->
+      <g fill="#ffffff" opacity="0.7" filter="url(#soft)">
+        <ellipse cx="1320" cy="250" rx="90" ry="24"/>
+        <ellipse cx="1400" cy="235" rx="70" ry="20"/>
+        <ellipse cx="1540" cy="200" rx="80" ry="20"/>
+      </g>
+      <!-- Sea -->
+      <rect x="1178" y="520" width="714" height="230" fill="url(#sea)"/>
+      <!-- Horizon line -->
+      <rect x="1178" y="520" width="714" height="3" fill="#2f7d99" opacity="0.6"/>
+      <!-- Sun reflection on water -->
+      <rect x="1636" y="522" width="48" height="140" fill="#fff3d6" opacity="0.45" filter="url(#soft)"/>
+      <!-- Wave streaks -->
+      <g stroke="#ffffff" stroke-width="2" opacity="0.5">
+        <line x1="1200" y1="560" x2="1300" y2="560"/>
+        <line x1="1360" y1="585" x2="1470" y2="585"/>
+        <line x1="1520" y1="605" x2="1640" y2="605"/>
+        <line x1="1240" y1="628" x2="1360" y2="628"/>
+        <line x1="1440" y1="650" x2="1560" y2="650"/>
+      </g>
+      <!-- Sand / beach -->
+      <path d="M1178 700 Q1500 660 1892 706 L1892 884 L1178 884 Z" fill="url(#sand)"/>
+      <!-- Foam line -->
+      <path d="M1178 702 Q1500 664 1892 708" stroke="#ffffff" stroke-width="6" fill="none" opacity="0.8" filter="url(#soft)"/>
+      <!-- Palm trees silhouette at left of window -->
+      <g fill="#123038">
+        <path d="M1230 884 C1224 780 1236 700 1250 640 C1252 700 1250 790 1258 884 Z"/>
+        <g stroke="#123038" stroke-width="10" fill="none" stroke-linecap="round">
+          <path d="M1250 640 C1210 616 1176 620 1150 636"/>
+          <path d="M1250 640 C1214 604 1206 566 1210 536"/>
+          <path d="M1250 640 C1284 614 1320 616 1346 634"/>
+          <path d="M1250 640 C1288 606 1300 570 1300 540"/>
+          <path d="M1250 640 C1250 604 1256 574 1268 548"/>
+        </g>
+        <circle cx="1250" cy="638" r="8"/>
+      </g>
+      <!-- Small second palm -->
+      <g fill="#16323a" opacity="0.85">
+        <path d="M1330 884 C1326 812 1334 760 1342 724 C1344 762 1342 820 1348 884 Z"/>
+        <g stroke="#16323a" stroke-width="7" fill="none" stroke-linecap="round">
+          <path d="M1342 724 C1314 706 1290 708 1272 720"/>
+          <path d="M1342 724 C1318 698 1312 672 1316 652"/>
+          <path d="M1342 724 C1368 706 1392 708 1410 720"/>
+          <path d="M1342 724 C1368 700 1378 674 1378 654"/>
+        </g>
+      </g>
+    </g>
+    <!-- Glass sheen overlay -->
+    <rect x="1178" y="148" width="714" height="736" fill="url(#glass)" clip-path="url(#viewClip)"/>
+    <!-- Mullions: 2 vertical, 1 horizontal transom -->
+    <g fill="#2c333d">
+      <rect x="1414" y="148" width="14" height="736"/>
+      <rect x="1650" y="148" width="14" height="736"/>
+      <rect x="1178" y="300" width="714" height="12"/>
+    </g>
+    <!-- Frame inner highlight -->
+    <rect x="1178" y="148" width="714" height="736" fill="none" stroke="#454e5a" stroke-width="2"/>
+  </g>
+
+  <!-- ===== FLOOR ===== -->
+  <rect x="0" y="912" width="1920" height="168" fill="url(#floor)"/>
+  <rect x="0" y="912" width="1920" height="4" fill="#2c3c5e"/>
+  <!-- Floor reflection of window light -->
+  <polygon points="1178,916 1892,916 1820,1040 1300,1040" fill="url(#reflection)"/>
+  <!-- Subtle floor sheen streaks -->
+  <g stroke="#3a4d74" stroke-width="1" opacity="0.4">
+    <line x1="0" y1="960" x2="1920" y2="960"/>
+    <line x1="0" y1="1010" x2="1920" y2="1010"/>
+  </g>
+
+  <!-- ===== CREDENZA + PLANT under window ===== -->
+  <g>
+    <!-- shadow -->
+    <ellipse cx="1520" cy="922" rx="330" ry="26" fill="#000" opacity="0.35" filter="url(#soft)"/>
+    <!-- credenza body -->
+    <rect x="1250" y="806" width="540" height="112" rx="6" fill="#20160f"/>
+    <rect x="1250" y="806" width="540" height="112" rx="6" fill="url(#reflection)" opacity="0.15"/>
+    <!-- wood top -->
+    <rect x="1242" y="798" width="556" height="16" rx="4" fill="#3a2a1c"/>
+    <!-- door lines + gold pulls -->
+    <g stroke="#0e0a06" stroke-width="2" opacity="0.7">
+      <line x1="1430" y1="812" x2="1430" y2="912"/>
+      <line x1="1610" y1="812" x2="1610" y2="912"/>
+    </g>
+    <g fill="#c99a34">
+      <rect x="1418" y="852" width="6" height="24" rx="3"/>
+      <rect x="1436" y="852" width="6" height="24" rx="3"/>
+      <rect x="1598" y="852" width="6" height="24" rx="3"/>
+      <rect x="1616" y="852" width="6" height="24" rx="3"/>
+    </g>
+    <!-- Plant -->
+    <g>
+      <rect x="1300" y="742" width="70" height="64" rx="6" fill="#c9bfae"/>
+      <rect x="1300" y="742" width="70" height="16" rx="6" fill="#ded5c4"/>
+      <g fill="#1f6b3a">
+        <path d="M1335 742 C1300 700 1300 640 1320 604 C1332 650 1338 700 1338 742 Z"/>
+        <path d="M1335 742 C1372 706 1384 654 1378 612 C1356 652 1342 700 1335 742 Z"/>
+        <path d="M1335 742 C1310 712 1296 676 1298 648 C1320 676 1332 708 1335 742 Z"/>
+        <path d="M1335 742 C1360 716 1376 686 1378 660 C1356 684 1342 712 1335 742 Z"/>
+      </g>
+      <g fill="#2c8a4d" opacity="0.9">
+        <path d="M1335 742 C1330 704 1332 662 1348 632 C1350 672 1344 712 1340 742 Z"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ===== FLOOR PLANT (left, foreground accent) ===== -->
+  <g>
+    <ellipse cx="150" cy="928" rx="120" ry="22" fill="#000" opacity="0.35" filter="url(#soft)"/>
+    <rect x="96" y="812" width="108" height="112" rx="8" fill="#c9bfae"/>
+    <rect x="96" y="812" width="108" height="20" rx="8" fill="#ded5c4"/>
+    <g fill="#1f6b3a">
+      <path d="M150 812 C96 748 96 648 128 590 C150 660 158 742 158 812 Z"/>
+      <path d="M150 812 C206 754 224 664 214 596 C180 664 158 742 150 812 Z"/>
+      <path d="M150 812 C112 764 92 700 96 656 C130 704 148 760 150 812 Z"/>
+      <path d="M150 812 C190 766 214 712 214 668 C182 712 158 762 150 812 Z"/>
+      <path d="M150 812 C150 748 156 676 176 628 C176 700 162 764 150 812 Z"/>
+    </g>
+  </g>
+
+  <!-- ===== SIGNAGE ON WALL ===== -->
+  <g filter="url(#textShadow)">
+    <text x="600" y="452" text-anchor="middle" fill="url(#gold)"
+          font-size="128" letter-spacing="10" font-weight="700">LIV</text>
+    <text x="600" y="560" text-anchor="middle" fill="url(#gold)"
+          font-size="72" letter-spacing="14" font-weight="600">FINANCIAL GROUP</text>
+  </g>
+  <!-- Gold rule -->
+  <rect x="300" y="600" width="600" height="3" fill="url(#goldRule)"/>
+  <!-- Tagline -->
+  <text x="600" y="648" text-anchor="middle" fill="#c9b98e"
+        font-size="26" letter-spacing="12" font-family="Helvetica, Arial, sans-serif">WEALTH  ·  RETIREMENT  ·  LEGACY</text>
+
+  <!-- Vignette for depth -->
+  <rect x="0" y="0" width="1920" height="1080" fill="none"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#vignette)"/>
+  <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
+    <stop offset="0.6" stop-color="#000000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000000" stop-opacity="0.32"/>
+  </radialGradient>
+</svg>
