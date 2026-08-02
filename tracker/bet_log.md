@@ -298,3 +298,24 @@ above Standard $510 — flag, tiers are locked.)
   30, not 1; the process was right even though the ticket lost. If Brett held
   Spain futures, this was cheap insurance he didn't need — Spain lifting the
   Cup is the win that matters.
+
+---
+
+## July 27 — MLB F5 CLV PLAYS 🎯 (first line-gap wins, pipeline end-to-end)
+
+| # | Date | Sport | Game | Market | Side | Stake | Odds | Result | P/L |
+|---|------|-------|------|--------|------|-------|------|--------|-----|
+| 52 | 7/27 | MLB | CLE @ CIN | F5 Moneyline | **Cleveland F5 +165** | $295 (Lean) | +165 @ Diamond | **W** | **+$486.75** |
+| 53 | 7/27 | MLB | TOR @ WAS | F5 Moneyline | **Toronto F5 +120** | $295 (Lean) | +120 @ Diamond | **W** | **+$354.00** |
+
+**Bets 52-53 — THE THESIS, PROVEN LIVE.** First two MLB F5 plays graded against a
+real DK sharp anchor, both **public-fade line-gaps**, both fired at Diamond, both won:
+- **#52 CLE +165** — faded **Chase Burns** (CIN rookie flamethrower) hype. DK CLE
+  +138 (fair +149) → Diamond hung +165 = **+6.5% EV**, +16¢ CLV. WON.
+- **#53 TOR +120** — faded the **Scherzer-return** hype. DK TOR −101 (fair +109) →
+  Diamond +120 = **+5.5% EV**, +11¢ CLV. WON.
+- Combined **+$840.75** on $590 risk. Both **beat the DK close (+CLV) AND cashed**.
+- Mechanism confirmed: soft books shade the public magnet (rookie hype, veteran-return
+  hype); we take the stale-long other side. First hard evidence the line-gap edge is real.
+- **CLV pipeline record: 3 fired — #51 L (Argentina, +CLV/lost), #52 W, #53 W.**
+  2-1 by result; all 3 were +CLV. The two positive-CLV *plus* winning tickets are #52-53.

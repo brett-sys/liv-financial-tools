@@ -37,6 +37,9 @@ CLV** before treating this as a real edge. Do not size up on it until then.
 
 | 2026-07-19 | Soccer | WC Final ARG vs ESP | side(to-win-cup) | ARG +127 (DK, steamed from +133) | Diamond/WB ARG +135-140 | 8-13c | offshore lagged DK's Spain steam | **y** | FIRED ARG +135 $295 (bet_log #51). Fair +132 -> +1.4% EV, **+8c CLV vs DK**. RESULT: Spain won Cup -> ARG LOST -$295. +CLV stands (beat close, landed on ~43% side). First graded CLV data point: +8c, losing result |
 
+| 2026-07-27 | MLB | CLE @ CIN | F5 ML | CLE +138 (DK, fair +149) | Diamond CLE +165 | 27c | soft book faded Chase Burns rookie hype | **y** | FIRED +165 $295 (#52). +6.5% EV, +16c CLV. **WON +$486.75** |
+| 2026-07-27 | MLB | TOR @ WAS | F5 ML | TOR -101 (DK, fair +109) | Diamond TOR +120 | 21c | soft book faded Scherzer-return hype | **y** | FIRED +120 $295 (#53). +5.5% EV, +11c CLV. **WON +$354.00** |
+
 > ⚠️ **Brett — the 3 seed rows above are placeholders.** The real week-1 gaps live
 > in `findings.md` / `notes/2026-05-week1.md` in the master project (not synced
 > into this branch). Paste the actual 3 gaps over the placeholder rows so the
